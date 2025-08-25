@@ -7,6 +7,7 @@ import {
   PoPageModule,
   PoToolbarModule,
 } from '@po-ui/ng-components';
+import { RouterOutlet } from "@angular/router";
 
 @Component({
   selector: 'app-root',
@@ -14,8 +15,9 @@ import {
     CommonModule,
     PoToolbarModule,
     PoMenuModule,
-    PoPageModule
-  ],
+    PoPageModule,
+    RouterOutlet
+],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })

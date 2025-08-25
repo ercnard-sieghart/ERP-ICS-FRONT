@@ -1,0 +1,71 @@
+
+
+.login-bg {
+  min-height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1A4E79 60%, #75C9C8 100%);
+  animation: fadeIn 1.2s ease;
+}
+
+.login-content {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  margin: 0 auto;
+}
+
+
+/* Ajuste para centralizar e enquadrar a tela de login sem rolagem e sem necessidade de zoom manual */
+body, html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.login-bg {
+  min-height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1A4E79 0%, #75C9C8 100%);
+}
+
+
+.login-content {
+  background: #fff;
+  border-radius: 1.25rem;
+  box-shadow: 0 10px 32px 0 rgba(26, 78, 121, 0.15);
+  padding: 2rem;
+  max-width: 400px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  max-height: 95vh;
+  overflow-y: auto;
+}
+
+.logo {
+  margin-bottom: 1.5rem;
+  width: 9rem;
+  height: 5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo img {
+  max-width: 100%;
+  max-height: 5rem;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 8px rgba(26, 78, 121, 0.15));
+}
