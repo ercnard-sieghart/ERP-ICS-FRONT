@@ -1,0 +1,17 @@
+<div class="flex min-h-screen bg-gradient-to-br from-[#1A4E79] to-[#75C9C8]">
+  <app-menu />
+<main class="w-full h-[calc(100vh)] flex-1 flex items-center justify-center p-8">
+    <div class="bg-white rounded-xl shadow-lg p-2 w-full max-w-6xl flex flex-col items-center">
+		
+  <div class="w-full h-[calc(100vh-5rem)] flex items-start justify-center border border-[#75C9C8] rounded-lg bg-gray-100 overflow-auto p-0">
+        <iframe id="powerbi-frame" title="Ferramenta Orçamentaria 3" src="https://app.powerbi.com/reportEmbed?reportId=0c9b505e-8147-411b-9b0e-0522cd67df28&autoAuth=true&ctid=d355eb06-94ff-4933-a704-99ae6388f863&actionBarEnabled=true&reportCopilotInEmbed=true" frameborder="0" allowfullscreen class="w-full h-full m-0 p-0"></iframe>
+      </div>
+      <div class="flex w-full justify-end mt-2">
+        <button onclick="document.getElementById('powerbi-frame').requestFullscreen()" class="p-2 bg-[#75C9C8] rounded-full hover:bg-[#1A4E79] transition flex items-center justify-center" title="Abrir em tela cheia">
+		<po-icon name="an-arrows-out-simple" size="lg" class="an an-arrows-out-simple"></po-icon>
+        </button>
+      </div>
+
+    </div>
+  </main>
+</div>
