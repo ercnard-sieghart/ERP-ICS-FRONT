@@ -1,6 +1,44 @@
-# ERPICSFRONT
+# ICS WEB
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.9.
+Solução WEB para intergração do ERP.
+
+## Branches
+
+- **main**: Produção
+- **desenvolvimento**: Desenvolvimento
+- **homologacao**: Homologação
+
+- Para cada nova funcionalidade, crie uma branch específica a partir de `desenvolvimento`.
+  - Exemplo: `feat/consulta-extrato`, `fix/login-error`, `refactor/menu-component`
+  - Após finalizar e revisar, faça merge para `desenvolvimento`.
+
+## Padrões de Commits
+
+- `feat:` Nova funcionalidade
+- `docs:` Documentação
+- `refactor:` Refatoração
+- `fix:` Correção de bug
+- `style:` Ajuste visual/CSS
+- `test:` Testes
+- `chore:` Tarefas de manutenção
+
+## Funcionalidades já implementadas
+
+- Autenticação com tela de login PO-UI
+- Menu lateral com navegação (Home, Dashboard, Consultas)
+- Dashboard integrado com PowerBI
+- Tela de Consultas com cards animados e responsivos
+- Filtros dinâmicos usando PO-UI (Filial, Banco, Conta, Período)
+- Relatório de extrato exibido em popup/modal customizado
+- Layout responsivo com Tailwind CSS
+- Correção de imports e bindings PO-UI
+- Cards de consulta com animação e hover
+- Botão Buscar integrado aos filtros
+- Visual moderno e limpo, seguindo padrões PO-UI
+
+---
+
+Para dúvidas ou sugestões, entre em contato com o time de desenvolvimento.
 
 ## Development server
 
