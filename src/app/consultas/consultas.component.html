@@ -1,7 +1,7 @@
 <div class="flex min-h-screen bg-gradient-to-br from-[#1A4E79] to-[#75C9C8]">
   <app-menu />
   <main class="flex-1 flex items-center justify-center p-8">
-    <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-6xl flex flex-col">
+    <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-2xl flex flex-col">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
         <span class="font-bold text-xl text-[#1A4E79]">Consultas</span>
         <select [(ngModel)]="moduloSelecionado" class="border border-[#75C9C8] rounded-lg px-3 py-2 text-[#1A4E79] focus:outline-none focus:ring-2 focus:ring-[#75C9C8] w-full md:w-64">
@@ -9,13 +9,27 @@
         </select>
       </div>
       <div *ngIf="consultasFiltradas.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
-        <a *ngFor="let consulta of consultasFiltradas" href="#" class="bg-white rounded-lg shadow p-4 flex flex-col items-center cursor-pointer transition transform hover:scale-105 hover:shadow-xl hover:bg-[#e6f7fa] duration-200 min-w-[180px] max-w-[220px]">
-          <span class="font-bold text-base text-[#1A4E79] mb-1">{{ consulta.nome }}</span>
-          <span class="text-gray-500 text-sm">{{ consulta.descricao }}</span>
-        </a>
+        <div *ngFor="let consulta of consultasFiltradas; let i = index">
+          <a (click)="i === 0 ? abrirRelatorio() : null" class="bg-white rounded-lg shadow p- flex flex-col items-center cursor-pointer transition transform hover:scale-105 hover:shadow-xl hover:bg-[#e6f7fa] duration-200 min-w-[180px] max-w-[220px]">
+            <span class="font-bold text-base text-[#1A4E79] mb-1">{{ consulta.nome }}</span>
+            <span class="text-gray-500 text-sm">{{ consulta.descricao }}</span>
+          </a>
+        </div>
       </div>
       <div *ngIf="consultasFiltradas.length === 0" class="text-center text-gray-400 py-12">
         Selecione um módulo para visualizar as consultas.
+      </div>
+      <div *ngIf="mostrarRelatorio" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+        <div class="relative w-full max-w-xl">
+          <div class="bg-white rounded-xl shadow-lg p-6">
+            <div class="flex justify-end mb-2">
+              <button (click)="fecharRelatorio()" class="bg-[#75C9C8] text-white rounded-full p-2 hover:bg-[#1A4E79] transition flex items-center justify-center" title="Fechar">
+                <po-icon name="fecharRelatorio" size="lg" class="an an-arrows-in-simple"></po-icon>
+              </button>
+            </div>
+            <app-consulta-extrato></app-consulta-extrato>
+          </div>
+        </div>
       </div>
     </div>
   </main>

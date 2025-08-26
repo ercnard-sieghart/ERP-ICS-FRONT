@@ -1,0 +1,79 @@
+<div class="bg-white rounded-xl shadow-lg p-6 max-w-md mx-auto mt-8">
+  <h2 class="text-xl font-bold text-[#1A4E79] mb-4">Extrato</h2>
+  <form class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    <div class="md:col-span-1 flex flex-col gap-4">
+      <po-combo
+        name="filial"
+        [ngModel]="filtros.filial"
+        (ngModelChange)="filtros.filial = $event"
+        [p-options]="filiais"
+        p-label="Filial"
+      ></po-combo>
+      <po-combo
+        name="banco"
+        [ngModel]="filtros.banco"
+        (ngModelChange)="filtros.banco = $event"
+        [p-options]="bancos"
+        p-label="Banco"
+      ></po-combo>
+      <po-combo
+        name="conta"
+        [ngModel]="filtros.conta"
+        (ngModelChange)="filtros.conta = $event"
+        [p-options]="contas"
+        p-label="Conta"
+      ></po-combo>
+    </div>
+    <div class="md:col-span-1 flex flex-col gap-2">
+      <div class="w-full bg-[#f3f6fa] rounded-lg p-2 mb-2">
+        <po-datepicker
+          name="periodoInicio"
+          [(ngModel)]="filtros.periodoInicio"
+          p-label="Período Início"
+        ></po-datepicker>
+      </div>
+      <div class="w-full bg-[#f3f6fa] rounded-lg p-2">
+        <po-datepicker
+          name="periodoFim"
+          [(ngModel)]="filtros.periodoFim"
+          p-label="Período Fim"
+        ></po-datepicker>
+      </div>
+    </div>
+    <div class="col-span-1 md:col-span-2 flex justify-end">
+      <po-button
+        p-label="Buscar"
+        p-primary="true"
+        (p-click)="buscarRelatorio()"
+      ></po-button>
+    </div>
+  </form>
+  <div *ngIf="modalAberto" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+    <div class="bg-white rounded-xl shadow-lg p-6 max-w-3xl w-full relative">
+      <h3 class="text-lg font-bold text-[#1A4E79] mb-4">Extrato</h3>
+      <div *ngIf="carregando" class="text-center text-[#1A4E79] py-4">Carregando...</div>
+      <table *ngIf="dados.length > 0" class="w-full border mt-4">
+        <thead>
+          <tr class="bg-[#e6f7fa]">
+            <th class="p-2 border">Filial</th>
+            <th class="p-2 border">Banco</th>
+            <th class="p-2 border">Conta</th>
+            <th class="p-2 border">Período</th>
+            <th class="p-2 border">Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let linha of dados">
+            <td class="p-2 border">{{ linha.filial }}</td>
+            <td class="p-2 border">{{ linha.banco }}</td>
+            <td class="p-2 border">{{ linha.conta }}</td>
+            <td class="p-2 border">{{ linha.periodo }}</td>
+            <td class="p-2 border">{{ linha.valor | currency:'BRL' }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div *ngIf="!carregando && dados.length === 0" class="text-center text-gray-400 py-8">Nenhum dado encontrado.</div>
+      <button (click)="modalAberto = false" class="absolute top-2 right-2 text-[#1A4E79] hover:text-[#75C9C8] text-xl font-bold">&times;</button>
+    </div>
+  </div>
+</div>

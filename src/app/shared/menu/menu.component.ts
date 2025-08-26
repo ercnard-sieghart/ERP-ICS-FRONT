@@ -2,13 +2,14 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PoIconModule } from '@po-ui/ng-components';
 import { PoMenuModule, PoMenuItem } from '@po-ui/ng-components';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-menu',
   templateUrl: './menu.component.html',
   // styleUrls: ['./menu.component.css'],
   standalone: true,
-  imports: [CommonModule, PoIconModule, PoMenuModule]
+  imports: [CommonModule, PoIconModule, PoMenuModule, RouterModule]
 })
 export class MenuComponent {
   menuItems: Array<PoMenuItem> = [

@@ -1,7 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { MenuComponent } from '../shared/menu/menu.component';
 import { CommonModule, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { ConsultaExtratoComponent } from './consulta-extrato.component';
+import { PoIconModule } from '@po-ui/ng-components';
 
 interface Consulta {
   nome: string;
@@ -14,7 +17,7 @@ interface Consulta {
   standalone: true,
   templateUrl: './consultas.component.html',
   styleUrls: ['./consultas.component.css'],
-  imports: [MenuComponent, CommonModule, FormsModule, NgFor, NgIf]
+  imports: [MenuComponent, CommonModule, FormsModule, NgFor, NgIf, RouterModule, ConsultaExtratoComponent, PoIconModule]
 })
 export class ConsultasComponent {
   modulos = [
@@ -24,7 +27,7 @@ export class ConsultasComponent {
   ];
 
   consultas: Consulta[] = [
-    { nome: 'Consulta Fictícia 1', descricao: 'Descrição breve da consulta', modulo: 'modulo1' },
+    { nome: 'Consulta Extrato', descricao: 'Extrato Bancário por período', modulo: 'modulo1' },
     { nome: 'Consulta Fictícia 2', descricao: 'Descrição breve da consulta', modulo: 'modulo1' },
     { nome: 'Consulta Fictícia 3', descricao: 'Descrição breve da consulta', modulo: 'modulo2' },
     { nome: 'Consulta Fictícia 4', descricao: 'Descrição breve da consulta', modulo: 'modulo2' },
@@ -33,8 +36,24 @@ export class ConsultasComponent {
   ];
 
   moduloSelecionado = this.modulos[0].value;
+  mostrarRelatorio = false;
 
   get consultasFiltradas() {
     return this.consultas.filter(c => c.modulo === this.moduloSelecionado);
+  }
+
+  abrirRelatorio() {
+    this.mostrarRelatorio = true;
+  }
+
+  fecharRelatorio() {
+    this.mostrarRelatorio = false;
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  onEscKey(event: KeyboardEvent) {
+    if (this.mostrarRelatorio) {
+      this.fecharRelatorio();
+    }
   }
 }

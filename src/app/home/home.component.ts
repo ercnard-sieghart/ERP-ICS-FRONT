@@ -10,4 +10,19 @@ import { MenuComponent } from '../shared/menu/menu.component';
   standalone: true,
   imports: [CommonModule, PoIconModule, MenuComponent]
 })
-export class HomeComponent {}
+export class HomeComponent {
+  eventos = [
+    {
+      subject: 'Reunião Equipe ICS',
+      start: { dateTime: new Date().toISOString() }
+    },
+    {
+      subject: 'Sprint Review',
+      start: { dateTime: new Date(Date.now() + 3600 * 1000).toISOString() }
+    },
+    {
+      subject: 'Reunião com Cliente',
+      start: { dateTime: new Date(Date.now() + 7200 * 1000).toISOString() }
+    }
+  ];
+}
