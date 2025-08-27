@@ -18,6 +18,28 @@ Solução WEB para intergração do ERP.
 - `docs:` Documentação
 - `refactor:` Refatoração
 - `fix:` Correção de bug
+
+## Dependências do Angular
+
+Se você encontrar o erro ao rodar `ng serve`:
+
+```
+Error: Could not find the '@angular-devkit/build-angular:dev-server' builder's node package.
+```
+
+Ou o erro de incompatibilidade de versões:
+
+```
+Error: The current version of "@angular/build" supports Angular versions ^20.0.0, but detected Angular version 19.0.7 instead.
+```
+
+Certifique-se de instalar a versão correta do builder para Angular 19:
+
+```bash
+yarn add @angular-devkit/build-angular@19 --dev
+```
+
+Isso garante compatibilidade com o Angular 19.x usado neste projeto.
 - `style:` Ajuste visual/CSS
 - `test:` Testes
 - `chore:` Tarefas de manutenção
