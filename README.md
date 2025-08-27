@@ -5,8 +5,8 @@ Solução WEB para intergração do ERP.
 ## Branches
 
 - **main**: Produção
-- **desenvolvimento**: Desenvolvimento
-- **homologacao**: Homologação
+- **desenv**: Desenvolvimento
+- **homolog**: Homologação
 
 - Para cada nova funcionalidade, crie uma branch específica a partir de `desenvolvimento`.
   - Exemplo: `feat/consulta-extrato`, `fix/login-error`, `refactor/menu-component`
