@@ -30,4 +30,11 @@
       </button>
     </form>
   </div>
+  <div *ngIf="showPopup" class="fixed left-1/2 bottom-8 transform -translate-x-1/2 z-50 min-w-[300px] flex items-center justify-center">
+    <div [ngClass]="popupType === 'success' ? 'bg-green-100 border-green-500 text-green-800' : 'bg-red-100 border-red-500 text-red-800'" class="border-l-8 rounded-xl shadow-lg px-6 py-4 flex items-center gap-3 animate-fade-in">
+      <span *ngIf="popupType === 'success'" class="inline-block w-4 h-4 rounded-full bg-green-500"></span>
+      <span *ngIf="popupType === 'error'" class="inline-block w-4 h-4 rounded-full bg-red-500"></span>
+      <span class="font-semibold">{{ popupMessage }}</span>
+    </div>
+  </div>
 </div>

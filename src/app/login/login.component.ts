@@ -17,8 +17,11 @@ export class LoginComponent {
   loading: boolean = false;
   username: string = '';
   password: string = '';
+  showPopup: boolean = false;
+  popupMessage: string = '';
+  popupType: 'success' | 'error' = 'success';
 
-  constructor(private http: HttpClient, private poDialog: PoDialogService) {}
+  constructor(private http: HttpClient) {}
 
   loginSubmit(loginData: any) {
     this.loading = true;
@@ -26,7 +29,7 @@ export class LoginComponent {
       username: loginData.login,
       password: loginData.password
     };
-    this.http.post('http://localhost:8181/rest/login', payload, { observe: 'response' }).subscribe({
+    this.http.post('/rest/login', payload, { observe: 'response' }).subscribe({
       next: (response) => {
         const body = response.body as { access_token?: string };
         const token = body && body.access_token;
@@ -35,19 +38,19 @@ export class LoginComponent {
         }
         setTimeout(() => {
           this.loading = false;
-          this.poDialog.alert({
-            title: 'Login realizado',
-            message: 'Autenticação realizada com sucesso!',
-          });
+          this.popupType = 'success';
+          this.popupMessage = 'Autenticação realizada com sucesso!';
+          this.showPopup = true;
+          setTimeout(() => this.showPopup = false, 3000);
         }, 1200);
       },
       error: (error: HttpErrorResponse) => {
         setTimeout(() => {
           this.loading = false;
-          this.poDialog.alert({
-            title: 'Falha no login',
-            message: 'Usuário ou senha inválidos.',
-          });
+          this.popupType = 'error';
+          this.popupMessage = 'Usuário ou senha inválidos.';
+          this.showPopup = true;
+          setTimeout(() => this.showPopup = false, 3000);
         }, 1200);
       }
     });
