@@ -28,6 +28,11 @@ export class LoginComponent {
     };
     this.http.post('http://localhost:8181/rest/login', payload, { observe: 'response' }).subscribe({
       next: (response) => {
+        const body = response.body as { access_token?: string };
+        const token = body && body.access_token;
+        if (token) {
+          localStorage.setItem('access_token', token);
+        }
         setTimeout(() => {
           this.loading = false;
           this.poDialog.alert({
