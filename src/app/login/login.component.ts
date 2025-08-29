@@ -1,7 +1,7 @@
 
 import { Component } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { PoDialogService } from '@po-ui/ng-components';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PoPageLoginModule, PoPageLogin } from '@po-ui/ng-templates';
@@ -21,7 +21,7 @@ export class LoginComponent {
   popupMessage: string = '';
   popupType: 'success' | 'error' = 'success';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
   loginSubmit(loginData: any) {
     this.loading = true;
@@ -41,7 +41,10 @@ export class LoginComponent {
           this.popupType = 'success';
           this.popupMessage = 'Autenticação realizada com sucesso!';
           this.showPopup = true;
-          setTimeout(() => this.showPopup = false, 3000);
+          setTimeout(() => {
+            this.showPopup = false;
+            this.router.navigate(['/home']);
+          }, 2000);
         }, 1200);
       },
       error: (error: HttpErrorResponse) => {
