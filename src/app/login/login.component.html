@@ -1,12 +1,40 @@
 
 <div class="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-[#1A4E79] to-[#75C9C8]">
-  <div class="bg-white rounded-2xl shadow-xl p-7 w-full max-w-lg flex flex-col items-center">
-    <po-page-login
-      p-logo="assets/logo.png"
-      p-title="Boas-vindas"
-      [p-loading]="loading"
-      (p-submit)="loginSubmit($event)"
-    >
-    </po-page-login>
+  <div class="bg-white rounded-2xl shadow-xl p-7 w-full max-w-md flex flex-col items-center">
+    <img src="assets/logo.png" alt="Logo" class="h-16 mb-4" />
+    <h2 class="text-2xl font-bold text-[#1A4E79] mb-6">Boas-vindas</h2>
+    <form class="w-full flex flex-col gap-4" (ngSubmit)="loginSubmit({login: username, password: password})">
+      <input
+        type="text"
+        [(ngModel)]="username"
+        name="username"
+        required
+        placeholder="Usuário"
+        class="border border-[#75C9C8] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#75C9C8]"
+      />
+      <input
+        type="password"
+        [(ngModel)]="password"
+        name="password"
+        required
+        placeholder="Senha"
+        class="border border-[#75C9C8] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#75C9C8]"
+      />
+      <button
+        type="submit"
+        [disabled]="loading"
+        class="bg-[#1A4E79] text-white rounded-lg py-2 font-semibold hover:bg-[#75C9C8] transition disabled:opacity-50"
+      >
+        <span *ngIf="!loading">Entrar</span>
+        <span *ngIf="loading">Aguarde...</span>
+      </button>
+    </form>
+  </div>
+  <div *ngIf="showPopup" class="fixed left-1/2 bottom-8 transform -translate-x-1/2 z-50 min-w-[300px] flex items-center justify-center">
+    <div [ngClass]="popupType === 'success' ? 'bg-green-100 border-green-500 text-green-800' : 'bg-red-100 border-red-500 text-red-800'" class="border-l-8 rounded-xl shadow-lg px-6 py-4 flex items-center gap-3 animate-fade-in">
+      <span *ngIf="popupType === 'success'" class="inline-block w-4 h-4 rounded-full bg-green-500"></span>
+      <span *ngIf="popupType === 'error'" class="inline-block w-4 h-4 rounded-full bg-red-500"></span>
+      <span class="font-semibold">{{ popupMessage }}</span>
+    </div>
   </div>
 </div>
