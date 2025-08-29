@@ -1,13 +1,33 @@
 
 <div class="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-[#1A4E79] to-[#75C9C8]">
   <div class="bg-white rounded-2xl shadow-xl p-7 w-full max-w-md flex flex-col items-center">
-    <po-page-login
-      p-logo="assets/logo.png"
-      p-title="Boas-vindas"
-      [p-loading]="loading"
-      (p-submit)="loginSubmit($event)"
-      [p-languages]="[]"
-    >
-    </po-page-login>
+    <img src="assets/logo.png" alt="Logo" class="h-16 mb-4" />
+    <h2 class="text-2xl font-bold text-[#1A4E79] mb-6">Boas-vindas</h2>
+    <form class="w-full flex flex-col gap-4" (ngSubmit)="loginSubmit({login: username, password: password})">
+      <input
+        type="text"
+        [(ngModel)]="username"
+        name="username"
+        required
+        placeholder="Usuário"
+        class="border border-[#75C9C8] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#75C9C8]"
+      />
+      <input
+        type="password"
+        [(ngModel)]="password"
+        name="password"
+        required
+        placeholder="Senha"
+        class="border border-[#75C9C8] rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#75C9C8]"
+      />
+      <button
+        type="submit"
+        [disabled]="loading"
+        class="bg-[#1A4E79] text-white rounded-lg py-2 font-semibold hover:bg-[#75C9C8] transition disabled:opacity-50"
+      >
+        <span *ngIf="!loading">Entrar</span>
+        <span *ngIf="loading">Aguarde...</span>
+      </button>
+    </form>
   </div>
 </div>

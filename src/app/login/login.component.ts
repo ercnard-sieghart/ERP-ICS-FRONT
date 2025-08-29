@@ -15,6 +15,8 @@ import { PoPageLoginModule, PoPageLogin } from '@po-ui/ng-templates';
 })
 export class LoginComponent {
   loading: boolean = false;
+  username: string = '';
+  password: string = '';
 
   constructor(private http: HttpClient, private poDialog: PoDialogService) {}
 
