@@ -14,6 +14,7 @@ import { PoPageLoginModule, PoPageLogin } from '@po-ui/ng-templates';
   imports: [CommonModule, FormsModule, PoPageLoginModule]
 })
 export class LoginComponent {
+  inactivityTimeout: any;
   loading: boolean = false;
   username: string = '';
   password: string = '';
@@ -21,7 +22,35 @@ export class LoginComponent {
   popupMessage: string = '';
   popupType: 'success' | 'error' = 'success';
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router) {
+    this.setupInactivityTimer();
+  }
+
+  setupInactivityTimer() {
+    const resetTimer = () => {
+      if (this.inactivityTimeout) {
+        clearTimeout(this.inactivityTimeout);
+      }
+      this.inactivityTimeout = setTimeout(() => {
+        this.logoutByInactivity();
+      }, 15 * 60 * 1000);
+    };
+    ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(event => {
+      window.addEventListener(event, resetTimer);
+    });
+    resetTimer();
+  }
+
+  logoutByInactivity() {
+    localStorage.removeItem('access_token');
+    this.popupType = 'error';
+    this.popupMessage = 'Sessão expirada por inatividade.';
+    this.showPopup = true;
+    setTimeout(() => {
+      this.showPopup = false;
+      this.router.navigate(['/login']);
+    }, 2500);
+  }
 
   loginSubmit(loginData: any) {
     this.loading = true;
