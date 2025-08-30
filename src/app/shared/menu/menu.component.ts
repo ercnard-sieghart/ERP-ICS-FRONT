@@ -19,4 +19,13 @@ export class MenuComponent {
     { label: 'Documentos', icon: 'document', link: '#' },
     { label: 'Configurações', icon: 'settings', link: '#' }
   ];
+  get userName(): string {
+    return localStorage.getItem('user_name') || '';
+  }
+
+  logout() {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user_name');
+    window.location.href = '/login';
+  }
 }

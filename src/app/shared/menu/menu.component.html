@@ -43,10 +43,13 @@
       </li>
     </ul>
   </nav>
-  <div class="mt-auto pt-6 border-t">
-    <a href="#" class="flex items-center text-[#6A6A6A] hover:text-[#1A4E79]">
+  <div class="mt-auto pt-6 border-t flex items-center justify-between gap-2">
+    <div class="flex items-center gap-2">
+      <span class="font-semibold text-[#1A4E79]">{{ userName }}</span>
+    </div>
+    <button (click)="logout()" class="flex items-center text-[#6A6A6A] hover:text-[#1A4E79] px-3 py-1 rounded transition">
       <po-icon name="exit" class="mr-2" size="md"></po-icon>
       Sair
-    </a>
+    </button>
   </div>
 </aside>

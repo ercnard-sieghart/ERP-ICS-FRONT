@@ -60,27 +60,43 @@ export class LoginComponent {
     };
     this.http.post('/rest/login', payload, { observe: 'response' }).subscribe({
       next: (response) => {
-        const body = response.body as { access_token?: string };
-        const token = body && body.access_token;
-        if (token) {
-          localStorage.setItem('access_token', token);
-        }
-        setTimeout(() => {
-          this.loading = false;
-          this.popupType = 'success';
-          this.popupMessage = 'Autenticação realizada com sucesso!';
-          this.showPopup = true;
+        const body = response.body as any;
+  if (body && (body.success === true || body.success === 'true')) {
+          if (body.access_token) {
+            localStorage.setItem('access_token', body.access_token);
+          }
+          if (body.name) {
+            localStorage.setItem('user_name', body.name);
+          }
           setTimeout(() => {
-            this.showPopup = false;
-            this.router.navigate(['/home']);
-          }, 2000);
-        }, 1200);
+            this.loading = false;
+            this.popupType = 'success';
+            this.popupMessage = body.message || 'Autenticação realizada com sucesso!';
+            this.showPopup = true;
+            setTimeout(() => {
+              this.showPopup = false;
+              this.router.navigate(['/home']);
+            }, 2000);
+          }, 1200);
+        } else {
+          setTimeout(() => {
+            this.loading = false;
+            this.popupType = 'error';
+            this.popupMessage = body && body.message ? body.message : 'Usuário ou senha inválidos.';
+            this.showPopup = true;
+            setTimeout(() => this.showPopup = false, 3000);
+          }, 1200);
+        }
       },
       error: (error: HttpErrorResponse) => {
         setTimeout(() => {
           this.loading = false;
           this.popupType = 'error';
-          this.popupMessage = 'Usuário ou senha inválidos.';
+          if (error.status === 403) {
+            this.popupMessage = 'Acesso negado.';
+          } else {
+            this.popupMessage = 'Usuário ou senha inválidos.';
+          }
           this.showPopup = true;
           setTimeout(() => this.showPopup = false, 3000);
         }, 1200);
