@@ -1,7 +1,18 @@
 <aside class="w-64 bg-white shadow-lg flex flex-col py-6 px-4 rounded-r-2xl min-h-screen">
-  <div class="flex items-center mb-8">
-    <img src="assets/logo.png" alt="Logo" class="h-10 w-10 mr-2 object-contain" />
-    <span class="text-xl font-bold text-[#1A4E79]">ICS WEB</span>
+  <div class="mb-8">
+    <div class="bg-[#f3f6fa] rounded-xl shadow flex flex-col items-center py-4 px-3">
+      <div class="flex items-center gap-3 w-full justify-center">
+        <img src="assets/logo.png" alt="Logo" class="h-10 w-10 object-contain" />
+          <span class="flex items-center justify-center h-9 w-9 rounded-full bg-[#75C9C8]">
+            <po-icon name="an-user" size="md" class="an an-user text-white"></po-icon>
+          </span>
+        <span class="font-semibold text-[#1A4E79] text-base ml-2">{{ userName }}</span>
+      </div>
+      <button (click)="logout()" class="mt-2 ml-auto flex items-center justify-center bg-transparent text-[#6A6A6A] px-2 py-1 rounded hover:text-[#1A4E79] border border-transparent hover:border-[#75C9C8] transition text-sm font-normal">
+        <po-icon name="exit" class="mr-1" size="sm"></po-icon>
+        Logout
+      </button>
+    </div>
   </div>
   <nav class="flex-1">
     <ul class="space-y-4">
@@ -43,13 +54,5 @@
       </li>
     </ul>
   </nav>
-  <div class="mt-auto pt-6 border-t flex items-center justify-between gap-2">
-    <div class="flex items-center gap-2">
-      <span class="font-semibold text-[#1A4E79]">{{ userName }}</span>
-    </div>
-    <button (click)="logout()" class="flex items-center text-[#6A6A6A] hover:text-[#1A4E79] px-3 py-1 rounded transition">
-      <po-icon name="exit" class="mr-2" size="md"></po-icon>
-      Sair
-    </button>
-  </div>
+  <!-- ...existing code... -->
 </aside>
