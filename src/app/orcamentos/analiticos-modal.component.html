@@ -1,0 +1,15 @@
+<po-modal
+  [p-primary-action]="{ label: 'Fechar', action: onClose.bind(this) }"
+  [p-title]="title"
+>
+  <div class="mb-4">
+    <h2 class="text-xl font-bold text-[#1A4E79] mb-2">Itens Analíticos</h2>
+    <po-table
+      [p-columns]="columns"
+      [p-items]="items"
+      [p-striped]="true"
+      [p-hide-columns-manager]="true"
+      (p-row-click)="onRowClick($event)"
+    ></po-table>
+  </div>
+</po-modal>

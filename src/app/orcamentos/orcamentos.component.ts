@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PoTableModule, PoTableColumn, PoModalModule } from '@po-ui/ng-components';
 import { MenuComponent } from "../shared/menu/menu.component";
+import { AnaliticosModalComponent } from './analiticos-modal.component';
 
 @Component({
   selector: 'app-orcamentos',
@@ -21,7 +22,8 @@ import { MenuComponent } from "../shared/menu/menu.component";
     UniqueCentroCustoPipe,
     FilterItemContabilPipe,
     FilterAnoPipe,
-    FilterCentroCustoPipe
+    FilterCentroCustoPipe,
+    AnaliticosModalComponent
   ]
 })
 export class OrcamentosComponent {
@@ -47,12 +49,75 @@ export class OrcamentosComponent {
       codigoItemContabil: '10104007001',
       nomeItemContabil: 'CORE HEWLETT GEN SUPPORT 2025',
       ano: '2025',
-      analiticos: []
+      analiticos: [
+        { codigo: 'A1001', nome: 'Analítico 1', valorOrcado: 50000, valorRealizado: 40000, saldo: 10000 },
+        { codigo: 'A1002', nome: 'Analítico 2', valorOrcado: 50000, valorRealizado: 40000, saldo: 10000 }
+      ]
     },
     {
       codigo: '71401', nome: 'EIXO 04 GRANTMAKING', valorOrcado: 96000, valorRealizado: 78000,
       codigoCentroCusto: '71401', centroCusto: 'EIXO 04 GRANTMAKING', codigoItemContabil: '10209004001', nomeItemContabil: 'GMF JM SALLES INST DADOS 2025', ano: '2025', analiticos: []
-    }
+    },
+    {
+      codigo: '72104',
+      nome: 'RH TREINAMENTO PROGRAMA',
+      valorOrcado: 0,
+      valorRealizado: 0,
+      codigoCentroCusto: '72104',
+      centroCusto: 'RH TREINAMENTO PROGRAMA',
+      codigoItemContabil: '10101015001',
+      nomeItemContabil: 'CORE CWF GENERAL SUPPORT 2025',
+      ano: '2025',
+      analiticos: [
+        { codigo: 'B2001', nome: 'Analítico RH 1', valorOrcado: 20000, valorRealizado: 15000, saldo: 5000 },
+        { codigo: 'B2002', nome: 'Analítico RH 2', valorOrcado: 30000, valorRealizado: 25000, saldo: 5000 }
+      ]
+    },
+      {
+        codigo: '72105',
+        nome: 'RH TREINAMENTO OPERACAO',
+        valorOrcado: 0,
+        valorRealizado: 0,
+        codigoCentroCusto: '72105',
+        centroCusto: 'RH TREINAMENTO OPERACAO',
+        codigoItemContabil: '10103008001',
+        nomeItemContabil: 'CORE OAK GENERAL SUPPORT 2025',
+        ano: '2025',
+        analiticos: [
+          { codigo: 'C3001', nome: 'Analítico OP 1', valorOrcado: 10000, valorRealizado: 8000, saldo: 2000 },
+          { codigo: 'C3002', nome: 'Analítico OP 2', valorOrcado: 15000, valorRealizado: 12000, saldo: 3000 }
+        ]
+      },
+      {
+        codigo: '72105',
+        nome: 'RH TREINAMENTO OPERACAO',
+        valorOrcado: 0,
+        valorRealizado: 0,
+        codigoCentroCusto: '72105',
+        centroCusto: 'RH TREINAMENTO OPERACAO',
+        codigoItemContabil: '10102004004',
+        nomeItemContabil: 'CORE CIFF 2025',
+        ano: '2025',
+        analiticos: [
+          { codigo: 'D4001', nome: 'Analítico CIFF 1', valorOrcado: 8000, valorRealizado: 6000, saldo: 2000 },
+          { codigo: 'D4002', nome: 'Analítico CIFF 2', valorOrcado: 12000, valorRealizado: 10000, saldo: 2000 }
+        ]
+      },
+      {
+        codigo: '72105',
+        nome: 'RH TREINAMENTO OPERACAO',
+        valorOrcado: 0,
+        valorRealizado: 0,
+        codigoCentroCusto: '72105',
+        centroCusto: 'RH TREINAMENTO OPERACAO',
+        codigoItemContabil: '10137001002',
+        nomeItemContabil: 'CORE BALLMER 2025',
+        ano: '2025',
+        analiticos: [
+          { codigo: 'E5001', nome: 'Analítico BALLMER 1', valorOrcado: 9000, valorRealizado: 7000, saldo: 2000 },
+          { codigo: 'E5002', nome: 'Analítico BALLMER 2', valorOrcado: 11000, valorRealizado: 9000, saldo: 2000 }
+        ]
+      }
   ];
   selectedSintetico: any = null;
   showAnaliticosModal: boolean = false;

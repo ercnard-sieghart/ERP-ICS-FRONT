@@ -2,7 +2,7 @@
   <app-menu/>
   <main class="flex-1 p-10 text-white">
   <div class="max-w-4xl w-full mx-auto p-6 bg-gradient-to-br from-[#e6f7fa] to-[#f3f6fa] rounded-xl shadow-lg flex flex-col items-center" style="max-height:calc(100vh - 48px);height:100%;">
-      <h1 class="text-3xl font-bold mb-8 text-[#1A4E79]">Itens Contábeis Sintéticos</h1>
+      <h1 class="text-2x1 font-bold mb-8 text-[#1A4E79]"></h1>
       <div class="flex flex-col md:flex-row gap-4 mb-4 items-center">
         <div class="flex flex-col">
           <label class="text-[#1A4E79] font-semibold mb-1">Item Contábil</label>
@@ -27,10 +27,10 @@
         | filterItemContabil:filtroItemContabil
         | filterAno:filtroAno
         | filterCentroCusto:filtroCentroCusto"
-  class="bg-white rounded-lg shadow-md px-6 py-4 flex flex-col justify-between w-full max-w-2xl min-h-[140px] min-w-[400px] transition hover:shadow-xl mr-auto relative">
+    class="bg-white rounded-lg shadow-md px-8 py-6 flex flex-col justify-between w-full max-w-3xl min-h-[180px] min-w-[500px] transition hover:shadow-xl mr-auto relative overflow-hidden">
         <div>
           <div class="flex flex-row items-center justify-between mb-4">
-            <h2 class="text-lg font-bold">{{ item.nomeItemContabil }}</h2>
+            <h2 class="text-lg font-bold truncate break-words max-w-[220px]" title="{{ item.nomeItemContabil }}">{{ item.nomeItemContabil }}</h2>
             <button
               (click)="onSinteticoClick(item)"
               class="px-3 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white shadow-md hover:scale-105 hover:from-[#155a8a] hover:to-[#5bbdbb] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#1A4E79] focus:ring-offset-2"
@@ -44,47 +44,27 @@
           </div>
           <div class="flex flex-row flex-wrap items-center justify-between gap-4">
             <div class="flex flex-col gap-1 flex-1">
-              <p class="text-sm text-gray-600 mb-1">Ano: <span class="font-semibold">{{ item.ano }}</span></p>
-              <p class="text-sm text-gray-600 mb-1">Valor Orçado: <span class="font-semibold">{{ item.valorOrcado | currency:'BRL' }}</span></p>
-              <p class="text-sm text-gray-600 mb-1">Valor Realizado: <span class="font-semibold">{{ item.valorRealizado | currency:'BRL' }}</span></p>
+              <p class="text-sm text-gray-600 mb-1 truncate break-words" title="{{ item.ano }}">Ano: <span class="font-semibold">{{ item.ano }}</span></p>
+              <p class="text-sm text-gray-600 mb-1 truncate break-words" title="{{ item.valorOrcado | currency:'BRL' }}">Valor Orçado: <span class="font-semibold">{{ item.valorOrcado | currency:'BRL' }}</span></p>
+              <p class="text-sm text-gray-600 mb-1 truncate break-words" title="{{ item.valorRealizado | currency:'BRL' }}">Valor Realizado: <span class="font-semibold">{{ item.valorRealizado | currency:'BRL' }}</span></p>
             </div>
             <div class="flex flex-col gap-1 items-end flex-1">
-              <p class="text-xs text-gray-500 mb-1">Item Contábil: <span class="font-semibold">{{ item.codigoItemContabil }}</span></p>
-              <p class="text-xs text-gray-500 mb-1">Centro de Custo: <span class="font-semibold">{{ item.codigoCentroCusto }}</span></p>
-              <p class="text-sm text-gray-600 mb-1">Centro de Custo: <span class="font-semibold">{{ item.centroCusto }}</span></p>
+              <p class="text-xs text-gray-500 mb-1 truncate break-words" title="{{ item.codigoItemContabil }}">Item Contábil: <span class="font-semibold">{{ item.codigoItemContabil }}</span></p>
+              <p class="text-xs text-gray-500 mb-1 truncate break-words" title="{{ item.codigoCentroCusto }}">Centro de Custo: <span class="font-semibold">{{ item.codigoCentroCusto }}</span></p>
+              <p class="text-sm text-gray-600 mb-1 truncate break-words" title="{{ item.centroCusto }}">Centro de Custo: <span class="font-semibold">{{ item.centroCusto }}</span></p>
             </div>
           </div>
         </div>
       </div>
     </div>
-  <po-modal [(ngModel)]="showAnaliticosModal" [p-title]="selectedSintetico?.nomeItemContabil" [p-primary-action]="{ label: 'Fechar', action: closeAnaliticosModal.bind(this) }">
-      <po-table [p-items]="getAnaliticosTableData()" [p-columns]="analiticosColumns"></po-table>
-    </po-modal>
-
-      <po-modal
-        *ngIf="showAnaliticosModal"
-        [p-primary-action]="{ label: 'Fechar', action: closeAnaliticosModal.bind(this) }"
-        [p-title]="selectedSintetico?.nome"
-      >
-        <div class="mb-4">
-          <h2 class="text-xl font-bold text-[#1A4E79] mb-2">Itens Analíticos</h2>
-          <po-table
-            [p-columns]="analiticosColumns"
-            [p-items]="getAnaliticosTableData()"
-            [p-striped]="true"
-            [p-hide-columns-manager]="true"
-            (p-row-click)="onAnaliticoClick($event)"
-          ></po-table>
-          <div class="flex justify-end mt-4">
-            <button
-              class="bg-[#1A4E79] text-white px-4 py-2 rounded hover:bg-[#155a8a] transition"
-              (click)="openRemanejamentoModal()"
-            >
-              Solicitar Remanejamento de Saldo
-            </button>
-          </div>
-        </div>
-      </po-modal>
+  <app-analiticos-modal
+    [show]="showAnaliticosModal"
+    [title]="selectedSintetico?.nomeItemContabil || selectedSintetico?.nome"
+    [columns]="analiticosColumns"
+    [items]="getAnaliticosTableData()"
+    (close)="closeAnaliticosModal()"
+    (rowClick)="onAnaliticoClick($event)"
+  ></app-analiticos-modal>
 
       <po-modal
         *ngIf="showDetalhesAnaliticoModal"
