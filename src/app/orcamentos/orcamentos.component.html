@@ -3,14 +3,43 @@
   <main class="flex-1 p-10 text-white">
     <div class="max-w-5xl mx-auto p-8 bg-gradient-to-br from-[#e6f7fa] to-[#f3f6fa] rounded-xl shadow-lg">
       <h1 class="text-3xl font-bold mb-8 text-[#1A4E79]">Itens Contábeis Sintéticos</h1>
-      <po-table
-        [p-columns]="columnsSinteticos"
-        [p-items]="getSinteticosTableData()"
-        [p-striped]="true"
-        [p-hide-columns-manager]="true"
-        (p-row-click)="onSinteticoClick($event)"
-        class="mb-4"
-      ></po-table>
+      <div class="flex flex-col md:flex-row gap-4 mb-4 items-center">
+        <div class="flex flex-col">
+          <label class="text-[#1A4E79] font-semibold mb-1">Item Contábil</label>
+          <input type="text" class="p-2 rounded border text-[#1A4E79]" [(ngModel)]="filtroItemContabil" placeholder="Filtrar por nome ou código" />
+        </div>
+        <div class="flex flex-col">
+          <label class="text-[#1A4E79] font-semibold mb-1">Ano Vigente</label>
+          <select class="p-2 rounded border text-[#1A4E79]" [(ngModel)]="filtroAno">
+            <option *ngFor="let ano of anosDisponiveis" [value]="ano">{{ ano }}</option>
+          </select>
+        </div>
+      </div>
+  <div class="flex flex-col gap-3 mb-4">
+        <div
+          *ngFor="let item of getSinteticosTableDataFiltrados()"
+          (click)="onSinteticoClick(item)"
+          class="cursor-pointer bg-white rounded-lg shadow p-3 hover:scale-[1.02] hover:shadow-xl transition flex flex-col border border-transparent hover:border-[#1A4E79]"
+        >
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-base font-bold text-[#1A4E79]">{{ item.codigo }}</span>
+            <span class="text-sm font-semibold text-[#155a8a]">{{ item.nome }}</span>
+          </div>
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs text-gray-700">Ano: <span class="font-bold">{{ item.ano }}</span></span>
+            <span class="text-xs text-gray-700">Item Contábil: <span class="font-bold">{{ item.codigoItemContabil }}</span> - {{ item.nomeItemContabil }}</span>
+          </div>
+          <div class="flex items-center justify-end mb-1 gap-2">
+            <span class="text-xs text-gray-700">CC: <span class="font-bold">{{ item.codigoCentroCusto }}</span></span>
+            <span class="text-xs text-gray-700">{{ item.centroCusto }}</span>
+          </div>
+          <div class="flex flex-col gap-0.5 mt-1">
+            <span class="text-xs text-gray-700">Orçado: <span class="font-bold">{{ item.valorOrcado | currency:'BRL' }}</span></span>
+            <span class="text-xs text-gray-700">Realizado: <span class="font-bold">{{ item.valorRealizado | currency:'BRL' }}</span></span>
+            <span class="text-xs text-gray-700">Saldo: <span class="font-bold">{{ item.saldo | currency:'BRL' }}</span></span>
+          </div>
+        </div>
+      </div>
 
       <po-modal
         *ngIf="showAnaliticosModal"

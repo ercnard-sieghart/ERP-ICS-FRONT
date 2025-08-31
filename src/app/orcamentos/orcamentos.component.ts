@@ -1,4 +1,3 @@
-
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -12,6 +11,28 @@ import { MenuComponent } from "../shared/menu/menu.component";
   imports: [CommonModule, FormsModule, PoTableModule, PoModalModule, MenuComponent]
 })
 export class OrcamentosComponent {
+  filtroItemContabil: string = '';
+  filtroAno: string = '';
+  filtroCentroCusto: string = '';
+  anosDisponiveis: string[] = ['2024', '2025', '2026'];
+
+  getSinteticosTableDataFiltrados() {
+    let lista = this.getSinteticosTableData();
+    if (this.filtroItemContabil) {
+      const termo = this.filtroItemContabil.toLowerCase();
+      lista = lista.filter(item =>
+        item.nome.toLowerCase().includes(termo) ||
+        item.codigo.toLowerCase().includes(termo)
+      );
+    }
+    if (this.filtroAno) {
+      lista = lista.filter(item => item.ano === this.filtroAno);
+    }
+    if (this.filtroCentroCusto) {
+      lista = lista.filter(item => item.codigoCentroCusto === this.filtroCentroCusto);
+    }
+    return lista;
+  }
   showDetalhesAnaliticoModal = false;
   analiticoSelecionado: any = null;
 
@@ -48,25 +69,124 @@ export class OrcamentosComponent {
   }
   itensSinteticos = [
     {
-      codigo: '1001',
-      nome: 'Despesas Operacionais',
-      valorOrcado: 5000,
-      valorRealizado: 3200,
-      analiticos: [
-        { codigo: 'A01', nome: 'Energia', valorOrcado: 2000, valorRealizado: 1200 },
-        { codigo: 'A02', nome: 'Água', valorOrcado: 1500, valorRealizado: 1100 },
-        { codigo: 'A03', nome: 'Internet', valorOrcado: 1500, valorRealizado: 900 }
-      ]
+      codigo: '71401',
+      nome: 'EIXO 04 GRANTMAKING',
+      valorOrcado: 100000,
+      valorRealizado: 80000,
+      codigoCentroCusto: '71401',
+      centroCusto: 'EIXO 04 GRANTMAKING',
+      codigoItemContabil: '10113003003',
+      nomeItemContabil: 'CORE SEQUOIA 2025',
+      ano: '2025',
+      analiticos: []
     },
     {
-      codigo: '1002',
-      nome: 'Despesas Administrativas',
-      valorOrcado: 3000,
-      valorRealizado: 1800,
-      analiticos: [
-        { codigo: 'A10', nome: 'Material Escritório', valorOrcado: 2000, valorRealizado: 1200 },
-        { codigo: 'A11', nome: 'Serviços Terceiros', valorOrcado: 1000, valorRealizado: 600 }
-      ]
+      codigo: '71401',
+      nome: 'EIXO 04 GRANTMAKING',
+      valorOrcado: 90000,
+      valorRealizado: 70000,
+      codigoCentroCusto: '71401',
+      centroCusto: 'EIXO 04 GRANTMAKING',
+      codigoItemContabil: '10119001005',
+      nomeItemContabil: 'PROJ CLUA 2025',
+      ano: '2025',
+      analiticos: []
+    },
+    {
+      codigo: '71401',
+      nome: 'EIXO 04 GRANTMAKING',
+      valorOrcado: 120000,
+      valorRealizado: 95000,
+      codigoCentroCusto: '71401',
+      centroCusto: 'EIXO 04 GRANTMAKING',
+      codigoItemContabil: '10101016003',
+      nomeItemContabil: 'PROJ CWF FILANTROPIA E SUBNACIONA...',
+      ano: '2025',
+      analiticos: []
+    },
+    {
+      codigo: '71401',
+      nome: 'EIXO 04 GRANTMAKING',
+      valorOrcado: 110000,
+      valorRealizado: 90000,
+      codigoCentroCusto: '71401',
+      centroCusto: 'EIXO 04 GRANTMAKING',
+      codigoItemContabil: '10143001001',
+      nomeItemContabil: 'PROJ FC UNFCCC 2025',
+      ano: '2025',
+      analiticos: []
+    },
+    {
+      codigo: '71401',
+      nome: 'EIXO 04 GRANTMAKING',
+      valorOrcado: 95000,
+      valorRealizado: 70000,
+      codigoCentroCusto: '71401',
+      centroCusto: 'EIXO 04 GRANTMAKING',
+      codigoItemContabil: '10130005007',
+      nomeItemContabil: 'PROJ OAK PEOPLE CENTRIC 2025',
+      ano: '2025',
+      analiticos: []
+    },
+    {
+      codigo: '71401',
+      nome: 'EIXO 04 GRANTMAKING',
+      valorOrcado: 80000,
+      valorRealizado: 60000,
+      codigoCentroCusto: '71401',
+      centroCusto: 'EIXO 04 GRANTMAKING',
+      codigoItemContabil: '10208008001',
+      nomeItemContabil: 'PROJ ITAUSA ANUARIO 2.0 2025',
+      ano: '2025',
+      analiticos: []
+    },
+    {
+      codigo: '71401',
+      nome: 'EIXO 04 GRANTMAKING',
+      valorOrcado: 85000,
+      valorRealizado: 65000,
+      codigoCentroCusto: '71401',
+      centroCusto: 'EIXO 04 GRANTMAKING',
+      codigoItemContabil: '10124001007',
+      nomeItemContabil: 'GMF BEZOS AMAZONIA 2025',
+      ano: '2025',
+      analiticos: []
+    },
+    {
+      codigo: '71401',
+      nome: 'EIXO 04 GRANTMAKING',
+      valorOrcado: 90000,
+      valorRealizado: 70000,
+      codigoCentroCusto: '71401',
+      centroCusto: 'EIXO 04 GRANTMAKING',
+      codigoItemContabil: '10102005003',
+      nomeItemContabil: 'PROJ CIFF FISCAL POLICY 2025',
+      ano: '2025',
+      analiticos: []
+    },
+    {
+      codigo: '71401',
+      nome: 'EIXO 04 GRANTMAKING',
+      valorOrcado: 95000,
+      valorRealizado: 80000,
+      codigoCentroCusto: '71401',
+      centroCusto: 'EIXO 04 GRANTMAKING',
+      codigoItemContabil: '10124002001',
+      nomeItemContabil: 'GMF BEZOS USP_IPEA 2025',
+      ano: '2025',
+      analiticos: []
+    },
+    {
+      codigo: '71401',
+      nome: 'EIXO 04 GRANTMAKING',
+      valorOrcado: 100000,
+      valorRealizado: 85000,
+      codigoCentroCusto: '71401',
+      centroCusto: 'EIXO 04 GRANTMAKING',
+      codigoItemContabil: '10108002002',
+      nomeItemContabil: 'GMF FILE CLIMATE ACTION 2025',
+      ano: '2025',
+      analiticos: []
     }
   ];
 
