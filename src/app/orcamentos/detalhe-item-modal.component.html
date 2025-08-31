@@ -1,0 +1,14 @@
+<po-modal
+  [p-primary-action]="{ label: 'Fechar', action: onClose.bind(this) }"
+  [p-title]="'Detalhes do Item Contábil'"
+>
+  <div class="mb-4">
+    <div class="font-bold text-[#1A4E79] mb-2">{{ item?.nomeItemContabil }} ({{ item?.codigoItemContabil }})</div>
+    <div class="mb-2">Valor Orçado: <span class="font-semibold">{{ item?.valorOrcado | currency:'BRL' }}</span></div>
+    <div class="mb-2">Valor Realizado: <span class="font-semibold">{{ item?.valorRealizado | currency:'BRL' }}</span></div>
+    <div class="mb-2">Centro de Custo: <span class="font-semibold">{{ item?.centroCusto }}</span></div>
+    <div class="mb-2">Ano: <span class="font-semibold">{{ item?.ano }}</span></div>
+    <div class="mb-2">Descrição: <span class="font-semibold">{{ item?.descricao || 'Sem descrição.' }}</span></div>
+    <div class="mb-2">Observações: <span class="font-semibold">{{ item?.observacoes || 'Sem observações.' }}</span></div>
+  </div>
+</po-modal>

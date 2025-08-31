@@ -5,9 +5,11 @@ import { FilterAnoPipe } from './filter-ano.pipe';
 import { FilterCentroCustoPipe } from './filter-centro-custo.pipe';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DetalheItemModalComponent } from './detalhe-item-modal.component';
 import { PoTableModule, PoTableColumn, PoModalModule } from '@po-ui/ng-components';
 import { MenuComponent } from "../shared/menu/menu.component";
 import { AnaliticosModalComponent } from './analiticos-modal.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-orcamentos',
@@ -23,10 +25,22 @@ import { AnaliticosModalComponent } from './analiticos-modal.component';
     FilterItemContabilPipe,
     FilterAnoPipe,
     FilterCentroCustoPipe,
-    AnaliticosModalComponent
+  AnaliticosModalComponent,
+  DetalheItemModalComponent
   ]
 })
 export class OrcamentosComponent {
+  irParaDetalheItem(item: any) {
+    this.router.navigate(['/detalhe-item'], { state: { item } });
+  }
+  abrirDetalhamento(item: any) {
+    this.analiticoSelecionado = item;
+    this.showDetalhesAnaliticoModal = true;
+  }
+  constructor(private router: Router) {}
+  irParaHome() {
+    this.router.navigate(['/home']);
+  }
   filtroItemContabil: string = '';
   filtroAno: string = '';
   filtroCentroCusto: string = '';
@@ -127,6 +141,7 @@ export class OrcamentosComponent {
     remOrigem: string = '';
     remDestino: string = '';
     remValor: number | null = null;
+PoButtonType: any;
 
   getAnaliticosTableData() {
     if (!this.selectedSintetico) return [];
@@ -139,6 +154,8 @@ export class OrcamentosComponent {
   onSinteticoClick(row: any) {
     this.selectedSintetico = row;
     this.showAnaliticosModal = true;
+    // Força detecção de mudanças caso o modal não abra
+    Promise.resolve().then(() => {});
   }
 
   closeAnaliticosModal() {

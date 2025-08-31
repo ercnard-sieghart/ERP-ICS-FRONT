@@ -24,5 +24,6 @@ export const routes: Routes = [
 		path: 'orcamentos',
 		loadComponent: () => import('./orcamentos/orcamentos.component').then(m => m.OrcamentosComponent)
 	},
-	{ path: '', redirectTo: 'login', pathMatch: 'full' }
+	{ path: '', redirectTo: 'login', pathMatch: 'full' },
+	{ path: 'detalhe-item', loadComponent: () => import('./orcamentos/detalhe-item-modal.component').then(m => m.DetalheItemModalComponent) },
 ];

@@ -32,7 +32,7 @@
           <div class="flex flex-row items-center justify-between mb-4">
             <h2 class="text-lg font-bold truncate break-words max-w-[220px]" title="{{ item.nomeItemContabil }}">{{ item.nomeItemContabil }}</h2>
             <button
-              (click)="onSinteticoClick(item)"
+              (click)="irParaDetalheItem(item)"
               class="px-3 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white shadow-md hover:scale-105 hover:from-[#155a8a] hover:to-[#5bbdbb] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#1A4E79] focus:ring-offset-2"
               aria-label="Ver Analíticos"
             >
@@ -67,20 +67,11 @@
     (rowClick)="onAnaliticoClick($event)"
   ></app-analiticos-modal>
 
-      <po-modal
-        *ngIf="showDetalhesAnaliticoModal"
-        [p-primary-action]="{ label: 'Fechar', action: closeDetalhesAnaliticoModal.bind(this) }"
-        [p-title]="'Detalhes do Item Analítico'"
-      >
-        <div class="mb-4">
-          <div class="font-bold text-[#1A4E79] mb-2">{{ analiticoSelecionado?.nome }} ({{ analiticoSelecionado?.codigo }})</div>
-          <div class="mb-2">Valor Orçado: <span class="font-semibold">{{ analiticoSelecionado?.valorOrcado | currency:'BRL' }}</span></div>
-          <div class="mb-2">Valor Realizado: <span class="font-semibold">{{ analiticoSelecionado?.valorRealizado | currency:'BRL' }}</span></div>
-          <div class="mb-2">Saldo: <span class="font-semibold">{{ (analiticoSelecionado?.valorOrcado - analiticoSelecionado?.valorRealizado) | currency:'BRL' }}</span></div>
-          <div class="mb-2">Descrição: <span class="font-semibold">{{ analiticoSelecionado?.descricao || 'Sem descrição.' }}</span></div>
-          <div class="mb-2">Observações: <span class="font-semibold">{{ analiticoSelecionado?.observacoes || 'Sem observações.' }}</span></div>
-        </div>
-      </po-modal>
+      <app-detalhe-item-modal
+        [show]="showDetalhesAnaliticoModal"
+        [item]="analiticoSelecionado"
+        (close)="closeDetalhesAnaliticoModal()"
+      ></app-detalhe-item-modal>
 
       <po-modal
         *ngIf="showRemanejamentoModal"
