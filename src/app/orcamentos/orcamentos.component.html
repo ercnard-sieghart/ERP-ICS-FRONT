@@ -14,6 +14,13 @@
             <option *ngFor="let ano of anosDisponiveis" [value]="ano">{{ ano }}</option>
           </select>
         </div>
+        <div class="flex flex-col">
+          <label class="text-[#1A4E79] font-semibold mb-1">Centro de Custo</label>
+          <select class="p-2 rounded border text-[#1A4E79]" [(ngModel)]="filtroCentroCusto">
+            <option value="">Todos</option>
+            <option *ngFor="let cc of itensSinteticos | uniqueCentroCusto" [value]="cc.codigoCentroCusto">{{ cc.codigoCentroCusto }} - {{ cc.centroCusto }}</option>
+          </select>
+        </div>
       </div>
   <div class="flex flex-col gap-3 mb-4">
         <div
@@ -30,8 +37,7 @@
             <span class="text-xs text-gray-700">Item Contábil: <span class="font-bold">{{ item.codigoItemContabil }}</span> - {{ item.nomeItemContabil }}</span>
           </div>
           <div class="flex items-center justify-end mb-1 gap-2">
-            <span class="text-xs text-gray-700">CC: <span class="font-bold">{{ item.codigoCentroCusto }}</span></span>
-            <span class="text-xs text-gray-700">{{ item.centroCusto }}</span>
+            <span class="text-xs text-gray-700">Centro de Custo: <span class="font-bold">{{ item.codigoCentroCusto }}</span> - {{ item.centroCusto }}</span>
           </div>
           <div class="flex flex-col gap-0.5 mt-1">
             <span class="text-xs text-gray-700">Orçado: <span class="font-bold">{{ item.valorOrcado | currency:'BRL' }}</span></span>

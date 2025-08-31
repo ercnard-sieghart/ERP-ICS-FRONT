@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { UniqueCentroCustoPipe } from './unique-centro-custo.pipe';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PoTableModule, PoTableColumn, PoModalModule } from '@po-ui/ng-components';
@@ -8,7 +9,7 @@ import { MenuComponent } from "../shared/menu/menu.component";
   selector: 'app-orcamentos',
   templateUrl: './orcamentos.component.html',
   standalone: true,
-  imports: [CommonModule, FormsModule, PoTableModule, PoModalModule, MenuComponent]
+  imports: [CommonModule, FormsModule, PoTableModule, PoModalModule, MenuComponent, UniqueCentroCustoPipe]
 })
 export class OrcamentosComponent {
   filtroItemContabil: string = '';
@@ -123,7 +124,7 @@ export class OrcamentosComponent {
       valorRealizado: 70000,
       codigoCentroCusto: '71401',
       centroCusto: 'EIXO 04 GRANTMAKING',
-      codigoItemContabil: '10130005007',
+      codigoItemContabil: '10130005005',
       nomeItemContabil: 'PROJ OAK PEOPLE CENTRIC 2025',
       ano: '2025',
       analiticos: []
