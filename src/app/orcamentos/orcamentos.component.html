@@ -1,11 +1,76 @@
 <div class="flex min-h-screen bg-gradient-to-br from-[#1A4E79] to-[#75C9C8]">
-  <app-menu />
+  <app-menu/>
   <main class="flex-1 p-10 text-white">
-    <h1 class="text-3xl font-bold mb-6">Gestão de Orçamentos</h1>
-    <p class="text-lg mb-8">Aqui você poderá gerenciar e acompanhar os orçamentos da sua empresa.</p>
-    <div class="bg-white rounded-xl shadow-lg p-6 max-w-2xl mx-auto flex flex-col items-center">
-      <h2 class="text-xl font-bold text-[#1A4E79] mb-4">Em breve</h2>
-      <div class="text-gray-500 text-center">Esta página está em desenvolvimento. Aguarde novidades!</div>
+    <div class="max-w-5xl mx-auto p-8 bg-gradient-to-br from-[#e6f7fa] to-[#f3f6fa] rounded-xl shadow-lg">
+      <h1 class="text-3xl font-bold mb-8 text-[#1A4E79]">Itens Contábeis Sintéticos</h1>
+      <po-table
+        [p-columns]="columnsSinteticos"
+        [p-items]="getSinteticosTableData()"
+        [p-striped]="true"
+        [p-hide-columns-manager]="true"
+        (p-row-click)="onSinteticoClick($event)"
+        class="mb-4"
+      ></po-table>
+
+      <po-modal
+        *ngIf="showAnaliticosModal"
+        [p-primary-action]="{ label: 'Fechar', action: closeAnaliticosModal.bind(this) }"
+        [p-title]="selectedSintetico?.nome"
+      >
+        <div class="mb-4">
+          <h2 class="text-xl font-bold text-[#1A4E79] mb-2">Itens Analíticos</h2>
+          <po-table
+            [p-columns]="columnsAnaliticos"
+            [p-items]="getAnaliticosTableData()"
+            [p-striped]="true"
+            [p-hide-columns-manager]="true"
+            (p-row-click)="onAnaliticoClick($event)"
+          ></po-table>
+          <div class="flex justify-end mt-4">
+            <button
+              class="bg-[#1A4E79] text-white px-4 py-2 rounded hover:bg-[#155a8a] transition"
+              (click)="openRemanejamentoModal()"
+            >
+              Solicitar Remanejamento de Saldo
+            </button>
+          </div>
+        </div>
+      </po-modal>
+
+      <po-modal
+        *ngIf="showDetalhesAnaliticoModal"
+        [p-primary-action]="{ label: 'Fechar', action: closeDetalhesAnaliticoModal.bind(this) }"
+        [p-title]="'Detalhes do Item Analítico'"
+      >
+        <div class="mb-4">
+          <div class="font-bold text-[#1A4E79] mb-2">{{ analiticoSelecionado?.nome }} ({{ analiticoSelecionado?.codigo }})</div>
+          <div class="mb-2">Valor Orçado: <span class="font-semibold">{{ analiticoSelecionado?.valorOrcado | currency:'BRL' }}</span></div>
+          <div class="mb-2">Valor Realizado: <span class="font-semibold">{{ analiticoSelecionado?.valorRealizado | currency:'BRL' }}</span></div>
+          <div class="mb-2">Saldo: <span class="font-semibold">{{ (analiticoSelecionado?.valorOrcado - analiticoSelecionado?.valorRealizado) | currency:'BRL' }}</span></div>
+          <div class="mb-2">Descrição: <span class="font-semibold">{{ analiticoSelecionado?.descricao || 'Sem descrição.' }}</span></div>
+          <div class="mb-2">Observações: <span class="font-semibold">{{ analiticoSelecionado?.observacoes || 'Sem observações.' }}</span></div>
+        </div>
+      </po-modal>
+
+      <po-modal
+        *ngIf="showRemanejamentoModal"
+        [p-primary-action]="{ label: 'Solicitar', action: solicitarRemanejamento.bind(this) }"
+        [p-secondary-action]="{ label: 'Cancelar', action: closeRemanejamentoModal.bind(this) }"
+        [p-title]="'Solicitar Remanejamento de Saldo'"
+      >
+        <div class="mb-4">
+          <label class="block mb-2 text-[#1A4E79] font-semibold">Analítico de Origem</label>
+          <select class="w-full p-2 rounded border mb-4 text-[#1A4E79]" [(ngModel)]="remOrigem">
+            <option *ngFor="let a of getAnaliticosTableData()" [value]="a.codigo">{{ a.nome }} ({{ a.codigo }})</option>
+          </select>
+          <label class="block mb-2 text-[#1A4E79] font-semibold">Analítico de Destino</label>
+          <select class="w-full p-2 rounded border mb-4 text-[#1A4E79]" [(ngModel)]="remDestino">
+            <option *ngFor="let a of getAnaliticosTableData()" [value]="a.codigo">{{ a.nome }} ({{ a.codigo }})</option>
+          </select>
+          <label class="block mb-2 text-[#1A4E79] font-semibold">Valor a Remanejar</label>
+          <input type="number" class="w-full p-2 rounded border text-[#1A4E79]" [(ngModel)]="remValor" min="1" />
+        </div>
+      </po-modal>
     </div>
   </main>
 </div>

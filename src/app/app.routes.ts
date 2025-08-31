@@ -20,5 +20,9 @@ export const routes: Routes = [
 		path: 'consultas/consulta1',
 		loadComponent: () => import('./consultas/consulta-extrato.component').then(m => m.ConsultaExtratoComponent)
 	},
+	{
+		path: 'orcamentos',
+		loadComponent: () => import('./orcamentos/orcamentos.component').then(m => m.OrcamentosComponent)
+	},
 	{ path: '', redirectTo: 'login', pathMatch: 'full' }
 ];
