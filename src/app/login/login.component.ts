@@ -42,7 +42,7 @@ export class LoginComponent {
   }
 
   logoutByInactivity() {
-    localStorage.removeItem('access_token');
+  localStorage.removeItem('authToken');
     this.popupType = 'error';
     this.popupMessage = 'Sessão expirada por inatividade.';
     this.showPopup = true;
@@ -63,7 +63,7 @@ export class LoginComponent {
         const body = response.body as any;
   if (body && (body.success === true || body.success === 'true')) {
           if (body.access_token) {
-            localStorage.setItem('access_token', body.access_token);
+            localStorage.setItem('authToken', body.access_token);
           }
           if (body.name) {
             localStorage.setItem('user_name', body.name);
