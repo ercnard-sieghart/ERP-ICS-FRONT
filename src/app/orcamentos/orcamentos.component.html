@@ -1,7 +1,7 @@
 <div class="flex min-h-screen bg-gradient-to-br from-[#1A4E79] to-[#75C9C8]">
   <app-menu/>
   <main class="flex-1 p-10 text-white">
-    <div class="max-w-5xl mx-auto p-8 bg-gradient-to-br from-[#e6f7fa] to-[#f3f6fa] rounded-xl shadow-lg">
+  <div class="max-w-4xl w-full mx-auto p-6 bg-gradient-to-br from-[#e6f7fa] to-[#f3f6fa] rounded-xl shadow-lg flex flex-col items-center" style="max-height:calc(100vh - 48px);height:100%;">
       <h1 class="text-3xl font-bold mb-8 text-[#1A4E79]">Itens Contábeis Sintéticos</h1>
       <div class="flex flex-col md:flex-row gap-4 mb-4 items-center">
         <div class="flex flex-col">
@@ -22,23 +22,42 @@
           </select>
         </div>
       </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <div class="flex flex-col gap-4 p-2 w-full max-w-2xl flex-1" style="overflow-y:auto;">
       <div *ngFor="let item of itensSinteticos
         | filterItemContabil:filtroItemContabil
         | filterAno:filtroAno
         | filterCentroCusto:filtroCentroCusto"
-        class="bg-white rounded shadow p-6 flex flex-col justify-between">
+  class="bg-white rounded-lg shadow-md px-6 py-4 flex flex-col justify-between w-full max-w-2xl min-h-[140px] min-w-[400px] transition hover:shadow-xl mr-auto relative">
         <div>
-          <h2 class="text-lg font-bold mb-2">{{ item.nomeItemContabil }}</h2>
-          <p class="text-sm text-gray-600 mb-1">Centro de Custo: <span class="font-semibold">{{ item.centroCusto }}</span></p>
-          <p class="text-sm text-gray-600 mb-1">Ano: <span class="font-semibold">{{ item.ano }}</span></p>
-          <p class="text-sm text-gray-600 mb-1">Valor Orçado: <span class="font-semibold">{{ item.valorOrcado | currency:'BRL' }}</span></p>
-          <p class="text-sm text-gray-600 mb-1">Valor Realizado: <span class="font-semibold">{{ item.valorRealizado | currency:'BRL' }}</span></p>
+          <div class="flex flex-row items-center justify-between mb-4">
+            <h2 class="text-lg font-bold">{{ item.nomeItemContabil }}</h2>
+            <button
+              (click)="onSinteticoClick(item)"
+              class="px-3 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white shadow-md hover:scale-105 hover:from-[#155a8a] hover:to-[#5bbdbb] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#1A4E79] focus:ring-offset-2"
+              aria-label="Ver Analíticos"
+            >
+              <span class="flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                Ver Analíticos
+              </span>
+            </button>
+          </div>
+          <div class="flex flex-row flex-wrap items-center justify-between gap-4">
+            <div class="flex flex-col gap-1 flex-1">
+              <p class="text-sm text-gray-600 mb-1">Ano: <span class="font-semibold">{{ item.ano }}</span></p>
+              <p class="text-sm text-gray-600 mb-1">Valor Orçado: <span class="font-semibold">{{ item.valorOrcado | currency:'BRL' }}</span></p>
+              <p class="text-sm text-gray-600 mb-1">Valor Realizado: <span class="font-semibold">{{ item.valorRealizado | currency:'BRL' }}</span></p>
+            </div>
+            <div class="flex flex-col gap-1 items-end flex-1">
+              <p class="text-xs text-gray-500 mb-1">Item Contábil: <span class="font-semibold">{{ item.codigoItemContabil }}</span></p>
+              <p class="text-xs text-gray-500 mb-1">Centro de Custo: <span class="font-semibold">{{ item.codigoCentroCusto }}</span></p>
+              <p class="text-sm text-gray-600 mb-1">Centro de Custo: <span class="font-semibold">{{ item.centroCusto }}</span></p>
+            </div>
+          </div>
         </div>
-        <button (click)="onSinteticoClick(item)" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Ver Analíticos</button>
       </div>
     </div>
-    <po-modal [(ngModel)]="showAnaliticosModal" [p-title]="selectedSintetico?.nomeItemContabil" [p-primary-action]="closeAnaliticosModal" p-primary-label="Fechar">
+  <po-modal [(ngModel)]="showAnaliticosModal" [p-title]="selectedSintetico?.nomeItemContabil" [p-primary-action]="{ label: 'Fechar', action: closeAnaliticosModal.bind(this) }">
       <po-table [p-items]="getAnaliticosTableData()" [p-columns]="analiticosColumns"></po-table>
     </po-modal>
 
@@ -50,7 +69,7 @@
         <div class="mb-4">
           <h2 class="text-xl font-bold text-[#1A4E79] mb-2">Itens Analíticos</h2>
           <po-table
-            [p-columns]="columnsAnaliticos"
+            [p-columns]="analiticosColumns"
             [p-items]="getAnaliticosTableData()"
             [p-striped]="true"
             [p-hide-columns-manager]="true"
