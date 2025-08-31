@@ -22,30 +22,25 @@
           </select>
         </div>
       </div>
-  <div class="flex flex-col gap-3 mb-4">
-        <div
-          *ngFor="let item of getSinteticosTableDataFiltrados()"
-          (click)="onSinteticoClick(item)"
-          class="cursor-pointer bg-white rounded-lg shadow p-3 hover:scale-[1.02] hover:shadow-xl transition flex flex-col border border-transparent hover:border-[#1A4E79]"
-        >
-          <div class="flex items-center justify-between mb-1">
-            <span class="text-base font-bold text-[#1A4E79]">{{ item.codigo }}</span>
-            <span class="text-sm font-semibold text-[#155a8a]">{{ item.nome }}</span>
-          </div>
-          <div class="flex items-center justify-between mb-1">
-            <span class="text-xs text-gray-700">Ano: <span class="font-bold">{{ item.ano }}</span></span>
-            <span class="text-xs text-gray-700">Item Contábil: <span class="font-bold">{{ item.codigoItemContabil }}</span> - {{ item.nomeItemContabil }}</span>
-          </div>
-          <div class="flex items-center justify-end mb-1 gap-2">
-            <span class="text-xs text-gray-700">Centro de Custo: <span class="font-bold">{{ item.codigoCentroCusto }}</span> - {{ item.centroCusto }}</span>
-          </div>
-          <div class="flex flex-col gap-0.5 mt-1">
-            <span class="text-xs text-gray-700">Orçado: <span class="font-bold">{{ item.valorOrcado | currency:'BRL' }}</span></span>
-            <span class="text-xs text-gray-700">Realizado: <span class="font-bold">{{ item.valorRealizado | currency:'BRL' }}</span></span>
-            <span class="text-xs text-gray-700">Saldo: <span class="font-bold">{{ item.saldo | currency:'BRL' }}</span></span>
-          </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div *ngFor="let item of itensSinteticos
+        | filterItemContabil:filtroItemContabil
+        | filterAno:filtroAno
+        | filterCentroCusto:filtroCentroCusto"
+        class="bg-white rounded shadow p-6 flex flex-col justify-between">
+        <div>
+          <h2 class="text-lg font-bold mb-2">{{ item.nomeItemContabil }}</h2>
+          <p class="text-sm text-gray-600 mb-1">Centro de Custo: <span class="font-semibold">{{ item.centroCusto }}</span></p>
+          <p class="text-sm text-gray-600 mb-1">Ano: <span class="font-semibold">{{ item.ano }}</span></p>
+          <p class="text-sm text-gray-600 mb-1">Valor Orçado: <span class="font-semibold">{{ item.valorOrcado | currency:'BRL' }}</span></p>
+          <p class="text-sm text-gray-600 mb-1">Valor Realizado: <span class="font-semibold">{{ item.valorRealizado | currency:'BRL' }}</span></p>
         </div>
+        <button (click)="onSinteticoClick(item)" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Ver Analíticos</button>
       </div>
+    </div>
+    <po-modal [(ngModel)]="showAnaliticosModal" [p-title]="selectedSintetico?.nomeItemContabil" [p-primary-action]="closeAnaliticosModal" p-primary-label="Fechar">
+      <po-table [p-items]="getAnaliticosTableData()" [p-columns]="analiticosColumns"></po-table>
+    </po-modal>
 
       <po-modal
         *ngIf="showAnaliticosModal"
