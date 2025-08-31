@@ -62,6 +62,7 @@
     [title]="selectedSintetico?.nomeItemContabil || selectedSintetico?.nome"
     [columns]="analiticosColumns"
     [items]="getAnaliticosTableData()"
+    [sintetico]="selectedSintetico"
     (close)="closeAnaliticosModal()"
     (rowClick)="onAnaliticoClick($event)"
   ></app-analiticos-modal>

@@ -18,6 +18,7 @@ export class AnaliticosModalComponent {
   @Input() title: string = '';
   @Input() columns: PoTableColumn[] = [];
   @Input() items: any[] = [];
+  @Input() sintetico: any;
   @Output() close = new EventEmitter<void>();
   @Output() rowClick = new EventEmitter<any>();
 
