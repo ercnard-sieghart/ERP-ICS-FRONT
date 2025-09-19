@@ -1,0 +1,12 @@
+<div class="flex min-h-screen bg-gradient-to-br from-[#1A4E79] to-[#75C9C8]">
+  <!-- Menu removido para página de erro -->
+  <main class="flex-1 p-10 text-white flex flex-col items-center justify-center">
+    <div class="max-w-2xl w-full mx-auto p-8 bg-gradient-to-br from-[#e6f7fa] to-[#f3f6fa] rounded-xl shadow-lg flex flex-col items-center">
+  <h1 class="text-3xl font-bold mb-4 text-[#1A4E79]">Ocorreu um erro</h1>
+  <p *ngIf="errorCode" class="text-lg text-[#1A4E79] mb-2">Código do erro: <span class="font-semibold">{{ errorCode }}</span></p>
+  <p class="text-lg text-[#1A4E79] mb-6">{{ errorMessage }}</p>
+  <p class="text-base text-[#1A4E79] mb-6">Verifique sua conexão, tente novamente ou entre em contato com o suporte.</p>
+  <button class="px-4 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white shadow-md hover:scale-105 transition-all duration-200" onclick="window.location.reload()">Tentar novamente</button>
+    </div>
+  </main>
+</div>

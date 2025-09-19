@@ -1,0 +1,97 @@
+<div class="flex min-h-screen bg-gradient-to-br from-[#1A4E79] to-[#75C9C8]">
+  <app-menu/>
+  <main class="flex-1 p-10 text-white">
+  <div class="max-w-4xl w-full mx-auto p-6 bg-gradient-to-br from-[#e6f7fa] to-[#f3f6fa] rounded-xl shadow-lg flex flex-col items-center" style="max-height:calc(100vh - 48px);height:100%;">
+      <h1 class="text-2x1 font-bold mb-8 text-[#1A4E79]"></h1>
+      <div class="flex flex-col md:flex-row gap-4 mb-4 items-center">
+        <div class="flex flex-col">
+          <label class="text-[#1A4E79] font-semibold mb-1">Item Contábil</label>
+          <input type="text" class="p-2 rounded border text-[#1A4E79]" [(ngModel)]="filtroItemContabil" placeholder="Filtrar por nome ou código" />
+        </div>
+        <div class="flex flex-col">
+          <label class="text-[#1A4E79] font-semibold mb-1">Ano Vigente</label>
+          <select class="p-2 rounded border text-[#1A4E79]" [(ngModel)]="filtroAno">
+            <option *ngFor="let ano of anosDisponiveis" [value]="ano">{{ ano }}</option>
+          </select>
+        </div>
+        <div class="flex flex-col">
+          <label class="text-[#1A4E79] font-semibold mb-1">Centro de Custo</label>
+          <select class="p-2 rounded border text-[#1A4E79]" [(ngModel)]="filtroCentroCusto">
+            <option value="">Todos</option>
+            <option *ngFor="let cc of itensSinteticos | uniqueCentroCusto" [value]="cc.codigoCentroCusto">{{ cc.codigoCentroCusto }} - {{ cc.centroCusto }}</option>
+          </select>
+        </div>
+      </div>
+  <div class="flex flex-col gap-4 p-2 w-full max-w-2xl flex-1" style="overflow-y:auto;">
+      <div *ngFor="let item of itensSinteticos
+        | filterItemContabil:filtroItemContabil
+        | filterAno:filtroAno
+        | filterCentroCusto:filtroCentroCusto"
+    class="bg-white rounded-lg shadow-md px-8 py-6 flex flex-col justify-between w-full max-w-3xl min-h-[180px] min-w-[500px] transition hover:shadow-xl mr-auto relative overflow-hidden">
+        <div>
+          <div class="flex flex-row items-center justify-between mb-4">
+            <h2 class="text-lg font-bold truncate break-words max-w-[220px]" title="{{ item.nomeItemContabil }}">{{ item.nomeItemContabil }}</h2>
+            <button
+              (click)="irParaDetalheItem(item)"
+              class="px-3 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white shadow-md hover:scale-105 hover:from-[#155a8a] hover:to-[#5bbdbb] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#1A4E79] focus:ring-offset-2"
+              aria-label="Ver Analíticos"
+            >
+              <span class="flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                Ver Analíticos
+              </span>
+            </button>
+          </div>
+          <div class="flex flex-row flex-wrap items-center justify-between gap-4">
+            <div class="flex flex-col gap-1 flex-1">
+              <p class="text-sm text-gray-600 mb-1 truncate break-words" title="{{ item.ano }}">Ano: <span class="font-semibold">{{ item.ano }}</span></p>
+              <p class="text-sm text-gray-600 mb-1 truncate break-words" title="{{ item.valorOrcado | currency:'BRL' }}">Valor Orçado: <span class="font-semibold">{{ item.valorOrcado | currency:'BRL' }}</span></p>
+              <p class="text-sm text-gray-600 mb-1 truncate break-words" title="{{ item.valorRealizado | currency:'BRL' }}">Valor Realizado: <span class="font-semibold">{{ item.valorRealizado | currency:'BRL' }}</span></p>
+            </div>
+            <div class="flex flex-col gap-1 items-end flex-1">
+              <p class="text-xs text-gray-500 mb-1 truncate break-words" title="{{ item.codigoItemContabil }}">Item Contábil: <span class="font-semibold">{{ item.codigoItemContabil }}</span></p>
+              <p class="text-xs text-gray-500 mb-1 truncate break-words" title="{{ item.codigoCentroCusto }}">Centro de Custo: <span class="font-semibold">{{ item.codigoCentroCusto }}</span></p>
+              <p class="text-sm text-gray-600 mb-1 truncate break-words" title="{{ item.centroCusto }}">Centro de Custo: <span class="font-semibold">{{ item.centroCusto }}</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <app-analiticos-modal
+    [show]="showAnaliticosModal"
+    [title]="selectedSintetico?.nomeItemContabil || selectedSintetico?.nome"
+    [columns]="analiticosColumns"
+    [items]="getAnaliticosTableData()"
+    [sintetico]="selectedSintetico"
+    (close)="closeAnaliticosModal()"
+    (rowClick)="onAnaliticoClick($event)"
+  ></app-analiticos-modal>
+
+      <app-detalhe-item-modal
+        [show]="showDetalhesAnaliticoModal"
+        [item]="analiticoSelecionado"
+        (close)="closeDetalhesAnaliticoModal()"
+      ></app-detalhe-item-modal>
+
+      <po-modal
+        *ngIf="showRemanejamentoModal"
+        [p-primary-action]="{ label: 'Solicitar', action: solicitarRemanejamento.bind(this) }"
+        [p-secondary-action]="{ label: 'Cancelar', action: closeRemanejamentoModal.bind(this) }"
+        [p-title]="'Solicitar Remanejamento de Saldo'"
+      >
+        <div class="mb-4">
+          <label class="block mb-2 text-[#1A4E79] font-semibold">Analítico de Origem</label>
+          <select class="w-full p-2 rounded border mb-4 text-[#1A4E79]" [(ngModel)]="remOrigem">
+            <option *ngFor="let a of getAnaliticosTableData()" [value]="a.codigo">{{ a.nome }} ({{ a.codigo }})</option>
+          </select>
+          <label class="block mb-2 text-[#1A4E79] font-semibold">Analítico de Destino</label>
+          <select class="w-full p-2 rounded border mb-4 text-[#1A4E79]" [(ngModel)]="remDestino">
+            <option *ngFor="let a of getAnaliticosTableData()" [value]="a.codigo">{{ a.nome }} ({{ a.codigo }})</option>
+          </select>
+          <label class="block mb-2 text-[#1A4E79] font-semibold">Valor a Remanejar</label>
+          <input type="number" class="w-full p-2 rounded border text-[#1A4E79]" [(ngModel)]="remValor" min="1" />
+        </div>
+      </po-modal>
+    </div>
+  </main>
+</div>

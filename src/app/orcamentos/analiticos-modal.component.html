@@ -1,0 +1,23 @@
+<po-modal
+  [p-primary-action]="{ label: 'Fechar', action: onClose.bind(this) }"
+  [p-title]="title"
+>
+  <div class="mb-4">
+    <h2 class="text-xl font-bold text-[#1A4E79] mb-2">Origem dos Recursos</h2>
+    <div class="mb-2 text-gray-700">
+      <strong>Centro de Custo:</strong> {{ sintetico?.centroCusto || '-' }}<br>
+      <strong>Item Contábil:</strong> {{ sintetico?.nomeItemContabil || '-' }}<br>
+      <strong>Ano:</strong> {{ sintetico?.ano || '-' }}<br>
+      <strong>Valor Orçado:</strong> {{ sintetico?.valorOrcado | currency:'BRL' }}<br>
+      <strong>Valor Realizado:</strong> {{ sintetico?.valorRealizado | currency:'BRL' }}<br>
+    </div>
+    <h2 class="text-xl font-bold text-[#1A4E79] mb-2 mt-4">Gastos Analíticos</h2>
+    <po-table
+      [p-columns]="columns"
+      [p-items]="items"
+      [p-striped]="true"
+      [p-hide-columns-manager]="true"
+      (p-row-click)="onRowClick($event)"
+    ></po-table>
+  </div>
+</po-modal>
