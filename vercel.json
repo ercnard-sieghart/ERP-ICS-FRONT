@@ -11,6 +11,10 @@
   ],
   "routes": [
     {
+      "src": "/api/proxy/(.*)",
+      "dest": "http://institutoclima200507.protheus.cloudtotvs.com.br:4050/$1"
+    },
+    {
       "src": "/(.*\\.(js|css|ico|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot))",
       "dest": "/$1"
     },

@@ -63,7 +63,7 @@ export class LoginComponent {
     // Dados OAuth2 no formato form-encoded padrão
     const body = `grant_type=password&username=${encodeURIComponent(loginData.login)}&password=${encodeURIComponent(loginData.password)}`;
     
-    this.http.post('http://institutoclima200507.protheus.cloudtotvs.com.br:4050/rest/api/oauth2/v1/token', body, { headers, observe: 'response' }).subscribe({
+    this.http.post('/api/proxy/rest/api/oauth2/v1/token', body, { headers, observe: 'response' }).subscribe({
       next: (oauthResponse) => {
         const oauthBody = oauthResponse.body as any;
         console.log('OAuth2 response:', oauthBody);
@@ -80,7 +80,7 @@ export class LoginComponent {
             'Authorization': `Bearer ${oauthBody.access_token}`
           };
           
-          this.http.post('/login', {}, { headers, observe: 'response' }).subscribe({
+          this.http.post('/api/proxy/login', {}, { headers, observe: 'response' }).subscribe({
             next: (loginResponse) => {
               const loginBody = loginResponse.body as any;
               console.log('Login response:', loginBody);
