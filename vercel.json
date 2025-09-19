@@ -1,4 +1,7 @@
 {
+  "version": 2,
+  "buildCommand": "ng build --configuration production",
+  "outputDirectory": "dist/erp-ics-front/browser",
   "rewrites": [
     {
       "source": "/(.*)",
