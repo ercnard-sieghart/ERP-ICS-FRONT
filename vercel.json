@@ -1,11 +1,18 @@
 {
   "version": 2,
-  "buildCommand": "ng build --configuration production",
-  "outputDirectory": "dist/erp-ics-front/browser",
-  "rewrites": [
+  "builds": [
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist/erp-ics-front/browser"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
