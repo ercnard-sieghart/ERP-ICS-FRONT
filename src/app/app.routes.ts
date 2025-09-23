@@ -29,6 +29,11 @@ export const routes: Routes = [
 			loadComponent: () => import('./orcamentos/orcamentos.component').then(m => m.OrcamentosComponent),
 			canActivate: [authGuard]
 		},
+		{
+			path: 'compras/solicitacao',
+			loadComponent: () => import('./compras/solicitacao-compras/solicitacao-compras.component').then(m => m.SolicitacaoComprasComponent),
+			canActivate: [authGuard]
+		},
 	{ path: '', redirectTo: 'login', pathMatch: 'full' },
 		{ path: 'detalhe-item', loadComponent: () => import('./orcamentos/detalhe-item-modal.component').then(m => m.DetalheItemModalComponent), canActivate: [authGuard] },
 	{ path: 'error', component: ErrorPageComponent },

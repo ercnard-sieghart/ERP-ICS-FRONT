@@ -2,7 +2,7 @@
   <div class="mb-8">
     <div class="bg-[#f3f6fa] rounded-xl shadow flex flex-col items-center py-4 px-3">
       <div class="flex flex-col items-center w-full justify-center">
-  <img src="assets/logo.png" alt="Logo" class="h-20 w-20 object-contain mb-2" />
+        <img src="assets/logo.png" alt="Logo" class="h-20 w-20 object-contain mb-2" />
         <div class="flex items-center gap-3 w-full justify-center">
           <span class="flex items-center justify-center h-9 w-9 rounded-full bg-[#75C9C8]">
             <po-icon name="an-user" size="md" class="an an-user text-white"></po-icon>
@@ -16,45 +16,60 @@
       </button>
     </div>
   </div>
+  
   <nav class="flex-1">
-    <ul class="space-y-4">
-      <li>
-        <a href="/home" class="flex items-center text-[#1A4E79] hover:text-[#75C9C8] transition-colors">
-          <po-icon name="home" class="mr-2" size="md"></po-icon>
-          Home
-        </a>
-      </li>
-      <li>
-        <a href="/orcamentos" class="flex items-center text-[#1A4E79] hover:text-[#75C9C8] transition-colors">
-          <po-icon name="money" class="mr-2" size="md"></po-icon>
-          Gestão de Orçamentos
-        </a>
-      </li>
-      <li>
-        <a href="/consultas" class="flex items-center text-[#1A4E79] hover:text-[#75C9C8] transition-colors">
-          <po-icon name="search" class="mr-2" size="md"></po-icon>
-          Consultas
-        </a>
-      </li>
-      <li>
-        <a href="#" class="flex items-center text-[#1A4E79] hover:text-[#75C9C8] transition-colors">
-          <po-icon name="users" class="mr-2" size="md"></po-icon>
-          SharePoint
-        </a>
-      </li>
-      <li>
-        <a href="#" class="flex items-center text-[#1A4E79] hover:text-[#75C9C8] transition-colors">
-          <po-icon name="calendar" class="mr-2" size="md"></po-icon>
-          Ramais
-        </a>
-      </li>
-      <li>
-        <a href="#" class="flex items-center text-[#1A4E79] hover:text-[#75C9C8] transition-colors">
-          <po-icon name="document" class="mr-2" size="md"></po-icon>
-          Gestão de Patentes
-        </a>
+    <ul class="space-y-2">
+      <li *ngFor="let item of menuItems">
+        <!-- Item de menu principal -->
+        <div class="group">
+          <a 
+            *ngIf="!item.submenus || item.submenus.length === 0; else hasSubmenus"
+            [href]="item.link" 
+            class="flex items-center justify-between text-[#1A4E79] hover:text-[#75C9C8] hover:bg-[#f3f6fa] transition-colors px-3 py-2 rounded-lg"
+          >
+            <div class="flex items-center">
+              <span class="mr-3 text-lg">{{ getIconSymbol(item.icon) }}</span>
+              <span class="text-sm font-medium">{{ item.label }}</span>
+            </div>
+          </a>
+          
+          <!-- Template para itens com submenus -->
+          <ng-template #hasSubmenus>
+            <button 
+              (click)="toggleSubmenu(item)"
+              class="w-full flex items-center justify-between text-[#1A4E79] hover:text-[#75C9C8] hover:bg-[#f3f6fa] transition-colors px-3 py-2 rounded-lg text-left"
+            >
+              <div class="flex items-center">
+                <span class="mr-3 text-lg">{{ getIconSymbol(item.icon) }}</span>
+                <span class="text-sm font-medium">{{ item.label }}</span>
+              </div>
+              <span 
+                class="text-xs transition-transform duration-300"
+                [class.rotate-180]="item.expanded"
+              >▼</span>
+            </button>
+            
+            <!-- Submenus -->
+            <div 
+              class="overflow-hidden transition-all duration-300 ease-in-out"
+              [class.max-h-0]="!item.expanded"
+              [class.max-h-96]="item.expanded"
+            >
+              <ul class="mt-2 ml-6 space-y-1 border-l-2 border-[#f3f6fa] pl-4">
+                <li *ngFor="let submenu of item.submenus">
+                  <a 
+                    [href]="submenu.link" 
+                    class="flex items-center text-[#6A6A6A] hover:text-[#75C9C8] hover:bg-[#f9fafb] transition-colors px-2 py-1.5 rounded text-sm"
+                  >
+                    <span class="mr-2 text-sm">{{ getIconSymbol(submenu.icon) }}</span>
+                    {{ submenu.label }}
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </ng-template>
+        </div>
       </li>
     </ul>
   </nav>
-  <!-- ...existing code... -->
 </aside>

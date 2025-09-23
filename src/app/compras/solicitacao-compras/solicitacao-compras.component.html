@@ -1,0 +1,153 @@
+<div class="flex h-screen bg-gray-50">
+  <!-- Menu lateral -->
+  <app-menu></app-menu>
+  
+  <!-- Conteúdo principal -->
+  <main class="flex-1 p-6 overflow-auto">
+    <po-page 
+      p-title="Solicitação de Compras"
+      p-subtitle="Gerencie todas as solicitações de compras da empresa">
+      
+      <!-- Toolbar com ações -->
+      <div class="po-row mb-4">
+        <div class="po-md-12">
+          <div class="flex justify-between items-center">
+            <div class="flex gap-2">
+              <po-button
+                p-label="Nova Solicitação"
+                p-kind="primary"
+                p-icon="po-icon-plus"
+                (p-click)="novaSolicitacao()">
+              </po-button>
+              
+              <po-button
+                p-label="Exportar"
+                p-kind="secondary"
+                p-icon="po-icon-export"
+                (p-click)="exportar()">
+              </po-button>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-gray-600">
+                Total: {{ solicitacoes.length }} solicitações
+              </span>
+              
+              <po-button
+                p-label="Atualizar"
+                p-kind="tertiary"
+                p-icon="po-icon-refresh"
+                (p-click)="carregarSolicitacoes()">
+              </po-button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtros -->
+      <div class="po-row mb-4">
+        <div class="po-md-12">
+          <div class="filtros-container">
+            <h4 class="mb-3">Filtros</h4>
+            <div class="po-row">
+              <div class="po-md-3">
+                <input 
+                  type="text"
+                  class="po-input"
+                  placeholder="Nº Solicitação..."
+                />
+              </div>
+              
+              <div class="po-md-3">
+                <select class="po-select">
+                  <option value="">Todos os status</option>
+                  <option value="pendente">Pendente</option>
+                  <option value="aprovado">Aprovado</option>
+                  <option value="rejeitado">Rejeitado</option>
+                  <option value="processando">Processando</option>
+                </select>
+              </div>
+              
+              <div class="po-md-3">
+                <input 
+                  type="date"
+                  class="po-input"
+                  placeholder="Data Início"
+                />
+              </div>
+              
+              <div class="po-md-3">
+                <input 
+                  type="date"
+                  class="po-input"
+                  placeholder="Data Fim"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabela de solicitações -->
+      <div class="po-row">
+        <div class="po-md-12">
+          <po-table
+            [p-columns]="columns"
+            [p-items]="solicitacoes"
+            [p-actions]="actions"
+            [p-loading]="loading"
+            p-sort="true"
+            p-striped="true"
+            p-show-more-disabled="false"
+            [p-height]="600"
+            [p-loading-show-more]="loading">
+            
+            <!-- Template customizado para status -->
+            <ng-template p-table-column-template="status" let-row let-value>
+              <span 
+                class="px-2 py-1 rounded-full text-xs font-medium"
+                [ngClass]="getStatusClass(value)">
+                {{ getStatusLabel(value) }}
+              </span>
+            </ng-template>
+            
+            <!-- Template customizado para valor -->
+            <ng-template p-table-column-template="valorTotal" let-value>
+              <span class="font-semibold text-green-600">
+                {{ value | currency:'BRL':'symbol':'1.2-2' }}
+              </span>
+            </ng-template>
+            
+            <!-- Estado vazio -->
+            <ng-template p-table-no-data>
+              <div class="text-center py-8">
+                <div class="text-6xl mb-4">📋</div>
+                <h3 class="text-lg font-semibold text-gray-700 mb-2">
+                  Nenhuma solicitação encontrada
+                </h3>
+                <p class="text-gray-500 mb-4">
+                  Não há solicitações de compras para exibir no momento.
+                </p>
+                <po-button
+                  p-label="Nova Solicitação"
+                  p-kind="primary"
+                  p-icon="po-icon-plus"
+                  (p-click)="novaSolicitacao()">
+                </po-button>
+              </div>
+            </ng-template>
+          </po-table>
+        </div>
+      </div>
+      
+      <!-- Loading overlay -->
+      <po-loading-overlay *ngIf="loading">
+        <div class="flex flex-col items-center">
+          <div class="text-lg font-semibold mb-2">Carregando solicitações...</div>
+          <div class="text-sm text-gray-600">Por favor, aguarde</div>
+        </div>
+      </po-loading-overlay>
+      
+    </po-page>
+  </main>
+</div>
