@@ -28,6 +28,8 @@ export class MenuComponent implements OnInit, OnDestroy {
   
   constructor(private cdr: ChangeDetectorRef, private authService: AuthService) {}
 
+
+
   ngOnInit(): void {
     this.updateDisplayName();
     
