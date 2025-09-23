@@ -80,9 +80,6 @@ export class LoginComponent {
               
               if (loginBody && (loginBody.SUCCESS === true || loginBody.SUCCESS === 'true')) {
                 // Armazenar dados do usuário usando os campos corretos do backend
-                if (loginBody.USER_NAME) {
-                  localStorage.setItem('user_name', loginBody.USER_NAME);
-                }
                 if (loginBody.USER_FULLNAME) {
                   localStorage.setItem('user_fullname', loginBody.USER_FULLNAME);
                 }

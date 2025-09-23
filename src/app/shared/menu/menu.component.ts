@@ -48,12 +48,8 @@ export class MenuComponent implements OnInit, OnDestroy {
 
   updateDisplayName(): void {
     const fullName = localStorage.getItem('user_fullname');
-    const userName = localStorage.getItem('user_name');
     
-    this.displayName = fullName || userName || 'Usuário';
-    console.log('ATUALIZANDO NOME:', this.displayName);
-    console.log('user_fullname:', fullName);
-    console.log('user_name:', userName);
+    this.displayName = fullName || 'Usuário';
     
     this.cdr.detectChanges();
   }
