@@ -21,6 +21,7 @@ export class AuthService {
 
   authenticate(username: string, password: string): Observable<any> {
     console.log('[AUTH] Starting OAuth2 authentication');
+    
     const headers = new HttpHeaders({
       'Content-Type': 'application/x-www-form-urlencoded'
     });
