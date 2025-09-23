@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 @Injectable({
@@ -12,6 +12,10 @@ export class AuthService {
     oauth: `${this.API_BASE}/api/oauth2/v1/token`,
     login: `${this.API_BASE}/login`
   };
+
+  // Subject para notificar mudanças no usuário
+  private userUpdateSubject = new BehaviorSubject<string>('Usuário');
+  public userUpdate$ = this.userUpdateSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
@@ -90,6 +94,19 @@ export class AuthService {
     localStorage.removeItem('user_id');
     localStorage.removeItem('empresa');
     localStorage.removeItem('filial');
+    
+    // Notificar que o usuário foi deslogado
+    this.userUpdateSubject.next('Usuário');
+  }
+
+  // Método para atualizar o nome do usuário
+  updateUserDisplay(): void {
+    const fullName = localStorage.getItem('user_fullname');
+    const userName = localStorage.getItem('user_name');
+    const displayName = fullName || userName || 'Usuário';
+    
+    console.log('[AUTH] Atualizando display do usuário:', displayName);
+    this.userUpdateSubject.next(displayName);
   }
 
   getToken(): string | null {

@@ -101,6 +101,9 @@ export class LoginComponent {
                 
                 console.log('[LOGIN] Authentication successful - redirecting to home');
                 
+                // Notificar o AuthService para atualizar o display do usuário
+                this.authService.updateUserDisplay();
+                
                 setTimeout(() => {
                   this.loading = false;
                   this.popupType = 'success';

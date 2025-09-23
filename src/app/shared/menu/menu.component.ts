@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PoIconModule, PoAvatarModule } from '@po-ui/ng-components';
 import { PoMenuModule, PoMenuItem } from '@po-ui/ng-components';
 import { RouterModule } from '@angular/router';
+import { AuthService } from '../services/auth.service';
+import { Subscription } from 'rxjs';
 
 interface MenuItemWithSubmenu {
   label: string;
@@ -19,9 +21,45 @@ interface MenuItemWithSubmenu {
   standalone: true,
   imports: [CommonModule, PoIconModule, PoMenuModule, RouterModule, PoAvatarModule]
 })
-export class MenuComponent {
+export class MenuComponent implements OnInit, OnDestroy {
   avatarUrl: string = `https://i.pravatar.cc/150?u=${Math.random()}`;
+  displayName: string = 'Usuário';
+  private userSubscription?: Subscription;
   
+  constructor(private cdr: ChangeDetectorRef, private authService: AuthService) {}
+
+  ngOnInit(): void {
+    this.updateDisplayName();
+    
+    // Subscrever às atualizações do usuário
+    this.userSubscription = this.authService.userUpdate$.subscribe(userName => {
+      this.displayName = userName;
+      this.cdr.detectChanges();
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.userSubscription) {
+      this.userSubscription.unsubscribe();
+    }
+  }
+
+  updateDisplayName(): void {
+    const fullName = localStorage.getItem('user_fullname');
+    const userName = localStorage.getItem('user_name');
+    
+    this.displayName = fullName || userName || 'Usuário';
+    console.log('ATUALIZANDO NOME:', this.displayName);
+    console.log('user_fullname:', fullName);
+    console.log('user_name:', userName);
+    
+    this.cdr.detectChanges();
+  }
+
+  get userName(): string {
+    return this.displayName;
+  }
+
   menuItems: MenuItemWithSubmenu[] = [
     { 
       label: 'Home', 
@@ -78,10 +116,6 @@ export class MenuComponent {
     }
   ];
 
-  get userName(): string {
-    return localStorage.getItem('user_name') || localStorage.getItem('user_fullname') || 'Usuário';
-  }
-
   toggleSubmenu(item: MenuItemWithSubmenu) {
     if (item.submenus && item.submenus.length > 0) {
       item.expanded = !item.expanded;
@@ -109,16 +143,8 @@ export class MenuComponent {
   }
 
   logout() {
-    // Limpar todos os dados do localStorage
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user_name');
-    localStorage.removeItem('user_fullname');
-    localStorage.removeItem('user_email');
-    localStorage.removeItem('user_id');
-    localStorage.removeItem('empresa');
-    localStorage.removeItem('filial');
-    
+    // Usar o service para logout
+    this.authService.logout();
     window.location.href = '/login';
   }
 }
