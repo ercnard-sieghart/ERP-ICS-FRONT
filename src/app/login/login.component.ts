@@ -1,10 +1,11 @@
 
 import { Component } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PoPageLoginModule, PoPageLogin } from '@po-ui/ng-templates';
+import { AuthService } from '../shared/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -22,7 +23,7 @@ export class LoginComponent {
   popupMessage: string = '';
   popupType: 'success' | 'error' = 'success';
 
-  constructor(private http: HttpClient, private router: Router) {
+  constructor(private authService: AuthService, private router: Router) {
     this.setupInactivityTimer();
   }
 
@@ -42,7 +43,7 @@ export class LoginComponent {
   }
 
   logoutByInactivity() {
-  localStorage.removeItem('authToken');
+    this.authService.logout();
     this.popupType = 'error';
     this.popupMessage = 'Sessão expirada por inatividade.';
     this.showPopup = true;
@@ -56,17 +57,9 @@ export class LoginComponent {
     this.loading = true;
     
     // Primeira requisição OAuth2 para obter tokens
-    const headers = {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    };
-    
-    // Dados OAuth2 no formato form-encoded padrão
-    const body = `grant_type=password&username=${encodeURIComponent(loginData.login)}&password=${encodeURIComponent(loginData.password)}`;
-    
-    this.http.post('/api/proxy/rest/api/oauth2/v1/token', body, { headers, observe: 'response' }).subscribe({
-      next: (oauthResponse) => {
+    this.authService.authenticate(loginData.login, loginData.password).subscribe({
+      next: (oauthResponse: any) => {
         const oauthBody = oauthResponse.body as any;
-        console.log('OAuth2 response:', oauthBody);
         
         if (oauthBody && oauthBody.access_token) {
           // Armazenar tokens OAuth2
@@ -75,29 +68,43 @@ export class LoginComponent {
             localStorage.setItem('refreshToken', oauthBody.refresh_token);
           }
           
-
-          const headers = {
-            'Authorization': `Bearer ${oauthBody.access_token}`
-          };
-          
-          this.http.post('/api/proxy/login', {}, { headers, observe: 'response' }).subscribe({
-            next: (loginResponse) => {
+          // Segunda requisição para completar o login
+          this.authService.login(oauthBody.access_token).subscribe({
+            next: (loginResponse: any) => {
               const loginBody = loginResponse.body as any;
-              console.log('Login response:', loginBody);
+              console.log('[LOGIN] Response received:', {
+                hasBody: !!loginBody,
+                success: loginBody?.SUCCESS,
+                message: loginBody?.MESSAGE
+              });
               
-              if (loginBody && (loginBody.success === true || loginBody.success === 'true')) {
-                // Armazenar dados do usuário
-                if (loginBody.name) {
-                  localStorage.setItem('user_name', loginBody.name);
+              if (loginBody && (loginBody.SUCCESS === true || loginBody.SUCCESS === 'true')) {
+                // Armazenar dados do usuário usando os campos corretos do backend
+                if (loginBody.USER_NAME) {
+                  localStorage.setItem('user_name', loginBody.USER_NAME);
                 }
-                if (loginBody.email) {
-                  localStorage.setItem('user_email', loginBody.email);
+                if (loginBody.USER_FULLNAME) {
+                  localStorage.setItem('user_fullname', loginBody.USER_FULLNAME);
                 }
+                if (loginBody.USER_EMAIL) {
+                  localStorage.setItem('user_email', loginBody.USER_EMAIL);
+                }
+                if (loginBody.USER_ID) {
+                  localStorage.setItem('user_id', loginBody.USER_ID);
+                }
+                if (loginBody.EMPRESA) {
+                  localStorage.setItem('empresa', loginBody.EMPRESA);
+                }
+                if (loginBody.FILIAL) {
+                  localStorage.setItem('filial', loginBody.FILIAL);
+                }
+                
+                console.log('[LOGIN] Authentication successful - redirecting to home');
                 
                 setTimeout(() => {
                   this.loading = false;
                   this.popupType = 'success';
-                  this.popupMessage = loginBody.message || 'Autenticação realizada com sucesso!';
+                  this.popupMessage = loginBody.MESSAGE || 'Autenticação realizada com sucesso!';
                   this.showPopup = true;
                   setTimeout(() => {
                     this.showPopup = false;
@@ -105,11 +112,11 @@ export class LoginComponent {
                   }, 2000);
                 }, 1200);
               } else {
-                this.handleLoginError(loginBody && loginBody.message ? loginBody.message : 'Erro na autenticação.');
+                console.error('[LOGIN] Authentication failed - invalid response structure');
+                this.handleLoginError(loginBody && loginBody.MESSAGE ? loginBody.MESSAGE : 'Erro na autenticação.');
               }
             },
             error: (error: HttpErrorResponse) => {
-              // Log removido para evitar exposição no console
               this.handleLoginError('Erro na segunda etapa de autenticação.');
             }
           });
@@ -118,7 +125,6 @@ export class LoginComponent {
         }
       },
       error: (error: HttpErrorResponse) => {
-        // Log removido para evitar exposição no console
         setTimeout(() => {
           this.loading = false;
           this.popupType = 'error';
