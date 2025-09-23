@@ -95,15 +95,12 @@ export class AuthService {
     localStorage.removeItem('empresa');
     localStorage.removeItem('filial');
     
-    // Notificar que o usuário foi deslogado
     this.userUpdateSubject.next('Usuário');
   }
 
-  // Método para atualizar o nome do usuário
   updateUserDisplay(): void {
     const fullName = localStorage.getItem('user_fullname');
-    const userName = localStorage.getItem('user_name');
-    const displayName = fullName || userName || 'Usuário';
+    const displayName = fullName || 'Usuário';
     
     console.log('[AUTH] Atualizando display do usuário:', displayName);
     this.userUpdateSubject.next(displayName);

@@ -1,5 +1,13 @@
-<aside class="w-64 bg-white shadow-lg flex flex-col py-6 px-4 rounded-r-2xl min-h-screen">
-  <div class="mb-8">
+<aside [class]="'bg-white shadow-lg flex flex-col py-6 px-4 rounded-r-2xl min-h-screen transition-all duration-300 ' + (isMenuCollapsed ? 'w-16' : 'w-64')">
+  <!-- Botão toggle do menu -->
+  <div class="mb-4">
+    <button (click)="toggleMenu()" class="w-full flex justify-center items-center p-2 text-[#1A4E79] hover:bg-[#f3f6fa] rounded-lg transition">
+      <span *ngIf="!isMenuCollapsed">‹</span>
+      <span *ngIf="isMenuCollapsed">›</span>
+    </button>
+  </div>
+
+  <div class="mb-8" [class.hidden]="isMenuCollapsed">
     <div class="bg-[#f3f6fa] rounded-xl shadow flex flex-col items-center py-4 px-3">
       <div class="flex flex-col items-center w-full justify-center">
         <img src="assets/logo.png" alt="Logo" class="h-20 w-20 object-contain mb-2" />
@@ -26,10 +34,11 @@
             *ngIf="!item.submenus || item.submenus.length === 0; else hasSubmenus"
             [href]="item.link" 
             class="flex items-center justify-between text-[#1A4E79] hover:text-[#75C9C8] hover:bg-[#f3f6fa] transition-colors px-3 py-2 rounded-lg"
+            [title]="isMenuCollapsed ? item.label : ''"
           >
             <div class="flex items-center">
               <span class="mr-3 text-lg">{{ getIconSymbol(item.icon) }}</span>
-              <span class="text-sm font-medium">{{ item.label }}</span>
+              <span class="text-sm font-medium" [class.hidden]="isMenuCollapsed">{{ item.label }}</span>
             </div>
           </a>
           
@@ -38,22 +47,24 @@
             <button 
               (click)="toggleSubmenu(item)"
               class="w-full flex items-center justify-between text-[#1A4E79] hover:text-[#75C9C8] hover:bg-[#f3f6fa] transition-colors px-3 py-2 rounded-lg text-left"
+              [title]="isMenuCollapsed ? item.label : ''"
             >
               <div class="flex items-center">
                 <span class="mr-3 text-lg">{{ getIconSymbol(item.icon) }}</span>
-                <span class="text-sm font-medium">{{ item.label }}</span>
+                <span class="text-sm font-medium" [class.hidden]="isMenuCollapsed">{{ item.label }}</span>
               </div>
               <span 
                 class="text-xs transition-transform duration-300"
                 [class.rotate-180]="item.expanded"
+                [class.hidden]="isMenuCollapsed"
               >▼</span>
             </button>
             
             <!-- Submenus -->
             <div 
               class="overflow-hidden transition-all duration-300 ease-in-out"
-              [class.max-h-0]="!item.expanded"
-              [class.max-h-96]="item.expanded"
+              [class.max-h-0]="!item.expanded || isMenuCollapsed"
+              [class.max-h-96]="item.expanded && !isMenuCollapsed"
             >
               <ul class="mt-2 ml-6 space-y-1 border-l-2 border-[#f3f6fa] pl-4">
                 <li *ngFor="let submenu of item.submenus">

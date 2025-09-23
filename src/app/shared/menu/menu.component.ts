@@ -24,6 +24,7 @@ interface MenuItemWithSubmenu {
 export class MenuComponent implements OnInit, OnDestroy {
   avatarUrl: string = `https://i.pravatar.cc/150?u=${Math.random()}`;
   displayName: string = 'Usuário';
+  isMenuCollapsed: boolean = false;
   private userSubscription?: Subscription;
   
   constructor(private cdr: ChangeDetectorRef, private authService: AuthService) {}
@@ -34,9 +35,8 @@ export class MenuComponent implements OnInit, OnDestroy {
     this.updateDisplayName();
     
     // Subscrever às atualizações do usuário
-    this.userSubscription = this.authService.userUpdate$.subscribe(userName => {
-      this.displayName = userName;
-      this.cdr.detectChanges();
+    this.userSubscription = this.authService.userUpdate$.subscribe(() => {
+      this.updateDisplayName();
     });
   }
 
@@ -118,6 +118,10 @@ export class MenuComponent implements OnInit, OnDestroy {
     if (item.submenus && item.submenus.length > 0) {
       item.expanded = !item.expanded;
     }
+  }
+
+  toggleMenu() {
+    this.isMenuCollapsed = !this.isMenuCollapsed;
   }
 
   getIconSymbol(iconName: string): string {
