@@ -7,7 +7,6 @@ import {
   PoTableColumn, 
   PoButtonModule,
   PoFieldModule,
-  PoLoadingModule,
   PoNotificationModule,
   PoToolbarModule,
   PoModalModule,
@@ -40,7 +39,6 @@ interface SolicitacaoCompra {
     PoTableModule,
     PoButtonModule,
     PoFieldModule,
-    PoLoadingModule,
     PoNotificationModule,
     PoToolbarModule,
     PoModalModule,
@@ -232,7 +230,6 @@ export class SolicitacaoComprasComponent implements OnInit {
     // Tentar salvar na API em background
     this.solicitacaoService.criarSolicitacao(novasolicitacao).subscribe({
       next: (resposta) => {
-        console.log('Solicitação sincronizada com a API:', resposta);
         this.setLoading(false);
       },
       error: (erro) => {
@@ -287,8 +284,6 @@ export class SolicitacaoComprasComponent implements OnInit {
    * Carrega dados de exemplo caso a API falhe
    */
   private carregarDadosExemplo(): void {
-    console.log('Carregando dados de exemplo...');
-    
     this.solicitacoes = [
       {
         id: '1',
@@ -334,12 +329,10 @@ export class SolicitacaoComprasComponent implements OnInit {
   }
 
   novaSolicitacao(): void {
-    console.log('Nova solicitação clicada');
     // Aqui você implementaria a navegação para o formulário de nova solicitação
   }
 
   exportar(): void {
-    console.log('Exportar dados');
     // Implementar exportação
   }
 

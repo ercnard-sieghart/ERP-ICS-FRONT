@@ -1,5 +1,5 @@
 <div class="relative">
-  <aside [class]="'bg-white shadow-lg flex flex-col py-4 px-2 sm:px-4 rounded-r-2xl h-screen max-h-screen overflow-y-auto transition-all duration-300 ' + (isMenuCollapsed ? 'w-12 sm:w-16' : 'w-56 sm:w-64 md:w-72 lg:w-80')">
+  <aside [class]="'bg-white shadow-lg flex flex-col py-4 px-2 sm:px-4 rounded-r-2xl h-screen max-h-screen overflow-y-auto transition-all duration-300 z-40 relative ' + (isMenuCollapsed ? 'w-12 sm:w-16' : 'w-56 sm:w-64 md:w-72 lg:w-80')">
     <div class="mb-4 sm:mb-6 lg:mb-8" [class.hidden]="isMenuCollapsed">
     <div class="bg-[#f3f6fa] rounded-xl shadow flex flex-col items-center py-2 sm:py-3 lg:py-4 px-2 sm:px-3">
       <div class="flex flex-col items-center w-full justify-center">
@@ -83,7 +83,7 @@
 <!-- Botão toggle posicionado na lateral direita do menu -->
 <button 
   (click)="toggleMenu()" 
-  class="absolute top-6 -right-4 z-10 bg-[#1A4E79] hover:bg-[#75C9C8] text-white rounded-full p-2 shadow-lg transition-all duration-300 hover:shadow-xl"
+  class="absolute top-6 -right-4 z-50 bg-[#1A4E79] hover:bg-[#75C9C8] text-white rounded-full p-2 shadow-lg transition-all duration-300 hover:shadow-xl"
 >
   <span class="text-lg font-bold" *ngIf="!isMenuCollapsed">‹</span>
   <span class="text-lg font-bold" *ngIf="isMenuCollapsed">›</span>

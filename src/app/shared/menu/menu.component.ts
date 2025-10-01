@@ -38,6 +38,12 @@ export class MenuComponent implements OnInit, OnDestroy {
     this.userSubscription = this.authService.userUpdate$.subscribe(() => {
       this.updateDisplayName();
     });
+    
+    // Verificar estado salvo do menu
+    const savedCollapsedState = localStorage.getItem('menuCollapsed');
+    if (savedCollapsedState) {
+      this.isMenuCollapsed = JSON.parse(savedCollapsedState);
+    }
   }
 
   ngOnDestroy(): void {
