@@ -19,6 +19,7 @@ export interface SolicitacaoCompraAPI {
   C7_QUANT: number;
   C7_PRECO: number;
   C7_TOTAL: number;
+  C7_EMISSAO?: string;
   C7_CONTATO?: string;
   C7_OBS?: string;
   C7_CC?: string;
@@ -127,10 +128,30 @@ export class SolicitacaoComprasService {
       const produtoCompleto = item.C7_PRODUTO || '';
       const produtoUltimos4 = produtoCompleto.length >= 4 ? produtoCompleto.slice(-4) : produtoCompleto;
       
+      // Formatar data C7_EMISSAO se existir, senão usar data atual
+      let dataFormatada = new Date().toISOString().split('T')[0];
+      if (item.C7_EMISSAO) {
+        // Assumindo formato YYYYMMDD da API
+        const dataStr = item.C7_EMISSAO.toString();
+        if (dataStr.length === 8) {
+          const ano = dataStr.substring(0, 4);
+          const mes = dataStr.substring(4, 6);
+          const dia = dataStr.substring(6, 8);
+          dataFormatada = `${ano}-${mes}-${dia}`;
+        } else {
+          // Se já estiver no formato ISO ou outro, tentar converter
+          try {
+            dataFormatada = new Date(item.C7_EMISSAO).toISOString().split('T')[0];
+          } catch {
+            dataFormatada = new Date().toISOString().split('T')[0];
+          }
+        }
+      }
+      
       return {
         id: item.C7_NUM + item.C7_ITEM || Math.random().toString(),
         numeroSolicitacao: item.C7_NUM || 'SC-' + new Date().getTime(),
-        dataSolicitacao: new Date().toISOString().split('T')[0],
+        dataSolicitacao: dataFormatada,
         produto: produtoUltimos4,
         cc: item.C7_CC || '',
         contato: item.C7_CONTATO || '',

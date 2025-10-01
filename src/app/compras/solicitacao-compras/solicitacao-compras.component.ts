@@ -150,6 +150,8 @@ export class SolicitacaoComprasComponent implements OnInit {
 
   ngOnInit(): void {
     this.carregarSolicitacoes();
+    // Centralizar na tabela após o carregamento inicial
+    this.centralizarTabela();
   }
 
   onRowSelect(selectedRows: SolicitacaoCompra[]): void {
@@ -502,5 +504,41 @@ export class SolicitacaoComprasComponent implements OnInit {
     setTimeout(() => {
       this.mostrarSugestoesContato = false;
     }, 200);
+  }
+
+  centralizarTabela(): void {
+    // Aguardar um tempo para a tabela ser renderizada
+    setTimeout(() => {
+      // Tentar diferentes seletores para encontrar a tabela
+      let tabelaElement = document.getElementById('tabela-solicitacoes');
+      
+      if (!tabelaElement) {
+        tabelaElement = document.getElementById('secao-tabela');
+      }
+      
+      if (!tabelaElement) {
+        tabelaElement = document.querySelector('po-table');
+      }
+      
+      if (tabelaElement) {
+        // Scroll suave para o início da tabela
+        tabelaElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'nearest'
+        });
+        
+        console.log('Tabela centralizada na tela');
+      } else {
+        // Fallback: scroll para uma posição aproximada
+        const aproximatePosition = window.innerHeight * 0.8; // 80% da altura da tela
+        window.scrollTo({
+          top: aproximatePosition,
+          behavior: 'smooth'
+        });
+        
+        console.warn('Elemento da tabela não encontrado, usando posição aproximada');
+      }
+    }, 2000); // Delay maior para garantir renderização completa no carregamento inicial
   }
 }

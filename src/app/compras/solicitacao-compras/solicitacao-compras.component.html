@@ -157,7 +157,7 @@
       </div>
 
       <!-- Tabela de solicitações -->
-      <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-[#75C9C8]/20">
+      <div id="secao-tabela" class="bg-white rounded-xl shadow-lg overflow-hidden border border-[#75C9C8]/20">
         <div class="bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] p-4">
           <h3 class="text-white font-semibold text-lg flex items-center">
             <i class="po-icon po-icon-table mr-2"></i>
@@ -167,6 +167,7 @@
         
         <div class="p-4">
           <po-table
+            id="tabela-solicitacoes"
             [p-columns]="columns"
             [p-items]="solicitacoesFiltradas"
             [p-loading]="loading"
@@ -262,11 +263,18 @@
       </div>
       
       <!-- Loading overlay -->
-      <div *ngIf="loading" class="fixed inset-0 bg-gradient-to-br from-[#1A4E79]/80 to-[#75C9C8]/80 backdrop-blur-sm flex items-center justify-center z-50">
-        <div class="bg-white rounded-xl p-8 shadow-2xl text-center max-w-sm mx-4">
-          <div class="animate-spin w-12 h-12 border-4 border-[#75C9C8] border-t-[#1A4E79] rounded-full mx-auto mb-4"></div>
-          <div class="text-lg font-bold text-[#1A4E79] mb-2">Carregando solicitações...</div>
-          <div class="text-sm text-[#1A4E79]/70">Por favor, aguarde</div>
+      <div *ngIf="loading" class="loading-overlay bg-gradient-to-br from-[#1A4E79]/85 to-[#75C9C8]/85">
+        <div class="loading-container absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          <div class="bg-white rounded-2xl p-10 shadow-2xl text-center min-w-[320px] mx-4 border border-[#75C9C8]/20">
+            <div class="loading-spinner w-20 h-20 border-4 border-[#75C9C8]/30 border-t-[#1A4E79] rounded-full mx-auto mb-8"></div>
+            <div class="loading-text text-2xl font-bold text-[#1A4E79] mb-3">Carregando solicitações...</div>
+            <div class="text-lg text-[#1A4E79]/70">Por favor, aguarde</div>
+            
+            <!-- Indicador de progresso adicional -->
+            <div class="mt-6 w-full bg-gray-200 rounded-full h-2">
+              <div class="bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] h-2 rounded-full animate-pulse" style="width: 60%"></div>
+            </div>
+          </div>
         </div>
       </div>
 
