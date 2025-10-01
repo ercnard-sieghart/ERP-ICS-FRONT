@@ -52,7 +52,24 @@ interface SolicitacaoCompra {
 export class SolicitacaoComprasComponent implements OnInit {
   loading: boolean = false;
   solicitacoes: SolicitacaoCompra[] = [];
+  solicitacoesFiltradas: SolicitacaoCompra[] = [];
   registroSelecionado: SolicitacaoCompra | null = null;
+  
+  // Propriedades de filtros
+  filtros = {
+    numeroSolicitacao: '',
+    data: '',
+    cc: '',
+    contato: ''
+  };
+
+  // Listas para autocomplete
+  ccSugestoes: string[] = [];
+  contatoSugestoes: string[] = [];
+  ccSugestoesFiltradas: string[] = [];
+  contatoSugestoesFiltradas: string[] = [];
+  mostrarSugestoesCc: boolean = false;
+  mostrarSugestoesContato: boolean = false;
   
   // Propriedades do modal de edição
   showEditModal: boolean = false;
@@ -248,6 +265,10 @@ export class SolicitacaoComprasComponent implements OnInit {
         console.log('Dados recebidos da API:', dadosAPI);
         
         this.solicitacoes = this.solicitacaoService.mapearDadosAPI(dadosAPI);
+        this.solicitacoesFiltradas = [...this.solicitacoes];
+        
+        // Extrair listas únicas para autocomplete
+        this.extrairSugestoes();
         
         console.log('Dados mapeados:', this.solicitacoes);
         
@@ -362,5 +383,124 @@ export class SolicitacaoComprasComponent implements OnInit {
       'processando': 'status-processando'
     };
     return classMap[status] || 'bg-gray-100 text-gray-800';
+  }
+
+  aplicarFiltros(): void {
+    this.solicitacoesFiltradas = this.solicitacoes.filter(solicitacao => {
+      let atendeFiltro = true;
+
+      if (this.filtros.numeroSolicitacao && this.filtros.numeroSolicitacao.trim()) {
+        atendeFiltro = atendeFiltro && solicitacao.numeroSolicitacao
+          .toLowerCase()
+          .includes(this.filtros.numeroSolicitacao.toLowerCase());
+      }
+
+      if (this.filtros.data && this.filtros.data.trim()) {
+        const dataFiltro = new Date(this.filtros.data);
+        const dataSolicitacao = new Date(solicitacao.dataSolicitacao);
+        atendeFiltro = atendeFiltro && dataSolicitacao.toDateString() === dataFiltro.toDateString();
+      }
+
+      if (this.filtros.cc && this.filtros.cc.trim()) {
+        atendeFiltro = atendeFiltro && (solicitacao as any).cc
+          .toLowerCase()
+          .includes(this.filtros.cc.toLowerCase());
+      }
+
+      if (this.filtros.contato && this.filtros.contato.trim()) {
+        atendeFiltro = atendeFiltro && (solicitacao as any).contato
+          .toLowerCase()
+          .includes(this.filtros.contato.toLowerCase());
+      }
+
+      return atendeFiltro;
+    });
+
+    this.poNotification.success({
+      message: `${this.solicitacoesFiltradas.length} registros encontrados`,
+      duration: 3000
+    });
+  }
+
+  limparFiltros(): void {
+    this.filtros = {
+      numeroSolicitacao: '',
+      data: '',
+      cc: '',
+      contato: ''
+    };
+    
+    this.solicitacoesFiltradas = [...this.solicitacoes];
+    
+    this.poNotification.information({
+      message: 'Filtros limpos. Exibindo todas as solicitações.',
+      duration: 3000
+    });
+  }
+
+  extrairSugestoes(): void {
+    // Extrair CCs únicos
+    const ccsUnicos = [...new Set(this.solicitacoes.map(s => (s as any).cc).filter(cc => cc && cc.trim()))];
+    this.ccSugestoes = ccsUnicos.sort();
+
+    // Extrair contatos únicos
+    const contatosUnicos = [...new Set(this.solicitacoes.map(s => (s as any).contato).filter(contato => contato && contato.trim()))];
+    this.contatoSugestoes = contatosUnicos.sort();
+  }
+
+  onCcInput(valor: string): void {
+    if (valor && valor.length > 0) {
+      this.ccSugestoesFiltradas = this.ccSugestoes.filter(cc => 
+        cc.toLowerCase().includes(valor.toLowerCase())
+      ).slice(0, 5); // Mostrar apenas 5 sugestões
+      this.mostrarSugestoesCc = this.ccSugestoesFiltradas.length > 0;
+    } else {
+      this.mostrarSugestoesCc = false;
+    }
+  }
+
+  onContatoInput(valor: string): void {
+    if (valor && valor.length > 0) {
+      this.contatoSugestoesFiltradas = this.contatoSugestoes.filter(contato => 
+        contato.toLowerCase().includes(valor.toLowerCase())
+      ).slice(0, 5); // Mostrar apenas 5 sugestões
+      this.mostrarSugestoesContato = this.contatoSugestoesFiltradas.length > 0;
+    } else {
+      this.mostrarSugestoesContato = false;
+    }
+  }
+
+  selecionarCc(cc: string): void {
+    this.filtros.cc = cc;
+    this.mostrarSugestoesCc = false;
+  }
+
+  selecionarContato(contato: string): void {
+    this.filtros.contato = contato;
+    this.mostrarSugestoesContato = false;
+  }
+
+  onCcInputChange(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.onCcInput(target.value);
+  }
+
+  onContatoInputChange(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.onContatoInput(target.value);
+  }
+
+  onCcBlur(): void {
+    // Delay para permitir clique na sugestão
+    setTimeout(() => {
+      this.mostrarSugestoesCc = false;
+    }, 200);
+  }
+
+  onContatoBlur(): void {
+    // Delay para permitir clique na sugestão
+    setTimeout(() => {
+      this.mostrarSugestoesContato = false;
+    }, 200);
   }
 }
