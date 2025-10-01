@@ -274,20 +274,20 @@
       </div>
 
       <!-- Modal de Edição - Sempre na viewport -->
-      <div *ngIf="showEditModal" class="fixed inset-0 bg-gradient-to-br from-[#1A4E79]/90 to-[#75C9C8]/90 backdrop-blur-sm z-[9999] flex items-center justify-center p-4" style="position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg max-h-[90vh] animate-fade-in-scale">
+      <div *ngIf="showEditModal" class="fixed inset-0 bg-gradient-to-br from-[#1A4E79]/90 to-[#75C9C8]/90 backdrop-blur-sm z-[9999]" style="position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;">
+        <div class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white rounded-lg shadow-2xl w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg max-h-[calc(100vh-2rem)] overflow-hidden animate-fade-in-scale" style="margin: 0 1rem;">
           <!-- Header do Modal -->
-          <div class="bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] p-4 rounded-t-lg">
-            <h2 class="text-lg font-bold text-white flex items-center">
-              <i class="po-icon po-icon-edit mr-2"></i>
+          <div class="bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] p-3 sm:p-4 rounded-t-lg">
+            <h2 class="text-sm sm:text-lg font-bold text-white flex items-center">
+              <i class="po-icon po-icon-edit mr-1 sm:mr-2 text-sm sm:text-base"></i>
               Copiar Solicitação
             </h2>
           </div>
 
           <!-- Corpo do Modal -->
-          <div class="p-4">
+          <div class="p-3 sm:p-4 max-h-[calc(95vh-120px)] sm:max-h-[calc(90vh-120px)] overflow-y-auto">
             <form #formEdicao="ngForm">
-              <div class="grid grid-cols-2 gap-3">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                 <!-- Número da Solicitação -->
                 <div>
                   <label class="block text-xs font-medium text-[#1A4E79] mb-1">Número *</label>
@@ -296,7 +296,7 @@
                     [(ngModel)]="registroEdicao.numeroSolicitacao"
                     name="numeroSolicitacao"
                     required
-                    class="w-full p-2 text-sm border border-[#75C9C8]/30 rounded focus:ring-1 focus:ring-[#75C9C8] focus:border-transparent"
+                    class="w-full p-2 text-xs sm:text-sm border border-[#75C9C8]/30 rounded focus:ring-1 focus:ring-[#75C9C8] focus:border-transparent"
                     placeholder="SOL-000000"
                   />
                 </div>
@@ -309,44 +309,44 @@
                     [(ngModel)]="registroEdicao.dataSolicitacao"
                     name="dataSolicitacao"
                     required
-                    class="w-full p-2 text-sm border border-[#75C9C8]/30 rounded focus:ring-1 focus:ring-[#75C9C8] focus:border-transparent"
+                    class="w-full p-2 text-xs sm:text-sm border border-[#75C9C8]/30 rounded focus:ring-1 focus:ring-[#75C9C8] focus:border-transparent"
                   />
                 </div>
 
                 <!-- Solicitante -->
-                <div>
+                <div class="sm:col-span-1 col-span-1">
                   <label class="block text-xs font-medium text-[#1A4E79] mb-1">Solicitante *</label>
                   <input 
                     type="text"
                     [(ngModel)]="registroEdicao.solicitante"
                     name="solicitante"
                     required
-                    class="w-full p-2 text-sm border border-[#75C9C8]/30 rounded focus:ring-1 focus:ring-[#75C9C8] focus:border-transparent"
+                    class="w-full p-2 text-xs sm:text-sm border border-[#75C9C8]/30 rounded focus:ring-1 focus:ring-[#75C9C8] focus:border-transparent"
                     placeholder="Nome"
                   />
                 </div>
 
                 <!-- Departamento -->
-                <div>
+                <div class="sm:col-span-1 col-span-1">
                   <label class="block text-xs font-medium text-[#1A4E79] mb-1">Departamento *</label>
                   <input 
                     type="text"
                     [(ngModel)]="registroEdicao.departamento"
                     name="departamento"
                     required
-                    class="w-full p-2 text-sm border border-[#75C9C8]/30 rounded focus:ring-1 focus:ring-[#75C9C8] focus:border-transparent"
+                    class="w-full p-2 text-xs sm:text-sm border border-[#75C9C8]/30 rounded focus:ring-1 focus:ring-[#75C9C8] focus:border-transparent"
                     placeholder="Depto"
                   />
                 </div>
 
                 <!-- Status -->
-                <div>
+                <div class="sm:col-span-1 col-span-1">
                   <label class="block text-xs font-medium text-[#1A4E79] mb-1">Status *</label>
                   <select 
                     [(ngModel)]="registroEdicao.status"
                     name="status"
                     required
-                    class="w-full p-2 text-sm border border-[#75C9C8]/30 rounded focus:ring-1 focus:ring-[#75C9C8] focus:border-transparent"
+                    class="w-full p-2 text-xs sm:text-sm border border-[#75C9C8]/30 rounded focus:ring-1 focus:ring-[#75C9C8] focus:border-transparent"
                   >
                     <option value="pendente">Pendente</option>
                     <option value="processando">Processando</option>
@@ -356,7 +356,7 @@
                 </div>
 
                 <!-- Valor Total -->
-                <div>
+                <div class="sm:col-span-1 col-span-1">
                   <label class="block text-xs font-medium text-[#1A4E79] mb-1">Valor (R$) *</label>
                   <input 
                     type="number"
@@ -365,19 +365,19 @@
                     required
                     step="0.01"
                     min="0"
-                    class="w-full p-2 text-sm border border-[#75C9C8]/30 rounded focus:ring-1 focus:ring-[#75C9C8] focus:border-transparent"
+                    class="w-full p-2 text-xs sm:text-sm border border-[#75C9C8]/30 rounded focus:ring-1 focus:ring-[#75C9C8] focus:border-transparent"
                     placeholder="0,00"
                   />
                 </div>
 
                 <!-- Observações -->
-                <div class="col-span-2">
+                <div class="col-span-1 sm:col-span-2">
                   <label class="block text-xs font-medium text-[#1A4E79] mb-1">Observações</label>
                   <textarea 
                     [(ngModel)]="registroEdicao.observacoes"
                     name="observacoes"
                     rows="2"
-                    class="w-full p-2 text-sm border border-[#75C9C8]/30 rounded focus:ring-1 focus:ring-[#75C9C8] focus:border-transparent resize-none"
+                    class="w-full p-2 text-xs sm:text-sm border border-[#75C9C8]/30 rounded focus:ring-1 focus:ring-[#75C9C8] focus:border-transparent resize-none"
                     placeholder="Observações..."
                   ></textarea>
                 </div>
@@ -386,11 +386,11 @@
           </div>
 
           <!-- Footer do Modal -->
-          <div class="bg-gray-50 px-4 py-3 rounded-b-lg flex gap-2 justify-end">
+          <div class="bg-gray-50 px-3 sm:px-4 py-3 rounded-b-lg flex flex-col sm:flex-row gap-2 justify-end">
             <button 
               type="button"
               (click)="cancelarEdicao()"
-              class="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded hover:bg-gray-100 transition-all"
+              class="w-full sm:w-auto px-3 sm:px-4 py-2 text-xs sm:text-sm border border-gray-300 text-gray-700 rounded hover:bg-gray-100 transition-all order-2 sm:order-1"
             >
               <i class="po-icon po-icon-close mr-1"></i>
               Cancelar
@@ -399,7 +399,7 @@
               type="button"
               (click)="confirmarCopia()"
               [disabled]="!formEdicao.form.valid"
-              class="px-4 py-2 text-sm bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white rounded hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              class="w-full sm:w-auto px-3 sm:px-4 py-2 text-xs sm:text-sm bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white rounded hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-2"
             >
               <i class="po-icon po-icon-ok mr-1"></i>
               Confirmar

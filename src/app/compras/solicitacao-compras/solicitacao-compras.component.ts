@@ -196,18 +196,14 @@ export class SolicitacaoComprasComponent implements OnInit {
       status: 'pendente'
     };
 
-    // Fazer scroll suave para o topo da página antes de abrir o modal
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
+    // Fazer scroll instantâneo para o topo da página
+    window.scrollTo(0, 0);
 
-    // Abrir modal após um pequeno delay para completar o scroll
-    setTimeout(() => {
-      this.showEditModal = true;
-      // Garantir que o modal apareça sempre na viewport
-      document.body.style.overflow = 'hidden';
-    }, 300);
+    // Abrir modal imediatamente
+    this.showEditModal = true;
+    
+    // Garantir que o modal apareça sempre na viewport
+    document.body.style.overflow = 'hidden';
   }
 
   cancelarEdicao(): void {
