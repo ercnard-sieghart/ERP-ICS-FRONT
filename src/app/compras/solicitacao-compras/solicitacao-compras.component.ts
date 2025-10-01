@@ -79,19 +79,31 @@ export class SolicitacaoComprasComponent implements OnInit {
       property: 'dataSolicitacao',
       label: 'Data',
       type: 'date',
+      width: '15%'
+    },
+    {
+      property: 'produto',
+      label: 'Produto',
+      type: 'string',
+      width: '15%'
+    },
+    {
+      property: 'cc',
+      label: 'Centro de Custo',
+      type: 'string',
       width: '10%'
     },
     {
       property: 'contato',
       label: 'Contato',
       type: 'string',
-      width: '20%'
+      width: '15%'
     },
     {
       property: 'status',
       label: 'Situação',
       type: 'label',
-      width: '12%',
+      width: '10%',
       labels: [
         { value: 'pendente', color: 'color-08', label: 'Pendente' },
         { value: 'aprovado', color: 'color-11', label: 'Aprovado' },
@@ -104,13 +116,13 @@ export class SolicitacaoComprasComponent implements OnInit {
       label: 'Valor Total',
       type: 'currency',
       format: 'BRL',
-      width: '12%'
+      width: '10%'
     },
     {
       property: 'obs',
       label: 'Observações',
       type: 'string',
-      width: '34%'
+      width: '18%'
     }
   ];
 
