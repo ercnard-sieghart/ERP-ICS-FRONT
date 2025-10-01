@@ -4,16 +4,17 @@
   <!-- Menu lateral -->
   <app-menu></app-menu>
   
+  <!-- Loading overlay - ocupa toda a tela menos a área do menu -->
+  <div *ngIf="loading" class="fixed top-0 bottom-0 right-0 bg-gradient-to-br from-[#1A4E79]/90 to-[#75C9C8]/90 backdrop-blur-sm z-[45] flex items-center justify-center" style="left: 320px;">
+    <div class="bg-white rounded-xl p-8 shadow-2xl text-center min-w-[280px] mx-4">
+      <div class="w-16 h-16 border-4 border-[#75C9C8]/30 border-t-[#1A4E79] rounded-full mx-auto mb-6 animate-spin"></div>
+      <div class="text-xl font-bold text-[#1A4E79] mb-2">Carregando...</div>
+      <div class="text-base text-[#1A4E79]/70">Aguarde</div>
+    </div>
+  </div>
+
   <!-- Conteúdo principal -->
   <main class="flex-1 p-6 overflow-auto relative min-h-screen">
-    <!-- Loading overlay cobrindo todo o conteúdo -->
-    <div *ngIf="loading" class="fixed inset-0 bg-gradient-to-br from-[#1A4E79]/90 to-[#75C9C8]/90 backdrop-blur-sm z-[50] flex items-center justify-center" style="left: 320px;">
-      <div class="bg-white rounded-xl p-8 shadow-2xl text-center min-w-[280px] mx-4">
-        <div class="w-16 h-16 border-4 border-[#75C9C8]/30 border-t-[#1A4E79] rounded-full mx-auto mb-6 animate-spin"></div>
-        <div class="text-xl font-bold text-[#1A4E79] mb-2">Carregando...</div>
-        <div class="text-base text-[#1A4E79]/70">Aguarde</div>
-      </div>
-    </div>
     
     <div class="bg-white/95 backdrop-blur-sm rounded-xl shadow-xl p-8 border border-white/20">
       <div class="mb-8">
