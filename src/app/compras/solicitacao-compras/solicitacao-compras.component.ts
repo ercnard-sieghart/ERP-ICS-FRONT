@@ -73,7 +73,7 @@ export class SolicitacaoComprasComponent implements OnInit {
       property: 'numeroSolicitacao',
       label: 'Número',
       type: 'string',
-      width: '12%'
+      width: '10%'
     },
     {
       property: 'dataSolicitacao',
@@ -85,7 +85,7 @@ export class SolicitacaoComprasComponent implements OnInit {
       property: 'produto',
       label: 'Produto',
       type: 'string',
-      width: '15%'
+      width: '10%'
     },
     {
       property: 'cc',
@@ -97,7 +97,7 @@ export class SolicitacaoComprasComponent implements OnInit {
       property: 'contato',
       label: 'Contato',
       type: 'string',
-      width: '15%'
+      width: '12%'
     },
     {
       property: 'status',
@@ -116,7 +116,7 @@ export class SolicitacaoComprasComponent implements OnInit {
       label: 'Valor Total',
       type: 'currency',
       format: 'BRL',
-      width: '10%'
+      width: '15%'
     },
     {
       property: 'obs',

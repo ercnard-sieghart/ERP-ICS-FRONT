@@ -65,17 +65,17 @@ export class MenuComponent implements OnInit, OnDestroy {
       link: '/home' 
     },
     { 
-      label: 'Gestão de Orçamentos', 
-      icon: 'money', 
-      link: '/orcamentos'
-    },
-    { 
       label: 'Compras', 
       icon: 'shopping', 
       expanded: false,
       submenus: [
         { label: 'Solicitação de Compras', icon: 'cart', link: '/compras/solicitacao' }
       ]
+    },
+    { 
+      label: 'Gestão de Orçamentos', 
+      icon: 'money', 
+      link: '/orcamentos'
     },
     { 
       label: 'Consultas', 

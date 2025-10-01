@@ -12,6 +12,17 @@
   background: linear-gradient(135deg, #1A4E79 0%, #75C9C8 100%);
   color: white;
   font-weight: 600;
+  font-size: 0.75rem !important;
+}
+
+/* Diminuir fonte dos headers da tabela */
+.po-table .po-table-header th {
+  font-size: 0.75rem !important;
+  padding: 8px 12px !important;
+}
+
+.po-table .po-table-header .po-table-header-ellipsis {
+  font-size: 0.75rem !important;
 }
 
 /* Linhas da tabela com hover azul */

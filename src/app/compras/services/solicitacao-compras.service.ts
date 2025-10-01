@@ -21,6 +21,7 @@ export interface SolicitacaoCompraAPI {
   C7_TOTAL: number;
   C7_CONTATO?: string;
   C7_OBS?: string;
+  C7_CC?: string;
 }
 
 @Injectable({
@@ -123,15 +124,19 @@ export class SolicitacaoComprasService {
 
   mapearDadosAPI(dadosAPI: SolicitacaoCompraAPI[]): any[] {
     return dadosAPI.map(item => {
+      const produtoCompleto = item.C7_PRODUTO || '';
+      const produtoUltimos4 = produtoCompleto.length >= 4 ? produtoCompleto.slice(-4) : produtoCompleto;
+      
       return {
         id: item.C7_NUM + item.C7_ITEM || Math.random().toString(),
         numeroSolicitacao: item.C7_NUM || 'SC-' + new Date().getTime(),
         dataSolicitacao: new Date().toISOString().split('T')[0],
+        produto: produtoUltimos4,
+        cc: item.C7_CC || '',
         contato: item.C7_CONTATO || '',
         status: 'pendente',
         valorTotal: item.C7_TOTAL || 0,
         obs: item.C7_OBS || '',
-        produto: item.C7_PRODUTO || '',
         descricao: item.C7_DESCRI || '',
         quantidade: item.C7_QUANT || 0,
         preco: item.C7_PRECO || 0,
