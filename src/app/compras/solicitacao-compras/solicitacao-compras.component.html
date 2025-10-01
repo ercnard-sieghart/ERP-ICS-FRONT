@@ -5,9 +5,9 @@
   <app-menu></app-menu>
   
   <!-- Conteúdo principal -->
-  <main class="flex-1 p-6 overflow-auto relative">
-    <!-- Loading overlay apenas no conteúdo principal -->
-    <div *ngIf="loading" class="absolute inset-0 bg-gradient-to-br from-[#1A4E79]/90 to-[#75C9C8]/90 backdrop-blur-sm z-[5] flex items-center justify-center rounded-xl">
+  <main class="flex-1 p-6 overflow-auto relative min-h-screen">
+    <!-- Loading overlay cobrindo todo o conteúdo -->
+    <div *ngIf="loading" class="fixed inset-0 bg-gradient-to-br from-[#1A4E79]/90 to-[#75C9C8]/90 backdrop-blur-sm z-[50] flex items-center justify-center" style="left: 320px;">
       <div class="bg-white rounded-xl p-8 shadow-2xl text-center min-w-[280px] mx-4">
         <div class="w-16 h-16 border-4 border-[#75C9C8]/30 border-t-[#1A4E79] rounded-full mx-auto mb-6 animate-spin"></div>
         <div class="text-xl font-bold text-[#1A4E79] mb-2">Carregando...</div>
@@ -123,13 +123,6 @@
           <!-- Cabeçalho da tabela com ações -->
           <div class="flex justify-between items-center mb-4 bg-gradient-to-r from-[#1A4E79]/5 to-[#75C9C8]/5 rounded-lg p-3 border border-[#75C9C8]/20">
             <div class="flex items-center gap-3">
-              <po-button
-                p-label="Exportar"
-                p-kind="secondary"
-                p-size="small"
-                p-icon="po-icon-export"
-                (p-click)="exportar()">
-              </po-button>
               
               <po-button
                 p-label="Atualizar"
