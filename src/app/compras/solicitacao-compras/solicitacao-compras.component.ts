@@ -234,37 +234,34 @@ export class SolicitacaoComprasComponent implements OnInit {
     });
   }
 
-  carregarSolicitacoes(): void {
+  carregarSolicitacoes(mostrarNotificacao: boolean = false): void {
     this.loading = true;
     
-    // Carregando dados da API SZ2
     this.solicitacaoService.getSolicitacoes().subscribe({
       next: (dadosAPI) => {
-        console.log('Dados recebidos da API SZ2:', dadosAPI);
+        console.log('Dados recebidos da API:', dadosAPI);
         
-        // Mapear dados da API para o formato do componente
         this.solicitacoes = this.solicitacaoService.mapearDadosAPI(dadosAPI);
         
         console.log('Dados mapeados:', this.solicitacoes);
         
-        // Notificação de sucesso
-        this.poNotification.success({
-          message: `${this.solicitacoes.length} solicitações carregadas com sucesso!`,
-          duration: 3000
-        });
+        if (mostrarNotificacao) {
+          this.poNotification.success({
+            message: `${this.solicitacoes.length} solicitações carregadas com sucesso!`,
+            duration: 3000
+          });
+        }
         
         this.loading = false;
       },
       error: (erro) => {
         console.error('Erro ao carregar solicitações:', erro);
         
-        // Notificação de erro
         this.poNotification.error({
           message: `Erro ao carregar solicitações: ${erro.message}`,
           duration: 5000
         });
         
-        // Carregar dados de exemplo em caso de erro
         this.carregarDadosExemplo();
         this.loading = false;
       }
