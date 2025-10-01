@@ -323,10 +323,21 @@
 /* Animações rápidas para modais */
 .modal-overlay {
   animation: fadeIn 0.2s ease-out;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 9999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .modal-container {
   animation: fadeInScale 0.15s ease-out;
+  max-width: 90vw !important;
+  max-height: 90vh !important;
 }
 
 @keyframes fadeIn {
@@ -426,10 +437,32 @@
   }
 }
 
-/* Melhoria para responsividade do modal */
+/* Modal compacto sem scroll */
+.modal-container {
+  overflow: visible !important;
+  max-height: 95vh !important;
+}
+
+/* Garantir visibilidade em telas pequenas */
+@media (max-height: 700px) {
+  .modal-container {
+    max-height: 90vh !important;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-height: 600px) {
+  .modal-container {
+    max-height: 85vh !important;
+    transform: scale(0.95);
+  }
+}
+
+/* Responsividade para mobile */
 @media (max-width: 768px) {
   .modal-container {
-    margin: 1rem;
-    max-height: 85vh;
+    margin: 0.5rem;
+    max-height: 90vh;
+    font-size: 0.9rem;
   }
 }

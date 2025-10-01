@@ -200,9 +200,6 @@ export class SolicitacaoComprasComponent implements OnInit {
 
     // Abrir modal imediatamente
     this.showEditModal = true;
-    
-    // Garantir que a tela esteja na posição correta para exibir o modal
-    this.garantirVisibilidadeModal();
   }
 
   cancelarEdicao(): void {
@@ -530,19 +527,6 @@ export class SolicitacaoComprasComponent implements OnInit {
         }
       }, 100);
     }
-  }
-
-  garantirVisibilidadeModal(): void {
-    // Scroll suave para o centro da tela para garantir que o modal seja visível
-    setTimeout(() => {
-      const alturaJanela = window.innerHeight;
-      const posicaoCentral = window.pageYOffset + (alturaJanela / 2) - 200;
-      
-      window.scrollTo({
-        top: Math.max(0, posicaoCentral),
-        behavior: 'smooth'
-      });
-    }, 50);
   }
 
 }
