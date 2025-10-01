@@ -51,6 +51,7 @@
                 class="text-xs transition-transform duration-300 flex-shrink-0 ml-1"
                 [class.rotate-180]="item.expanded"
                 [class.hidden]="isMenuCollapsed"
+                *ngIf="!isMenuCollapsed"
               >▼</span>
             </button>
             
@@ -85,7 +86,6 @@
   (click)="toggleMenu()" 
   class="absolute top-6 -right-4 z-50 bg-[#1A4E79] hover:bg-[#75C9C8] text-white rounded-full p-2 shadow-lg transition-all duration-300 hover:shadow-xl"
 >
-  <span class="text-lg font-bold" *ngIf="!isMenuCollapsed">‹</span>
-  <span class="text-lg font-bold" *ngIf="isMenuCollapsed">›</span>
+  <span class="text-sm font-bold">☰</span>
 </button>
 </div>
