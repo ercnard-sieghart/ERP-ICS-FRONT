@@ -82,7 +82,9 @@ export class MenuComponent implements OnInit, OnDestroy {
       submenus: [
         { label: 'Solicitação de Compras', icon: 'cart', link: '/compras/solicitacao' }
       ]
-    },
+    }
+    // Menus temporariamente ocultos
+    /* 
     { 
       label: 'Gestão de Orçamentos', 
       icon: 'money', 
@@ -123,6 +125,7 @@ export class MenuComponent implements OnInit, OnDestroy {
         { label: 'Relatórios', icon: 'chart', link: '#' }
       ]
     }
+    */
   ];
 
   toggleSubmenu(item: MenuItemWithSubmenu) {
