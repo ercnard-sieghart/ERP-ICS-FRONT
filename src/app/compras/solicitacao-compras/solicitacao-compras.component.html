@@ -2,7 +2,7 @@
 
 <div class="flex h-screen bg-gradient-to-br from-[#1A4E79] to-[#75C9C8]">
   <!-- Menu lateral -->
-  <app-menu></app-menu>
+  <app-menu [isLoading]="loading"></app-menu>
   
   <!-- Loading overlay - ocupa toda a tela menos a área do menu -->
   <div *ngIf="loading" class="fixed top-0 bottom-0 right-0 bg-gradient-to-br from-[#1A4E79]/90 to-[#75C9C8]/90 backdrop-blur-sm z-[45] flex items-center justify-center" style="left: 320px;">
@@ -17,12 +17,7 @@
   <main class="flex-1 p-6 overflow-auto relative min-h-screen">
     
     <div class="bg-white/95 backdrop-blur-sm rounded-xl shadow-xl p-8 border border-white/20">
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] bg-clip-text text-transparent mb-3">
-          Solicitação de Compras
-        </h1>
-        <p class="text-[#1A4E79]/70 text-lg">Gerencie todas as solicitações de compras da empresa</p>
-      </div>
+
       
       <!-- Filtros -->
       <div class="bg-white rounded-xl shadow-lg p-6 mb-6 border-l-4 border-[#75C9C8]">

@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PoIconModule, PoAvatarModule } from '@po-ui/ng-components';
 import { PoMenuModule, PoMenuItem } from '@po-ui/ng-components';
@@ -22,6 +22,7 @@ interface MenuItemWithSubmenu {
   imports: [CommonModule, PoIconModule, PoMenuModule, RouterModule, PoAvatarModule]
 })
 export class MenuComponent implements OnInit, OnDestroy {
+  @Input() isLoading: boolean = false;
   avatarUrl: string = `https://i.pravatar.cc/150?u=${Math.random()}`;
   displayName: string = 'Usuário';
   isMenuCollapsed: boolean = false;
