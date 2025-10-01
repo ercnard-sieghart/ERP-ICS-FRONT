@@ -350,6 +350,21 @@
   100% { transform: rotate(360deg); }
 }
 
+/* Garantir que o loading seja sempre visível */
+.loading-overlay-force {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 99999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: linear-gradient(135deg, rgba(26, 78, 121, 0.9), rgba(117, 201, 200, 0.9)) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.7; }
@@ -465,4 +480,13 @@
     max-height: 90vh;
     font-size: 0.9rem;
   }
+  
+  .loading-with-menu {
+    left: 0 !important;
+  }
+}
+
+/* Loading centralizado com Tailwind - apenas overrides necessários */
+body.loading-active {
+  overflow: hidden !important;
 }

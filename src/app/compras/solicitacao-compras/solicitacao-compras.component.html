@@ -1,9 +1,20 @@
+
+
 <div class="flex h-screen bg-gradient-to-br from-[#1A4E79] to-[#75C9C8]">
   <!-- Menu lateral -->
   <app-menu></app-menu>
   
   <!-- Conteúdo principal -->
-  <main class="flex-1 p-6 overflow-auto">
+  <main class="flex-1 p-6 overflow-auto relative">
+    <!-- Loading overlay apenas no conteúdo principal -->
+    <div *ngIf="loading" class="absolute inset-0 bg-gradient-to-br from-[#1A4E79]/90 to-[#75C9C8]/90 backdrop-blur-sm z-50 flex items-center justify-center rounded-xl">
+      <div class="bg-white rounded-xl p-8 shadow-2xl text-center min-w-[280px] mx-4">
+        <div class="w-16 h-16 border-4 border-[#75C9C8]/30 border-t-[#1A4E79] rounded-full mx-auto mb-6 animate-spin"></div>
+        <div class="text-xl font-bold text-[#1A4E79] mb-2">Carregando...</div>
+        <div class="text-base text-[#1A4E79]/70">Aguarde</div>
+      </div>
+    </div>
+    
     <div class="bg-white/95 backdrop-blur-sm rounded-xl shadow-xl p-8 border border-white/20">
       <div class="mb-8">
         <h1 class="text-3xl font-bold bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] bg-clip-text text-transparent mb-3">
@@ -259,15 +270,6 @@
               </div>
             </ng-template>
           </po-table>
-        </div>
-      </div>
-      
-      <!-- Loading overlay rápido -->
-      <div *ngIf="loading" class="fixed inset-0 bg-gradient-to-br from-[#1A4E79]/90 to-[#75C9C8]/90 backdrop-blur-sm z-50 flex items-center justify-center">
-        <div class="bg-white rounded-xl p-8 shadow-2xl text-center min-w-[280px] mx-4 animate-pulse">
-          <div class="w-16 h-16 border-4 border-[#75C9C8]/30 border-t-[#1A4E79] rounded-full mx-auto mb-6 animate-spin"></div>
-          <div class="text-xl font-bold text-[#1A4E79] mb-2">Carregando...</div>
-          <div class="text-base text-[#1A4E79]/70">Aguarde</div>
         </div>
       </div>
 

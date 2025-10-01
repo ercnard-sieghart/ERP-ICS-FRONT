@@ -211,7 +211,7 @@ export class SolicitacaoComprasComponent implements OnInit {
   confirmarCopia(): void {
     // Feedback imediato - fechar modal primeiro
     this.showEditModal = false;
-    this.loading = true;
+    this.setLoading(true);
     
     // Adicionar à lista local imediatamente para responsividade
     const novasolicitacao = { ...this.registroEdicao };
@@ -233,7 +233,7 @@ export class SolicitacaoComprasComponent implements OnInit {
     this.solicitacaoService.criarSolicitacao(novasolicitacao).subscribe({
       next: (resposta) => {
         console.log('Solicitação sincronizada com a API:', resposta);
-        this.loading = false;
+        this.setLoading(false);
       },
       error: (erro) => {
         console.warn('Erro ao sincronizar com API:', erro);
@@ -241,13 +241,13 @@ export class SolicitacaoComprasComponent implements OnInit {
           message: `Solicitação ${numeroSolicitacao} salva localmente. Sincronização pendente.`,
           duration: 4000
         });
-        this.loading = false;
+        this.setLoading(false);
       }
     });
   }
 
   carregarSolicitacoes(mostrarNotificacao: boolean = false): void {
-    this.loading = true;
+    this.setLoading(true);
     
     this.solicitacaoService.getSolicitacoes().subscribe({
       next: (dadosAPI) => {
@@ -265,7 +265,7 @@ export class SolicitacaoComprasComponent implements OnInit {
           });
         }
         
-        this.loading = false;
+        this.setLoading(false);
         
         // Centralizar tabela após carregamento
         this.centralizarTabela();
@@ -277,7 +277,7 @@ export class SolicitacaoComprasComponent implements OnInit {
         });
         
         this.carregarDadosExemplo();
-        this.loading = false;
+        this.setLoading(false);
         this.centralizarTabela();
       }
     });
@@ -526,6 +526,19 @@ export class SolicitacaoComprasComponent implements OnInit {
           }, 300);
         }
       }, 100);
+    }
+  }
+
+  setLoading(isLoading: boolean): void {
+    this.loading = isLoading;
+    
+    // Controlar scroll do body para garantir que o loading seja sempre visível
+    if (isLoading) {
+      document.body.classList.add('loading-active');
+      // Forçar scroll para o topo para garantir visibilidade do loading
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    } else {
+      document.body.classList.remove('loading-active');
     }
   }
 
