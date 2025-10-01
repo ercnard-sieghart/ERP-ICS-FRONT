@@ -82,14 +82,14 @@ export class MenuComponent implements OnInit, OnDestroy {
       submenus: [
         { label: 'Solicitação de Compras', icon: 'cart', link: '/compras/solicitacao' }
       ]
-    }
-    // Menus temporariamente ocultos
-    /* 
+    },
     { 
       label: 'Gestão de Orçamentos', 
       icon: 'money', 
       link: '/orcamentos'
-    },
+    }
+    // Menus temporariamente ocultos
+    /* 
     { 
       label: 'Consultas', 
       icon: 'search', 

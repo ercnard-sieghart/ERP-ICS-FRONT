@@ -196,18 +196,19 @@ export class SolicitacaoComprasComponent implements OnInit {
       status: 'pendente'
     };
 
-    // Abrir modal imediatamente
+    // Abrir modal centralizado na viewport
     this.showEditModal = true;
     
-    // Forçar scroll para o topo da página múltiplas vezes para garantir
-    setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: 'auto' });
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-    }, 0);
-    
-    // Garantir que o modal apareça sempre na viewport
+    // Bloquear scroll do body para modal centralizado
     document.body.style.overflow = 'hidden';
+  }
+
+  abrirModalCopia(registro: any): void {
+    // Definir o registro selecionado
+    this.registroSelecionado = registro;
+    
+    // Chamar o método copiarRegistro que já tem toda a lógica
+    this.copiarRegistro();
   }
 
   cancelarEdicao(): void {
