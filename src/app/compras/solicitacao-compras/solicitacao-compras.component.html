@@ -23,55 +23,6 @@
         <p class="text-[#1A4E79]/70 text-lg">Gerencie todas as solicitações de compras da empresa</p>
       </div>
       
-      <!-- Toolbar com ações -->
-      <div class="bg-gradient-to-r from-[#1A4E79]/10 to-[#75C9C8]/10 rounded-lg p-4 mb-6 border border-[#75C9C8]/20">
-        <div class="flex justify-between items-center">
-          <div class="flex gap-3">
-            <po-button
-              p-label="Exportar"
-              p-kind="secondary"
-              p-icon="po-icon-export"
-              (p-click)="exportar()">
-            </po-button>
-          </div>
-          
-          <div class="flex items-center gap-3">
-            <div class="bg-[#1A4E79] text-white px-4 py-2 rounded-lg shadow-sm">
-              <span class="text-sm font-medium">
-                Total: {{ solicitacoesFiltradas.length }} solicitações
-              </span>
-            </div>
-            
-            <po-button
-              p-label="Atualizar"
-              p-kind="tertiary"
-              p-icon="po-icon-refresh"
-              (p-click)="carregarSolicitacoes(true)">
-            </po-button>
-          </div>
-        </div>
-        
-        <!-- Informação sobre seleção -->
-        <div *ngIf="registroSelecionado" class="mt-3 p-4 bg-gradient-to-r from-[#75C9C8]/20 to-[#1A4E79]/20 rounded-lg border-l-4 border-[#75C9C8] shadow-sm">
-          <div class="flex items-center text-[#1A4E79]">
-            <div class="w-3 h-3 bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] rounded-full mr-3 animate-pulse"></div>
-            <i class="po-icon po-icon-ok mr-2 text-[#75C9C8]"></i>
-            <span class="font-bold">Registro selecionado:</span>
-            <span class="ml-2 px-3 py-1 bg-white rounded-lg shadow-sm border border-[#75C9C8]/30">
-              {{ registroSelecionado.numeroSolicitacao }} - {{ registroSelecionado.solicitante }}
-            </span>
-          </div>
-        </div>
-        
-        <!-- Instrução quando nenhum registro está selecionado -->
-        <div *ngIf="!registroSelecionado" class="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-          <div class="flex items-center text-gray-600">
-            <i class="po-icon po-icon-info mr-2"></i>
-            <span class="text-sm">Clique no ícone circular da primeira coluna para selecionar um registro</span>
-          </div>
-        </div>
-      </div>
-
       <!-- Filtros -->
       <div class="bg-white rounded-xl shadow-lg p-6 mb-6 border-l-4 border-[#75C9C8]">
         <div class="filtros-container">
