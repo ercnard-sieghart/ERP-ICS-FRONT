@@ -196,11 +196,18 @@ export class SolicitacaoComprasComponent implements OnInit {
       status: 'pendente'
     };
 
-    // Abrir modal imediatamente
-    this.showEditModal = true;
-    
-    // Garantir que o modal apareça sempre na viewport
-    document.body.style.overflow = 'hidden';
+    // Fazer scroll suave para o topo da página antes de abrir o modal
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+
+    // Abrir modal após um pequeno delay para completar o scroll
+    setTimeout(() => {
+      this.showEditModal = true;
+      // Garantir que o modal apareça sempre na viewport
+      document.body.style.overflow = 'hidden';
+    }, 300);
   }
 
   cancelarEdicao(): void {
