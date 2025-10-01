@@ -1,111 +1,212 @@
-<div class="flex h-screen bg-gray-50">
+<div class="flex h-screen bg-gradient-to-br from-[#1A4E79] to-[#75C9C8]">
   <!-- Menu lateral -->
   <app-menu></app-menu>
   
   <!-- Conteúdo principal -->
   <main class="flex-1 p-6 overflow-auto">
-    <div class="bg-white rounded-lg shadow-sm p-6">
-      <h1 class="text-2xl font-bold text-gray-800 mb-2">Solicitação de Compras</h1>
-      <p class="text-gray-600 mb-6">Gerencie todas as solicitações de compras da empresa</p>
+    <div class="bg-white/95 backdrop-blur-sm rounded-xl shadow-xl p-8 border border-white/20">
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] bg-clip-text text-transparent mb-3">
+          Solicitação de Compras
+        </h1>
+        <p class="text-[#1A4E79]/70 text-lg">Gerencie todas as solicitações de compras da empresa</p>
+      </div>
       
       <!-- Toolbar com ações -->
-      <div class="po-row mb-4">
-        <div class="po-md-12">
-          <div class="flex justify-between items-center">
-            <div class="flex gap-2">
-              <po-button
-                p-label="Nova Solicitação"
-                p-kind="primary"
-                p-icon="po-icon-plus"
-                (p-click)="novaSolicitacao()">
-              </po-button>
-              
-              <po-button
-                p-label="Exportar"
-                p-kind="secondary"
-                p-icon="po-icon-export"
-                (p-click)="exportar()">
-              </po-button>
-            </div>
+      <div class="bg-gradient-to-r from-[#1A4E79]/10 to-[#75C9C8]/10 rounded-lg p-4 mb-6 border border-[#75C9C8]/20">
+        <div class="flex justify-between items-center">
+          <div class="flex gap-3">
+            <po-button
+              p-label="Copiar Selecionado"
+              p-kind="primary"
+              p-icon="po-icon-copy"
+              [p-disabled]="!registroSelecionado"
+              (p-click)="copiarRegistro()">
+            </po-button>
             
-            <div class="flex items-center gap-2">
-              <span class="text-sm text-gray-600">
+            <po-button
+              p-label="Exportar"
+              p-kind="secondary"
+              p-icon="po-icon-export"
+              (p-click)="exportar()">
+            </po-button>
+          </div>
+          
+          <div class="flex items-center gap-3">
+            <div class="bg-[#1A4E79] text-white px-4 py-2 rounded-lg shadow-sm">
+              <span class="text-sm font-medium">
                 Total: {{ solicitacoes.length }} solicitações
               </span>
-              
-              <po-button
-                p-label="Atualizar"
-                p-kind="tertiary"
-                p-icon="po-icon-refresh"
-                (p-click)="carregarSolicitacoes()">
-              </po-button>
             </div>
+            
+            <po-button
+              p-label="Atualizar"
+              p-kind="tertiary"
+              p-icon="po-icon-refresh"
+              (p-click)="carregarSolicitacoes()">
+            </po-button>
+            
+            <po-button
+              p-label="Testar API"
+              p-kind="tertiary"
+              p-icon="po-icon-api"
+              (p-click)="testarAPI()">
+            </po-button>
+          </div>
+        </div>
+        
+        <!-- Informação sobre seleção -->
+        <div *ngIf="registroSelecionado" class="mt-3 p-4 bg-gradient-to-r from-[#75C9C8]/20 to-[#1A4E79]/20 rounded-lg border-l-4 border-[#75C9C8] shadow-sm">
+          <div class="flex items-center text-[#1A4E79]">
+            <div class="w-3 h-3 bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] rounded-full mr-3 animate-pulse"></div>
+            <i class="po-icon po-icon-ok mr-2 text-[#75C9C8]"></i>
+            <span class="font-bold">Registro selecionado:</span>
+            <span class="ml-2 px-3 py-1 bg-white rounded-lg shadow-sm border border-[#75C9C8]/30">
+              {{ registroSelecionado.numeroSolicitacao }} - {{ registroSelecionado.solicitante }}
+            </span>
+          </div>
+        </div>
+        
+        <!-- Instrução quando nenhum registro está selecionado -->
+        <div *ngIf="!registroSelecionado" class="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+          <div class="flex items-center text-gray-600">
+            <i class="po-icon po-icon-info mr-2"></i>
+            <span class="text-sm">Clique no ícone circular da primeira coluna para selecionar um registro</span>
           </div>
         </div>
       </div>
 
       <!-- Filtros -->
-      <div class="po-row mb-4">
-        <div class="po-md-12">
-          <div class="filtros-container">
-            <h4 class="mb-3">Filtros</h4>
-            <div class="po-row">
-              <div class="po-md-3">
-                <input 
-                  type="text"
-                  class="po-input"
-                  placeholder="Nº Solicitação..."
-                />
-              </div>
-              
-              <div class="po-md-3">
-                <select class="po-select">
-                  <option value="">Todos os status</option>
-                  <option value="pendente">Pendente</option>
-                  <option value="aprovado">Aprovado</option>
-                  <option value="rejeitado">Rejeitado</option>
-                  <option value="processando">Processando</option>
-                </select>
-              </div>
-              
-              <div class="po-md-3">
-                <input 
-                  type="date"
-                  class="po-input"
-                  placeholder="Data Início"
-                />
-              </div>
-              
-              <div class="po-md-3">
-                <input 
-                  type="date"
-                  class="po-input"
-                  placeholder="Data Fim"
-                />
-              </div>
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-6 border-l-4 border-[#75C9C8]">
+        <div class="filtros-container">
+          <h4 class="text-lg font-semibold text-[#1A4E79] mb-4 flex items-center">
+            <i class="po-icon po-icon-filter mr-2"></i>
+            Filtros
+          </h4>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-[#1A4E79] mb-2">Nº Solicitação</label>
+              <input 
+                type="text"
+                class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all"
+                placeholder="Digite o número..."
+              />
             </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-[#1A4E79] mb-2">Status</label>
+              <select class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all">
+                <option value="">Todos os status</option>
+                <option value="pendente">Pendente</option>
+                <option value="aprovado">Aprovado</option>
+                <option value="rejeitado">Rejeitado</option>
+                <option value="processando">Processando</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-[#1A4E79] mb-2">Data Início</label>
+              <input 
+                type="date"
+                class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all"
+              />
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-[#1A4E79] mb-2">Data Fim</label>
+              <input 
+                type="date"
+                class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all"
+              />
+            </div>
+          </div>
+          
+          <div class="flex gap-3 mt-4 pt-4 border-t border-[#75C9C8]/20">
+            <button class="bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all font-medium">
+              <i class="po-icon po-icon-search mr-2"></i>
+              Buscar
+            </button>
+            <button class="bg-white border border-[#75C9C8] text-[#1A4E79] px-6 py-2 rounded-lg hover:bg-[#75C9C8]/10 transition-all font-medium">
+              <i class="po-icon po-icon-close mr-2"></i>
+              Limpar
+            </button>
           </div>
         </div>
       </div>
 
       <!-- Tabela de solicitações -->
-      <div class="po-row">
-        <div class="po-md-12">
+      <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-[#75C9C8]/20">
+        <div class="bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] p-4">
+          <h3 class="text-white font-semibold text-lg flex items-center">
+            <i class="po-icon po-icon-table mr-2"></i>
+            Lista de Solicitações
+          </h3>
+        </div>
+        
+        <div class="p-4">
           <po-table
             [p-columns]="columns"
             [p-items]="solicitacoes"
-            [p-actions]="actions"
             [p-loading]="loading"
-            p-sort="true"
-            p-striped="true"
-            p-show-more-disabled="false"
+            [p-sort]="true"
+            [p-striped]="false"
+            [p-selectable]="false"
+            [p-show-more-disabled]="false"
             [p-height]="600"
-            [p-loading-show-more]="loading">
+            [p-loading-show-more]="loading"
+            [p-hide-columns-manager]="true"
+            (p-row-click)="onRowClick($event)">
             
-            <!-- Template customizado para status -->
+            <!-- Template para linha customizada -->
+            <ng-template p-table-row-template let-row let-rowIndex="rowIndex">
+              <tr 
+                [style.background-color]="isRowSelected(row) ? 'rgba(117, 201, 200, 0.2)' : ''"
+                [style.border-left]="isRowSelected(row) ? '4px solid #75C9C8' : ''"
+                [style.box-shadow]="isRowSelected(row) ? '0 2px 8px rgba(117, 201, 200, 0.3)' : ''"
+                style="cursor: pointer; transition: all 0.3s ease;"
+                (click)="onRowClick({row: row})">
+                
+                <!-- Células das colunas -->
+                <td style="padding: 12px 8px; border-bottom: 1px solid #e5e5e5;">
+                  <strong style="color: #1A4E79;">{{ row.numeroSolicitacao }}</strong>
+                </td>
+                
+                <td style="padding: 12px 8px; border-bottom: 1px solid #e5e5e5;">
+                  {{ row.dataSolicitacao }}
+                </td>
+                
+                <td style="padding: 12px 8px; border-bottom: 1px solid #e5e5e5;">
+                  {{ row.solicitante }}
+                </td>
+                
+                <td style="padding: 12px 8px; border-bottom: 1px solid #e5e5e5;">
+                  {{ row.departamento }}
+                </td>
+                
+                <td style="padding: 12px 8px; border-bottom: 1px solid #e5e5e5;">
+                  <span 
+                    class="px-3 py-1 rounded-full text-xs font-medium border"
+                    [ngClass]="getStatusClass(row.status)">
+                    {{ getStatusLabel(row.status) }}
+                  </span>
+                </td>
+                
+                <td style="padding: 12px 8px; border-bottom: 1px solid #e5e5e5;">
+                  <span style="font-weight: bold; color: #1A4E79;">
+                    {{ row.valorTotal | currency:'BRL':'symbol':'1.2-2' }}
+                  </span>
+                </td>
+                
+                <td style="padding: 12px 8px; border-bottom: 1px solid #e5e5e5;">
+                  {{ row.observacoes }}
+                </td>
+              </tr>
+            </ng-template>
+            
+            <!-- Template customizado para status (fallback) -->
             <ng-template p-table-column-template="status" let-row let-value>
               <span 
-                class="px-2 py-1 rounded-full text-xs font-medium"
+                class="px-3 py-1 rounded-full text-xs font-medium border"
                 [ngClass]="getStatusClass(value)">
                 {{ getStatusLabel(value) }}
               </span>
@@ -113,27 +214,25 @@
             
             <!-- Template customizado para valor -->
             <ng-template p-table-column-template="valorTotal" let-value>
-              <span class="font-semibold text-green-600">
+              <span class="font-bold text-[#1A4E79]">
                 {{ value | currency:'BRL':'symbol':'1.2-2' }}
               </span>
             </ng-template>
             
             <!-- Estado vazio -->
             <ng-template p-table-no-data>
-              <div class="text-center py-8">
-                <div class="text-6xl mb-4">📋</div>
-                <h3 class="text-lg font-semibold text-gray-700 mb-2">
+              <div class="text-center py-12">
+                <div class="text-[#75C9C8] text-8xl mb-6">📋</div>
+                <h3 class="text-xl font-bold text-[#1A4E79] mb-3">
                   Nenhuma solicitação encontrada
                 </h3>
-                <p class="text-gray-500 mb-4">
+                <p class="text-[#1A4E79]/60 mb-6 max-w-md mx-auto">
                   Não há solicitações de compras para exibir no momento.
                 </p>
-                <po-button
-                  p-label="Nova Solicitação"
-                  p-kind="primary"
-                  p-icon="po-icon-plus"
-                  (p-click)="novaSolicitacao()">
-                </po-button>
+                <button class="bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white px-8 py-3 rounded-lg hover:shadow-lg transition-all font-medium">
+                  <i class="po-icon po-icon-refresh mr-2"></i>
+                  Atualizar Lista
+                </button>
               </div>
             </ng-template>
           </po-table>
@@ -141,12 +240,163 @@
       </div>
       
       <!-- Loading overlay -->
-      <po-loading-overlay *ngIf="loading">
-        <div class="flex flex-col items-center">
-          <div class="text-lg font-semibold mb-2">Carregando solicitações...</div>
-          <div class="text-sm text-gray-600">Por favor, aguarde</div>
+      <div *ngIf="loading" class="fixed inset-0 bg-gradient-to-br from-[#1A4E79]/80 to-[#75C9C8]/80 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 shadow-2xl text-center max-w-sm mx-4">
+          <div class="animate-spin w-12 h-12 border-4 border-[#75C9C8] border-t-[#1A4E79] rounded-full mx-auto mb-4"></div>
+          <div class="text-lg font-bold text-[#1A4E79] mb-2">Carregando solicitações...</div>
+          <div class="text-sm text-[#1A4E79]/70">Por favor, aguarde</div>
         </div>
-      </po-loading-overlay>
+      </div>
+
+      <!-- Modal de Edição -->
+      <div *ngIf="showEditModal" class="fixed inset-0 bg-gradient-to-br from-[#1A4E79]/90 to-[#75C9C8]/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <!-- Header do Modal -->
+          <div class="bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] p-6 rounded-t-xl">
+            <h2 class="text-xl font-bold text-white flex items-center">
+              <i class="po-icon po-icon-edit mr-3"></i>
+              Editar Cópia da Solicitação
+            </h2>
+            <p class="text-white/80 mt-1">Revise e confirme as informações da nova solicitação</p>
+          </div>
+
+          <!-- Corpo do Modal -->
+          <div class="p-6">
+            <form #formEdicao="ngForm">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Número da Solicitação -->
+                <div>
+                  <label class="block text-sm font-medium text-[#1A4E79] mb-2">
+                    Número da Solicitação *
+                  </label>
+                  <input 
+                    type="text"
+                    [(ngModel)]="registroEdicao.numeroSolicitacao"
+                    name="numeroSolicitacao"
+                    required
+                    class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all"
+                    placeholder="SOL-000000"
+                  />
+                </div>
+
+                <!-- Data da Solicitação -->
+                <div>
+                  <label class="block text-sm font-medium text-[#1A4E79] mb-2">
+                    Data da Solicitação *
+                  </label>
+                  <input 
+                    type="date"
+                    [(ngModel)]="registroEdicao.dataSolicitacao"
+                    name="dataSolicitacao"
+                    required
+                    class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all"
+                  />
+                </div>
+
+                <!-- Solicitante -->
+                <div>
+                  <label class="block text-sm font-medium text-[#1A4E79] mb-2">
+                    Solicitante *
+                  </label>
+                  <input 
+                    type="text"
+                    [(ngModel)]="registroEdicao.solicitante"
+                    name="solicitante"
+                    required
+                    class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all"
+                    placeholder="Nome do solicitante"
+                  />
+                </div>
+
+                <!-- Departamento -->
+                <div>
+                  <label class="block text-sm font-medium text-[#1A4E79] mb-2">
+                    Departamento *
+                  </label>
+                  <input 
+                    type="text"
+                    [(ngModel)]="registroEdicao.departamento"
+                    name="departamento"
+                    required
+                    class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all"
+                    placeholder="Nome do departamento"
+                  />
+                </div>
+
+                <!-- Status -->
+                <div>
+                  <label class="block text-sm font-medium text-[#1A4E79] mb-2">
+                    Status *
+                  </label>
+                  <select 
+                    [(ngModel)]="registroEdicao.status"
+                    name="status"
+                    required
+                    class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all"
+                  >
+                    <option value="pendente">Pendente</option>
+                    <option value="processando">Processando</option>
+                    <option value="aprovado">Aprovado</option>
+                    <option value="rejeitado">Rejeitado</option>
+                  </select>
+                </div>
+
+                <!-- Valor Total -->
+                <div>
+                  <label class="block text-sm font-medium text-[#1A4E79] mb-2">
+                    Valor Total (R$) *
+                  </label>
+                  <input 
+                    type="number"
+                    [(ngModel)]="registroEdicao.valorTotal"
+                    name="valorTotal"
+                    required
+                    step="0.01"
+                    min="0"
+                    class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all"
+                    placeholder="0,00"
+                  />
+                </div>
+
+                <!-- Observações (Span 2 columns) -->
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-medium text-[#1A4E79] mb-2">
+                    Observações
+                  </label>
+                  <textarea 
+                    [(ngModel)]="registroEdicao.observacoes"
+                    name="observacoes"
+                    rows="4"
+                    class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all resize-none"
+                    placeholder="Observações adicionais sobre a solicitação..."
+                  ></textarea>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- Footer do Modal -->
+          <div class="bg-gray-50 px-6 py-4 rounded-b-xl flex gap-3 justify-end">
+            <button 
+              type="button"
+              (click)="cancelarEdicao()"
+              class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-all font-medium"
+            >
+              <i class="po-icon po-icon-close mr-2"></i>
+              Cancelar
+            </button>
+            <button 
+              type="button"
+              (click)="confirmarCopia()"
+              [disabled]="!formEdicao.form.valid"
+              class="px-6 py-2 bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white rounded-lg hover:shadow-lg transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <i class="po-icon po-icon-ok mr-2"></i>
+              Confirmar Cópia
+            </button>
+          </div>
+        </div>
+      </div>
       
     </div>
   </main>

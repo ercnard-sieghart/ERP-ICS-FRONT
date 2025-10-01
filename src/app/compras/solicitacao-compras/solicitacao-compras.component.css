@@ -1,26 +1,161 @@
 /* Estilos para a página de Solicitação de Compras */
 
+/* Estilos personalizados com tema azul */
 .po-table {
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(117, 201, 200, 0.2);
 }
 
-/* Estilos para os filtros */
-.filtros-container {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
+/* Headers da tabela com gradiente azul */
+.po-table .po-table-header {
+  background: linear-gradient(135deg, #1A4E79 0%, #75C9C8 100%);
+  color: white;
+  font-weight: 600;
 }
 
-.po-input, .po-select {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+/* Linhas da tabela com hover azul */
+.po-table .po-table-row:hover {
+  background-color: rgba(117, 201, 200, 0.1) !important;
+  transition: all 0.3s ease;
+  cursor: pointer !important;
+}
+
+/* Estilos para linha selecionada e hover no template customizado */
+.po-table tbody tr {
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.po-table tbody tr:hover {
+  background-color: rgba(117, 201, 200, 0.1) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(117, 201, 200, 0.2) !important;
+}
+
+/* Estilo específico para linha selecionada */
+.selected-row {
+  background-color: rgba(117, 201, 200, 0.25) !important;
+  border-left: 4px solid #75C9C8 !important;
+  box-shadow: 0 2px 8px rgba(117, 201, 200, 0.3) !important;
+}
+
+.selected-row:hover {
+  background-color: rgba(117, 201, 200, 0.3) !important;
+}
+
+/* Garante que o hover funcione nos templates customizados */
+.po-table tbody tr td {
+  transition: all 0.2s ease !important;
+}
+
+/* Adiciona indicador visual na linha selecionada */
+.selected-row::before {
+  content: '✓';
+  position: absolute;
+  left: 8px;
+  color: #75C9C8;
+  font-weight: bold;
   font-size: 14px;
-  transition: border-color 0.2s ease;
+}
+
+/* Estilos para botões customizados */
+.btn-primary-blue {
+  background: linear-gradient(135deg, #1A4E79 0%, #75C9C8 100%);
+  border: none;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(26, 78, 121, 0.3);
+}
+
+.btn-primary-blue:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(26, 78, 121, 0.4);
+}
+
+/* Estilos para status badges */
+.status-pendente {
+  background-color: #FEF3C7;
+  color: #92400E;
+  border: 1px solid #F59E0B;
+}
+
+.status-aprovado {
+  background-color: #D1FAE5;
+  color: #065F46;
+  border: 1px solid #10B981;
+}
+
+.status-rejeitado {
+  background-color: #FEE2E2;
+  color: #991B1B;
+  border: 1px solid #EF4444;
+}
+
+.status-processando {
+  background-color: rgba(117, 201, 200, 0.2);
+  color: #1A4E79;
+  border: 1px solid #75C9C8;
+}
+
+/* Animações personalizadas */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* Estilos para inputs com foco azul */
+.input-blue:focus {
+  outline: none;
+  border-color: #75C9C8;
+  box-shadow: 0 0 0 3px rgba(117, 201, 200, 0.2);
+}
+
+/* Card com gradiente sutil */
+.card-blue {
+  background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(247,250,252,0.95) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(117, 201, 200, 0.2);
+}
+
+/* Texto com gradiente azul */
+.text-gradient-blue {
+  background: linear-gradient(135deg, #1A4E79 0%, #75C9C8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Scrollbar customizada */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(117, 201, 200, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #1A4E79 0%, #75C9C8 100%);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #164066 0%, #5fa8a7 100%);
 }
 
 .po-input:focus, .po-select:focus {
