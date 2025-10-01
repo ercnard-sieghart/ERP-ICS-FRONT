@@ -120,6 +120,33 @@
         </div>
         
         <div class="p-4">
+          <!-- Cabeçalho da tabela com ações -->
+          <div class="flex justify-between items-center mb-4 bg-gradient-to-r from-[#1A4E79]/5 to-[#75C9C8]/5 rounded-lg p-3 border border-[#75C9C8]/20">
+            <div class="flex items-center gap-3">
+              <po-button
+                p-label="Exportar"
+                p-kind="secondary"
+                p-size="small"
+                p-icon="po-icon-export"
+                (p-click)="exportar()">
+              </po-button>
+              
+              <po-button
+                p-label="Atualizar"
+                p-kind="tertiary"
+                p-size="small"
+                p-icon="po-icon-refresh"
+                (p-click)="carregarSolicitacoes(true)">
+              </po-button>
+            </div>
+            
+            <div class="bg-[#1A4E79] text-white px-3 py-1 rounded-lg shadow-sm">
+              <span class="text-sm font-medium">
+                Total: {{ solicitacoesFiltradas.length }} solicitações
+              </span>
+            </div>
+          </div>
+          
           <po-table
             id="tabela-solicitacoes"
             [p-columns]="columns"
