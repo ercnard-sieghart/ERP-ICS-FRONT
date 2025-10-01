@@ -312,12 +312,26 @@
 @keyframes fadeInScale {
   from {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.9);
+    transform: translate(-50%, -50%) scale(0.95);
   }
   to {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
   }
+}
+
+/* Animações rápidas para modais */
+.modal-overlay {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-container {
+  animation: fadeInScale 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes spin {
@@ -328,4 +342,94 @@
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.7; }
+}
+
+/* Animações rápidas para modal */
+.modal-overlay {
+  animation: fadeInModal 0.15s ease-out;
+}
+
+.modal-container {
+  animation: slideInModal 0.2s ease-out;
+}
+
+@keyframes fadeInModal {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(8px);
+  }
+}
+
+@keyframes slideInModal {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1) translateY(0);
+  }
+}
+
+/* Estilos para modal centralizado */
+.modal-container {
+  animation: modalFadeIn 0.3s ease-out;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-overlay {
+  animation: overlayFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Classe para modal visível */
+.modal-visible {
+  animation: modalBounceIn 0.4s ease-out;
+}
+
+@keyframes modalBounceIn {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.05);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Melhoria para responsividade do modal */
+@media (max-width: 768px) {
+  .modal-container {
+    margin: 1rem;
+    max-height: 85vh;
+  }
 }

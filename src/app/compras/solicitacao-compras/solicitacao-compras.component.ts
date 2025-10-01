@@ -150,25 +150,16 @@ export class SolicitacaoComprasComponent implements OnInit {
 
   ngOnInit(): void {
     this.carregarSolicitacoes();
-    // Centralizar na tabela após o carregamento inicial
-    this.centralizarTabela();
   }
 
   onRowSelect(selectedRows: SolicitacaoCompra[]): void {
     this.registroSelecionado = selectedRows.length > 0 ? selectedRows[0] : null;
-    console.log('Registro selecionado:', this.registroSelecionado);
   }
 
   onRowClick(event: any): void {
     // O evento do po-table contém a row clicada
     const row = event.row || event;
-    if (this.registroSelecionado?.id === row.id) {
-      this.registroSelecionado = null; // Desselecionar se já estiver selecionado
-    } else {
-      this.registroSelecionado = row; // Selecionar novo registro
-    }
-    console.log('Linha clicada:', row);
-    console.log('Registro selecionado:', this.registroSelecionado);
+    this.registroSelecionado = this.registroSelecionado?.id === row.id ? null : row;
   }
 
   isRowSelected(row: SolicitacaoCompra): boolean {
@@ -190,23 +181,28 @@ export class SolicitacaoComprasComponent implements OnInit {
 
   copiarRegistro(): void {
     if (!this.registroSelecionado) {
+      this.poNotification.warning('Selecione um registro para copiar.');
       return;
     }
 
-    // Preparar dados para edição
+    // Preparar dados para edição (operação rápida)
+    const timestamp = Date.now();
     const novaData = new Date().toISOString().split('T')[0];
-    const novoNumero = 'SOL-' + new Date().getTime().toString().slice(-6);
+    const novoNumero = 'SOL-' + timestamp.toString().slice(-6);
     
     this.registroEdicao = {
       ...this.registroSelecionado,
-      id: 'new-' + new Date().getTime(),
+      id: 'new-' + timestamp,
       numeroSolicitacao: novoNumero,
       dataSolicitacao: novaData,
       status: 'pendente'
     };
 
-    // Abrir modal de edição
+    // Abrir modal imediatamente
     this.showEditModal = true;
+    
+    // Garantir que a tela esteja na posição correta para exibir o modal
+    this.garantirVisibilidadeModal();
   }
 
   cancelarEdicao(): void {
@@ -216,44 +212,38 @@ export class SolicitacaoComprasComponent implements OnInit {
   }
 
   confirmarCopia(): void {
-    // Tentar salvar na API primeiro
+    // Feedback imediato - fechar modal primeiro
+    this.showEditModal = false;
     this.loading = true;
     
-    this.solicitacaoService.criarSolicitacao(this.registroEdicao).subscribe({
+    // Adicionar à lista local imediatamente para responsividade
+    const novasolicitacao = { ...this.registroEdicao };
+    this.solicitacoes.unshift(novasolicitacao);
+    this.solicitacoesFiltradas = [...this.solicitacoes];
+    
+    // Notificação de sucesso imediata
+    this.poNotification.success({
+      message: `Solicitação ${this.registroEdicao.numeroSolicitacao} criada!`,
+      duration: 3000
+    });
+    
+    // Limpar dados
+    const numeroSolicitacao = this.registroEdicao.numeroSolicitacao;
+    this.registroEdicao = this.criarRegistroVazio();
+    this.registroSelecionado = null;
+    
+    // Tentar salvar na API em background
+    this.solicitacaoService.criarSolicitacao(novasolicitacao).subscribe({
       next: (resposta) => {
-        console.log('Solicitação criada na API:', resposta);
-        
-        // Adicionar à lista local
-        this.solicitacoes.unshift({ ...this.registroEdicao });
-        
-        // Notificação de sucesso
-        this.poNotification.success({
-          message: `Solicitação ${this.registroEdicao.numeroSolicitacao} criada com sucesso!`,
-          duration: 4000
-        });
-        
-        // Fechar modal e limpar
-        this.showEditModal = false;
-        this.registroEdicao = this.criarRegistroVazio();
-        this.registroSelecionado = null;
+        console.log('Solicitação sincronizada com a API:', resposta);
         this.loading = false;
       },
       error: (erro) => {
-        console.error('Erro ao criar solicitação na API:', erro);
-        
-        // Mesmo com erro na API, adicionar localmente
-        this.solicitacoes.unshift({ ...this.registroEdicao });
-        
-        // Notificação de aviso
-        this.poNotification.warning({
-          message: `Solicitação ${this.registroEdicao.numeroSolicitacao} criada localmente. Erro na API: ${erro.message}`,
-          duration: 6000
+        console.warn('Erro ao sincronizar com API:', erro);
+        this.poNotification.information({
+          message: `Solicitação ${numeroSolicitacao} salva localmente. Sincronização pendente.`,
+          duration: 4000
         });
-        
-        // Fechar modal e limpar
-        this.showEditModal = false;
-        this.registroEdicao = this.criarRegistroVazio();
-        this.registroSelecionado = null;
         this.loading = false;
       }
     });
@@ -264,35 +254,34 @@ export class SolicitacaoComprasComponent implements OnInit {
     
     this.solicitacaoService.getSolicitacoes().subscribe({
       next: (dadosAPI) => {
-        console.log('Dados recebidos da API:', dadosAPI);
-        
+        // Mapear dados de forma mais eficiente
         this.solicitacoes = this.solicitacaoService.mapearDadosAPI(dadosAPI);
         this.solicitacoesFiltradas = [...this.solicitacoes];
         
         // Extrair listas únicas para autocomplete
         this.extrairSugestoes();
         
-        console.log('Dados mapeados:', this.solicitacoes);
-        
         if (mostrarNotificacao) {
           this.poNotification.success({
-            message: `${this.solicitacoes.length} solicitações carregadas com sucesso!`,
-            duration: 3000
+            message: `${this.solicitacoes.length} solicitações carregadas`,
+            duration: 2000
           });
         }
         
         this.loading = false;
+        
+        // Centralizar tabela após carregamento
+        this.centralizarTabela();
       },
       error: (erro) => {
-        console.error('Erro ao carregar solicitações:', erro);
-        
         this.poNotification.error({
-          message: `Erro ao carregar solicitações: ${erro.message}`,
-          duration: 5000
+          message: `Erro ao carregar dados`,
+          duration: 3000
         });
         
         this.carregarDadosExemplo();
         this.loading = false;
+        this.centralizarTabela();
       }
     });
   }
@@ -507,38 +496,53 @@ export class SolicitacaoComprasComponent implements OnInit {
   }
 
   centralizarTabela(): void {
-    // Aguardar um tempo para a tabela ser renderizada
-    setTimeout(() => {
-      // Tentar diferentes seletores para encontrar a tabela
-      let tabelaElement = document.getElementById('tabela-solicitacoes');
-      
-      if (!tabelaElement) {
-        tabelaElement = document.getElementById('secao-tabela');
-      }
-      
-      if (!tabelaElement) {
-        tabelaElement = document.querySelector('po-table');
-      }
+    // Centralização rápida com múltiplas tentativas
+    const tentarCentralizar = () => {
+      const tabelaElement = document.getElementById('secao-tabela') || 
+                           document.getElementById('tabela-solicitacoes') || 
+                           document.querySelector('po-table') || 
+                           document.querySelector('.po-table');
       
       if (tabelaElement) {
-        // Scroll suave para o início da tabela
         tabelaElement.scrollIntoView({
           behavior: 'smooth',
           block: 'center',
           inline: 'nearest'
         });
-        
-        console.log('Tabela centralizada na tela');
-      } else {
-        // Fallback: scroll para uma posição aproximada
-        const aproximatePosition = window.innerHeight * 0.8; // 80% da altura da tela
-        window.scrollTo({
-          top: aproximatePosition,
-          behavior: 'smooth'
-        });
-        
-        console.warn('Elemento da tabela não encontrado, usando posição aproximada');
+        return true;
       }
-    }, 2000); // Delay maior para garantir renderização completa no carregamento inicial
+      return false;
+    };
+
+    // Tentar imediatamente
+    if (!tentarCentralizar()) {
+      // Se não encontrou, tentar após 100ms
+      setTimeout(() => {
+        if (!tentarCentralizar()) {
+          // Fallback final após 300ms
+          setTimeout(() => {
+            const posicaoTabela = window.innerHeight * 0.6;
+            window.scrollTo({
+              top: posicaoTabela,
+              behavior: 'smooth'
+            });
+          }, 300);
+        }
+      }, 100);
+    }
   }
+
+  garantirVisibilidadeModal(): void {
+    // Scroll suave para o centro da tela para garantir que o modal seja visível
+    setTimeout(() => {
+      const alturaJanela = window.innerHeight;
+      const posicaoCentral = window.pageYOffset + (alturaJanela / 2) - 200;
+      
+      window.scrollTo({
+        top: Math.max(0, posicaoCentral),
+        behavior: 'smooth'
+      });
+    }, 50);
+  }
+
 }
