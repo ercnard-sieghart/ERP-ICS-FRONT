@@ -198,17 +198,27 @@ export class SolicitacaoComprasComponent implements OnInit {
 
     // Abrir modal imediatamente
     this.showEditModal = true;
+    
+    // Garantir que o modal apareça sempre na viewport
+    document.body.style.overflow = 'hidden';
   }
 
   cancelarEdicao(): void {
     this.showEditModal = false;
     this.registroEdicao = this.criarRegistroVazio();
     this.registroSelecionado = null;
+    
+    // Restaurar scroll do body
+    document.body.style.overflow = 'auto';
   }
 
   confirmarCopia(): void {
     // Feedback imediato - fechar modal primeiro
     this.showEditModal = false;
+    
+    // Restaurar scroll do body
+    document.body.style.overflow = 'auto';
+    
     this.setLoading(true);
     
     // Adicionar à lista local imediatamente para responsividade
