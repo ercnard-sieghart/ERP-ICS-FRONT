@@ -71,31 +71,25 @@ export class SolicitacaoComprasComponent implements OnInit {
   columns: PoTableColumn[] = [
     {
       property: 'numeroSolicitacao',
-      label: 'Nº Solicitação',
+      label: 'Número',
       type: 'string',
-      width: '15%'
+      width: '12%'
     },
     {
       property: 'dataSolicitacao',
       label: 'Data',
       type: 'date',
-      width: '12%'
+      width: '10%'
     },
     {
-      property: 'solicitante',
-      label: 'Solicitante',
+      property: 'contato',
+      label: 'Contato',
       type: 'string',
       width: '20%'
     },
     {
-      property: 'departamento',
-      label: 'Departamento',
-      type: 'string',
-      width: '15%'
-    },
-    {
       property: 'status',
-      label: 'Status',
+      label: 'Situação',
       type: 'label',
       width: '12%',
       labels: [
@@ -110,13 +104,13 @@ export class SolicitacaoComprasComponent implements OnInit {
       label: 'Valor Total',
       type: 'currency',
       format: 'BRL',
-      width: '13%'
+      width: '12%'
     },
     {
-      property: 'observacoes',
+      property: 'obs',
       label: 'Observações',
       type: 'string',
-      width: '20%'
+      width: '34%'
     }
   ];
 

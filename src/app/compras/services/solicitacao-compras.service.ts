@@ -19,6 +19,8 @@ export interface SolicitacaoCompraAPI {
   C7_QUANT: number;
   C7_PRECO: number;
   C7_TOTAL: number;
+  C7_CONTATO?: string;
+  C7_OBS?: string;
 }
 
 @Injectable({
@@ -125,11 +127,10 @@ export class SolicitacaoComprasService {
         id: item.C7_NUM + item.C7_ITEM || Math.random().toString(),
         numeroSolicitacao: item.C7_NUM || 'SC-' + new Date().getTime(),
         dataSolicitacao: new Date().toISOString().split('T')[0],
-        solicitante: 'Sistema',
-        departamento: 'Compras',
+        contato: item.C7_CONTATO || '',
         status: 'pendente',
         valorTotal: item.C7_TOTAL || 0,
-        observacoes: item.C7_DESCRI || '',
+        obs: item.C7_OBS || '',
         produto: item.C7_PRODUTO || '',
         descricao: item.C7_DESCRI || '',
         quantidade: item.C7_QUANT || 0,
