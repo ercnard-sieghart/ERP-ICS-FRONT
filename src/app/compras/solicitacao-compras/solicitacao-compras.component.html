@@ -55,7 +55,7 @@
               />
               <div *ngIf="mostrarSugestoesCc" class="sugestoes-dropdown">
                 <div 
-                  *ngFor="let cc of ccSugestoesFiltradas"
+                  *ngFor="let cc of ccSugestoesFiltradas; trackBy: trackByIndex"
                   class="sugestao-item"
                   (click)="selecionarCc(cc)">
                   {{ cc }}
@@ -76,7 +76,7 @@
               />
               <div *ngIf="mostrarSugestoesContato" class="sugestoes-dropdown">
                 <div 
-                  *ngFor="let contato of contatoSugestoesFiltradas"
+                  *ngFor="let contato of contatoSugestoesFiltradas; trackBy: trackByIndex"
                   class="sugestao-item"
                   (click)="selecionarContato(contato)">
                   {{ contato }}
@@ -145,6 +145,8 @@
             [p-height]="600"
             [p-loading-show-more]="loading"
             [p-hide-columns-manager]="true"
+            [p-virtual-scroll]="true"
+            [p-spacing]="'medium'"
             (p-row-click)="onRowClick($event)">
             
             <!-- Template para linha customizada -->
