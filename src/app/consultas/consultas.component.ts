@@ -20,19 +20,12 @@ interface Consulta {
 })
 export class ConsultasComponent {
   modulos = [
-    { value: 'modulo1', label: 'Módulo 1' },
-    { value: 'modulo2', label: 'Módulo 2' },
-    { value: 'modulo3', label: 'Módulo 3' }
+    { value: 'modulo1', label: 'Financeiro' },
+
   ];
 
   consultas: Consulta[] = [
-    { nome: 'Consulta Extrato', descricao: 'Extrato Bancário por período', modulo: 'modulo1' },
-    { nome: 'Consulta Fictícia 2', descricao: 'Descrição breve da consulta', modulo: 'modulo1' },
-    { nome: 'Consulta Fictícia 3', descricao: 'Descrição breve da consulta', modulo: 'modulo2' },
-    { nome: 'Consulta Fictícia 4', descricao: 'Descrição breve da consulta', modulo: 'modulo2' },
-    { nome: 'Consulta Fictícia 5', descricao: 'Descrição breve da consulta', modulo: 'modulo3' },
-    { nome: 'Consulta Fictícia 6', descricao: 'Descrição breve da consulta', modulo: 'modulo3' }
-  ];
+    { nome: 'Consulta Extrato', descricao: 'Extrato Bancário por período', modulo: 'modulo1' }];
 
   moduloSelecionado = this.modulos[0].value;
   mostrarRelatorio = false;

@@ -93,9 +93,14 @@ export class MenuComponent implements OnInit, OnDestroy {
       ]
     },
     { 
-      label: 'Gestão de Orçamentos', 
-      icon: 'money', 
-      link: '/orcamentos'
+      label: 'Consultas', 
+      icon: 'search', 
+      expanded: false,
+      submenus: [
+        { label: 'Extrato Bancário', icon: 'bank', link: '/consultas/extrato-bancario' },
+        { label: 'Relatórios', icon: 'chart', link: '/consultas/relatorios' },
+        { label: 'Histórico', icon: 'clock', link: '/consultas/historico' }
+      ]
     },
     { 
       label: 'Gestão de Patentes', 
@@ -118,6 +123,11 @@ export class MenuComponent implements OnInit, OnDestroy {
         { label: 'Relatórios', icon: 'chart', link: '/consultas/relatorios' },
         { label: 'Histórico', icon: 'clock', link: '/consultas/historico' }
       ]
+    },
+    { 
+      label: 'Gestão de Orçamentos', 
+      icon: 'money', 
+      link: '/orcamentos'
     },
     { 
       label: 'SharePoint', 
