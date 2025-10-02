@@ -72,48 +72,31 @@ export class LoginComponent {
           this.authService.login(oauthBody.access_token).subscribe({
             next: (loginResponse: any) => {
               const loginBody = loginResponse.body as any;
-              console.log('[LOGIN] Response received:', {
-                hasBody: !!loginBody,
-                success: loginBody?.SUCCESS,
-                message: loginBody?.MESSAGE
-              });
               
               if (loginBody && (loginBody.SUCCESS === true || loginBody.SUCCESS === 'true')) {
-                // Armazenar dados do usuário usando os campos corretos do backend
-                if (loginBody.USER_NAME) {
-                  localStorage.setItem('user_name', loginBody.USER_NAME);
-                }
-                if (loginBody.USER_FULLNAME) {
-                  localStorage.setItem('user_fullname', loginBody.USER_FULLNAME);
-                }
-                if (loginBody.USER_EMAIL) {
-                  localStorage.setItem('user_email', loginBody.USER_EMAIL);
-                }
-                if (loginBody.USER_ID) {
-                  localStorage.setItem('user_id', loginBody.USER_ID);
-                }
-                if (loginBody.EMPRESA) {
-                  localStorage.setItem('empresa', loginBody.EMPRESA);
-                }
-                if (loginBody.FILIAL) {
-                  localStorage.setItem('filial', loginBody.FILIAL);
-                }
+                // Armazenar dados do usuário rapidamente
+                if (loginBody.USER_FULLNAME) localStorage.setItem('user_fullname', loginBody.USER_FULLNAME);
+                if (loginBody.USER_EMAIL) localStorage.setItem('user_email', loginBody.USER_EMAIL);
+                if (loginBody.USER_ID) localStorage.setItem('user_id', loginBody.USER_ID);
+                if (loginBody.EMPRESA) localStorage.setItem('empresa', loginBody.EMPRESA);
+                if (loginBody.FILIAL) localStorage.setItem('filial', loginBody.FILIAL);
                 
-                console.log('[LOGIN] Authentication successful - redirecting to home');
+                // Atualizar display do usuário
+                this.authService.updateUserDisplay();
+                this.loading = false;
+                
+                // Mostrar popup de sucesso e navegar rapidamente
+                this.popupType = 'success';
+                this.popupMessage = loginBody.MESSAGE || 'Autenticação realizada com sucesso!';
+                this.showPopup = true;
                 
                 setTimeout(() => {
-                  this.loading = false;
-                  this.popupType = 'success';
-                  this.popupMessage = loginBody.MESSAGE || 'Autenticação realizada com sucesso!';
-                  this.showPopup = true;
-                  setTimeout(() => {
-                    this.showPopup = false;
-                    this.router.navigate(['/home']);
-                  }, 2000);
-                }, 1200);
+                  this.showPopup = false;
+                  this.router.navigate(['/home']);
+                }, 800); // Reduzido de 2000ms para 800ms
+                
               } else {
-                console.error('[LOGIN] Authentication failed - invalid response structure');
-                this.handleLoginError(loginBody && loginBody.MESSAGE ? loginBody.MESSAGE : 'Erro na autenticação.');
+                this.handleLoginError(loginBody?.MESSAGE || 'Erro na autenticação.');
               }
             },
             error: (error: HttpErrorResponse) => {
@@ -125,28 +108,24 @@ export class LoginComponent {
         }
       },
       error: (error: HttpErrorResponse) => {
-        setTimeout(() => {
-          this.loading = false;
-          this.popupType = 'error';
-          if (error.status === 403) {
-            this.popupMessage = 'Acesso negado.';
-          } else {
-            this.popupMessage = 'Usuário ou senha inválidos.';
-          }
-          this.showPopup = true;
-          setTimeout(() => this.showPopup = false, 3000);
-        }, 1200);
+        this.loading = false;
+        this.popupType = 'error';
+        if (error.status === 403) {
+          this.popupMessage = 'Acesso negado.';
+        } else {
+          this.popupMessage = 'Usuário ou senha inválidos.';
+        }
+        this.showPopup = true;
+        setTimeout(() => this.showPopup = false, 1500); // Reduzido para 1.5s
       }
     });
   }
 
   private handleLoginError(message: string) {
-    setTimeout(() => {
-      this.loading = false;
-      this.popupType = 'error';
-      this.popupMessage = message;
-      this.showPopup = true;
-      setTimeout(() => this.showPopup = false, 3000);
-    }, 1200);
+    this.loading = false;
+    this.popupType = 'error';
+    this.popupMessage = message;
+    this.showPopup = true;
+    setTimeout(() => this.showPopup = false, 1500); // Reduzido para 1.5s
   }
 }

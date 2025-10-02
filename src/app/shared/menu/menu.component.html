@@ -1,60 +1,92 @@
-<aside class="w-64 bg-white shadow-lg flex flex-col py-6 px-4 rounded-r-2xl min-h-screen">
-  <div class="mb-8">
-    <div class="bg-[#f3f6fa] rounded-xl shadow flex flex-col items-center py-4 px-3">
+<div class="relative">
+  <aside [class]="'bg-white shadow-lg flex flex-col py-4 px-2 sm:px-4 rounded-r-2xl h-screen max-h-screen overflow-y-auto transition-all duration-300 z-40 relative ' + (isMenuCollapsed ? 'w-12 sm:w-16' : 'w-56 sm:w-64 md:w-72 lg:w-80')">
+    <div class="mb-4 sm:mb-6 lg:mb-8" [class.hidden]="isMenuCollapsed">
+    <div class="bg-[#f3f6fa] rounded-xl shadow flex flex-col items-center py-2 sm:py-3 lg:py-4 px-2 sm:px-3">
       <div class="flex flex-col items-center w-full justify-center">
-  <img src="assets/logo.png" alt="Logo" class="h-20 w-20 object-contain mb-2" />
-        <div class="flex items-center gap-3 w-full justify-center">
-          <span class="flex items-center justify-center h-9 w-9 rounded-full bg-[#75C9C8]">
-            <po-icon name="an-user" size="md" class="an an-user text-white"></po-icon>
+        <img src="assets/logo.png" alt="Logo" class="h-12 w-12 sm:h-16 sm:w-16 lg:h-20 lg:w-20 object-contain mb-1 sm:mb-2" />
+        <div class="flex items-center gap-2 sm:gap-3 w-full justify-center">
+          <span class="flex items-center justify-center h-6 w-6 sm:h-8 sm:w-8 lg:h-9 lg:w-9 rounded-full bg-[#75C9C8]">
+            <po-icon name="an-user" size="sm" class="an an-user text-white lg:text-base"></po-icon>
           </span>
-          <span class="font-semibold text-[#1A4E79] text-base ml-2">{{ userName }}</span>
+          <span class="font-semibold text-[#1A4E79] text-xs sm:text-sm lg:text-base ml-1 sm:ml-2 truncate max-w-[120px] sm:max-w-[140px] lg:max-w-[160px]" [title]="userName">{{ userName }}</span>
         </div>
       </div>
-      <button (click)="logout()" class="mt-2 ml-auto flex items-center justify-center bg-transparent text-[#6A6A6A] px-2 py-1 rounded hover:text-[#1A4E79] border border-transparent hover:border-[#75C9C8] transition text-sm font-normal">
+      <button (click)="logout()" class="mt-1 sm:mt-2 ml-auto flex items-center justify-center bg-transparent text-[#6A6A6A] px-1 sm:px-2 py-1 rounded hover:text-[#1A4E79] border border-transparent hover:border-[#75C9C8] transition text-xs sm:text-sm font-normal">
         <po-icon name="exit" class="mr-1" size="sm"></po-icon>
-        Logout
+        <span class="hidden sm:inline">Logout</span>
+        <span class="sm:hidden">Sair</span>
       </button>
     </div>
   </div>
-  <nav class="flex-1">
-    <ul class="space-y-4">
-      <li>
-        <a href="/home" class="flex items-center text-[#1A4E79] hover:text-[#75C9C8] transition-colors">
-          <po-icon name="home" class="mr-2" size="md"></po-icon>
-          Home
-        </a>
-      </li>
-      <li>
-        <a href="/orcamentos" class="flex items-center text-[#1A4E79] hover:text-[#75C9C8] transition-colors">
-          <po-icon name="money" class="mr-2" size="md"></po-icon>
-          Gestão de Orçamentos
-        </a>
-      </li>
-      <li>
-        <a href="/consultas" class="flex items-center text-[#1A4E79] hover:text-[#75C9C8] transition-colors">
-          <po-icon name="search" class="mr-2" size="md"></po-icon>
-          Consultas
-        </a>
-      </li>
-      <li>
-        <a href="#" class="flex items-center text-[#1A4E79] hover:text-[#75C9C8] transition-colors">
-          <po-icon name="users" class="mr-2" size="md"></po-icon>
-          SharePoint
-        </a>
-      </li>
-      <li>
-        <a href="#" class="flex items-center text-[#1A4E79] hover:text-[#75C9C8] transition-colors">
-          <po-icon name="calendar" class="mr-2" size="md"></po-icon>
-          Ramais
-        </a>
-      </li>
-      <li>
-        <a href="#" class="flex items-center text-[#1A4E79] hover:text-[#75C9C8] transition-colors">
-          <po-icon name="document" class="mr-2" size="md"></po-icon>
-          Gestão de Patentes
-        </a>
+  
+  <nav class="flex-1 overflow-y-auto">
+    <ul class="space-y-1 sm:space-y-2">
+      <li *ngFor="let item of menuItems">
+        <!-- Item de menu principal -->
+        <div class="group">
+          <a 
+            *ngIf="!item.submenus || item.submenus.length === 0; else hasSubmenus"
+            [href]="item.link" 
+            class="flex items-center justify-between text-[#1A4E79] hover:text-[#75C9C8] hover:bg-[#f3f6fa] transition-colors px-2 py-2 sm:px-3 sm:py-2 rounded-lg"
+            [title]="isMenuCollapsed ? item.label : ''"
+          >
+            <div class="flex items-center">
+              <span class="mr-2 sm:mr-3 text-base sm:text-lg">{{ getIconSymbol(item.icon) }}</span>
+              <span class="text-xs sm:text-sm font-medium truncate" [class.hidden]="isMenuCollapsed">{{ item.label }}</span>
+            </div>
+          </a>
+          
+          <!-- Template para itens com submenus -->
+          <ng-template #hasSubmenus>
+            <button 
+              (click)="toggleSubmenu(item)"
+              class="w-full flex items-center justify-between text-[#1A4E79] hover:text-[#75C9C8] hover:bg-[#f3f6fa] transition-colors px-2 py-2 sm:px-3 sm:py-2 rounded-lg text-left"
+              [title]="isMenuCollapsed ? item.label : ''"
+            >
+              <div class="flex items-center min-w-0 flex-1">
+                <span class="mr-2 sm:mr-3 text-base sm:text-lg flex-shrink-0">{{ getIconSymbol(item.icon) }}</span>
+                <span class="text-xs sm:text-sm font-medium truncate" [class.hidden]="isMenuCollapsed">{{ item.label }}</span>
+              </div>
+              <span 
+                class="text-xs transition-transform duration-300 flex-shrink-0 ml-1"
+                [class.rotate-180]="item.expanded"
+                [class.hidden]="isMenuCollapsed"
+                *ngIf="!isMenuCollapsed"
+              >▼</span>
+            </button>
+            
+            <!-- Submenus -->
+            <div 
+              class="overflow-hidden transition-all duration-300 ease-in-out"
+              [class.max-h-0]="!item.expanded || isMenuCollapsed"
+              [class.max-h-screen]="item.expanded && !isMenuCollapsed"
+            >
+              <ul class="mt-1 sm:mt-2 ml-4 sm:ml-6 space-y-1 border-l-2 border-[#f3f6fa] pl-2 sm:pl-4">
+                <li *ngFor="let submenu of item.submenus">
+                  <a 
+                    [href]="submenu.link" 
+                    class="flex items-center text-[#6A6A6A] hover:text-[#75C9C8] hover:bg-[#f9fafb] transition-colors px-1 sm:px-2 py-1 sm:py-1.5 rounded text-xs sm:text-sm"
+                    [title]="submenu.label"
+                  >
+                    <span class="mr-1 sm:mr-2 text-xs sm:text-sm flex-shrink-0">{{ getIconSymbol(submenu.icon) }}</span>
+                    <span class="truncate">{{ submenu.label }}</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </ng-template>
+        </div>
       </li>
     </ul>
   </nav>
-  <!-- ...existing code... -->
 </aside>
+
+<!-- Botão toggle posicionado na lateral direita do menu -->
+<button 
+  (click)="toggleMenu()" 
+  [disabled]="isLoading"
+  class="absolute top-6 -right-4 z-50 bg-[#1A4E79] hover:bg-[#75C9C8] text-white rounded-full p-2 shadow-lg transition-all duration-300 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#1A4E79]"
+>
+  <span class="text-sm font-bold">☰</span>
+</button>
+</div>

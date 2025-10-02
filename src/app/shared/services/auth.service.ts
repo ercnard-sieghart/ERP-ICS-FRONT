@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 @Injectable({
@@ -13,10 +13,13 @@ export class AuthService {
     login: `${this.API_BASE}/login`
   };
 
+  // Subject para notificar mudanças no usuário
+  private userUpdateSubject = new BehaviorSubject<string>('Usuário');
+  public userUpdate$ = this.userUpdateSubject.asObservable();
+
   constructor(private http: HttpClient) {}
 
   authenticate(username: string, password: string): Observable<any> {
-    console.log('[AUTH] Starting OAuth2 authentication');
     const headers = new HttpHeaders({
       'Content-Type': 'application/x-www-form-urlencoded'
     });
@@ -30,7 +33,6 @@ export class AuthService {
   }
 
   login(token: string): Observable<any> {
-    console.log('[AUTH] Starting login validation');
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
@@ -42,46 +44,16 @@ export class AuthService {
   }
 
   private handleAuthError(operation: string, error: HttpErrorResponse): Observable<never> {
-    let errorMessage = `[AUTH ERROR] ${operation} failed`;
-    
-    // Log apenas informações não sensíveis
-    if (error.error instanceof ErrorEvent) {
-      // Erro do lado cliente/rede
-      errorMessage += ` - Client Error: ${error.error.message}`;
-    } else {
-      // Erro do servidor
-      errorMessage += ` - Server Error: ${error.status}`;
-      
-      switch (error.status) {
-        case 401:
-          errorMessage += ' (Unauthorized - Invalid credentials)';
-          break;
-        case 403:
-          errorMessage += ' (Forbidden - Access denied)';
-          break;
-        case 404:
-          errorMessage += ' (Not Found - Endpoint unavailable)';
-          break;
-        case 500:
-          errorMessage += ' (Internal Server Error)';
-          break;
-        case 0:
-          errorMessage += ' (Network Error - Server unreachable)';
-          break;
-        default:
-          errorMessage += ` (HTTP ${error.status})`;
-      }
+    // Log mínimo apenas para debug em desenvolvimento
+    if (error.status !== 401 && error.status !== 403) {
+      console.error(`[AUTH] ${operation} failed - HTTP ${error.status}`);
     }
-    
-    // Log do erro sem expor dados sensíveis
-    console.error(errorMessage);
     
     // Retorna o erro original para o componente tratar
     return throwError(() => error);
   }
 
   logout(): void {
-    console.log('[AUTH] User logged out');
     localStorage.removeItem('authToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user_name');
@@ -90,6 +62,14 @@ export class AuthService {
     localStorage.removeItem('user_id');
     localStorage.removeItem('empresa');
     localStorage.removeItem('filial');
+    
+    this.userUpdateSubject.next('Usuário');
+  }
+
+  updateUserDisplay(): void {
+    const fullName = localStorage.getItem('user_fullname');
+    const displayName = fullName || 'Usuário';
+    this.userUpdateSubject.next(displayName);
   }
 
   getToken(): string | null {
@@ -98,12 +78,6 @@ export class AuthService {
 
   isAuthenticated(): boolean {
     const token = this.getToken();
-    const isAuth = !!token;
-    
-    if (!isAuth) {
-      console.warn('[AUTH] No valid token found - User not authenticated');
-    }
-    
-    return isAuth;
+    return !!token;
   }
 }
