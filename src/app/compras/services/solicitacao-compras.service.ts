@@ -3,6 +3,7 @@ import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { AuthService } from '../../shared/services/auth.service';
+import { ConfigService } from '../../shared/services/config.service';
 
 export interface SolicitacaoCompraResponse {
   success: boolean;
@@ -29,11 +30,11 @@ export interface SolicitacaoCompraAPI {
   providedIn: 'root'
 })
 export class SolicitacaoComprasService {
-  private readonly baseUrl = '/rest';
 
   constructor(
     private http: HttpClient,
-    private authService: AuthService
+    private authService: AuthService,
+    private configService: ConfigService
   ) {}
 
   private getHttpOptions() {
@@ -68,7 +69,7 @@ export class SolicitacaoComprasService {
       return throwError(() => new Error('Usuário não autenticado. Faça login novamente.'));
     }
 
-    const url = `${this.baseUrl}/pedidos-compra`;
+    const url = this.configService.getRestEndpoint('/pedidos-compra');
     
     console.log('[SOLICITACAO-SERVICE] Fazendo requisição GET para:', url);
     console.log('[SOLICITACAO-SERVICE] Token presente:', !!this.authService.getToken());
@@ -95,7 +96,7 @@ export class SolicitacaoComprasService {
       return throwError(() => new Error('Usuário não autenticado. Faça login novamente.'));
     }
 
-    const url = `${this.baseUrl}/pedidos-compra`;
+    const url = this.configService.getRestEndpoint('/pedidos-compra');
     
     console.log('[SOLICITACAO-SERVICE] Fazendo requisição POST para:', url);
     console.log('[SOLICITACAO-SERVICE] Dados da solicitação:', solicitacao);
@@ -111,7 +112,7 @@ export class SolicitacaoComprasService {
       return throwError(() => new Error('Usuário não autenticado. Faça login novamente.'));
     }
 
-    const url = `${this.baseUrl}/pedidos-compra/${id}`;
+    const url = this.configService.getRestEndpoint(`/pedidos-compra/${id}`);
     
     console.log('[SOLICITACAO-SERVICE] Fazendo requisição PUT para:', url);
     console.log('[SOLICITACAO-SERVICE] ID da solicitação:', id);

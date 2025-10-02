@@ -13,7 +13,7 @@ import {
   PoTagModule,
   PoNotificationService
 } from '@po-ui/ng-components';
-import { MenuComponent } from '../../shared/menu/menu.component';
+
 import { SolicitacaoComprasService } from '../../compras/services/solicitacao-compras.service';
 
 interface SolicitacaoCompra {
@@ -42,8 +42,7 @@ interface SolicitacaoCompra {
     PoNotificationModule,
     PoToolbarModule,
     PoModalModule,
-    PoTagModule,
-    MenuComponent
+    PoTagModule
   ],
   providers: [SolicitacaoComprasService]
 })
