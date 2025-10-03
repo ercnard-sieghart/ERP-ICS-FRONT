@@ -35,21 +35,4 @@ input:focus, select:focus {
   outline: none;
 }
 
-/* Scrollbar customization */
-.table-scroll::-webkit-scrollbar {
-  width: 8px;
-}
-
-.table-scroll::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
-}
-
-.table-scroll::-webkit-scrollbar-thumb {
-  background: #75C9C8;
-  border-radius: 4px;
-}
-
-.table-scroll::-webkit-scrollbar-thumb:hover {
-  background: #1A4E79;
-}
+/* Scrollbar já aplicado globalmente através de styles.scss */

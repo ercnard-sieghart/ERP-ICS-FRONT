@@ -21,7 +21,7 @@ import {
   MovimentoBancario, 
   RespostaExtrato, 
   Banco 
-} from '../shared/services/extrato-bancario.service';
+} from './services/extrato-bancario.service';
 
 
 @Component({

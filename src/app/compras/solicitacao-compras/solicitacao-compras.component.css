@@ -57,24 +57,7 @@
   border: 1px solid rgba(117, 201, 200, 0.2);
 }
 
-/* Custom scrollbar */
-.table-wrapper::-webkit-scrollbar {
-  width: 8px;
-}
-
-.table-wrapper::-webkit-scrollbar-track {
-  background: rgba(117, 201, 200, 0.1);
-  border-radius: 4px;
-}
-
-.table-wrapper::-webkit-scrollbar-thumb {
-  background: var(--secondary);
-  border-radius: 4px;
-}
-
-.table-wrapper::-webkit-scrollbar-thumb:hover {
-  background: var(--primary);
-}
+/* Scrollbar customizado já aplicado globalmente */
 .status-aprovado { background-color: #D1FAE5; color: #065F46; }
 .status-rejeitado { background-color: #FEE2E2; color: #991B1B; }
 .status-em-analise { background-color: #E0E7FF; color: #3730A3; }
@@ -103,10 +86,7 @@
   box-shadow: 0 0 0 3px var(--hover-bg);
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: var(--hover-bg); border-radius: 4px; }
-::-webkit-scrollbar-thumb { background: var(--gradient); border-radius: 4px; }
+/* Scrollbar já aplicado globalmente */
 
 /* Utilities */
 .valor-monetario { font-weight: 600; color: #10b981; }
