@@ -79,6 +79,40 @@ export class AuthService {
 
   isAuthenticated(): boolean {
     const token = this.getToken();
-    return !!token;
+    if (!token) {
+      return false;
+    }
+    
+    // Verifica se o token não está vazio ou com valor inválido
+    if (token.length < 10) {
+      this.logout(); // Remove token inválido
+      return false;
+    }
+    
+    return true;
+  }
+
+  // Método para verificar se o usuário tem uma sessão válida
+  hasValidSession(): boolean {
+    const token = this.getToken();
+    // Verifica apenas o token, pois user_name pode não estar sendo salvo
+    
+    if (!token || token.length < 10) {
+      return false;
+    }
+    
+    // Verificação adicional - token não pode ser apenas espaços ou string vazia
+    if (token.trim().length === 0) {
+      return false;
+    }
+    
+    return true;
+  }
+
+  // Método para limpar sessão inválida
+  clearInvalidSession(): void {
+    if (!this.hasValidSession()) {
+      this.logout();
+    }
   }
 }
