@@ -98,7 +98,7 @@ export class MenuComponent implements OnInit, OnDestroy {
       expanded: false,
       submenus: [
         { label: 'Extrato Bancário', icon: 'bank', link: '/consultas/extrato-bancario' },
-        { label: 'Relatórios', icon: 'chart', link: '/consultas/relatorios' },
+      //  { label: 'Relatórios', icon: 'chart', link: '/consultas/relatorios' },
         { label: 'Histórico', icon: 'clock', link: '/consultas/historico' }
       ]
     },
