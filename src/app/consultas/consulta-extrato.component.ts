@@ -21,7 +21,8 @@ import {
   MovimentoBancario, 
   RespostaExtrato, 
   Banco,
-  Agencia
+  Agencia,
+  Conta
 } from './services/extrato-bancario.service';
 
 
@@ -61,6 +62,7 @@ export class ConsultaExtratoComponent implements OnInit, OnDestroy {
   bancos: Banco[] = [];
   bancosOptions: PoSelectOption[] = [];
   agenciasOptions: PoSelectOption[] = [];
+  contasOptions: PoSelectOption[] = [];
   
   // Estados
   isLoading = false;
@@ -186,10 +188,22 @@ export class ConsultaExtratoComponent implements OnInit, OnDestroy {
   onBancoChange(codigoBanco: string) {
     this.filtros.banco = codigoBanco;
     this.filtros.agencia = '';
+    this.filtros.conta = '';
     this.agenciasOptions = [];
+    this.contasOptions = [];
     
     if (codigoBanco) {
       this.carregarAgencias(codigoBanco);
+    }
+  }
+
+  onAgenciaChange(codigoAgencia: string) {
+    this.filtros.agencia = codigoAgencia;
+    this.filtros.conta = '';
+    this.contasOptions = [];
+    
+    if (this.filtros.banco) {
+      this.carregarContas(this.filtros.banco, codigoAgencia);
     }
   }
 
@@ -207,6 +221,23 @@ export class ConsultaExtratoComponent implements OnInit, OnDestroy {
       }
     } catch (error) {
       this.notification.error('Erro ao carregar agências');
+    }
+  }
+
+  async carregarContas(codigoBanco: string, codigoAgencia?: string) {
+    try {
+      const response = await this.extratoService.listarContas(codigoBanco, codigoAgencia).toPromise();
+      if (response?.success) {
+        this.contasOptions = [
+          { label: 'Todas as contas', value: '' },
+          ...response.contas.map(conta => ({
+            label: conta.CONTAS,
+            value: conta.CONTAS
+          }))
+        ];
+      }
+    } catch (error) {
+      this.notification.error('Erro ao carregar contas');
     }
   }
 

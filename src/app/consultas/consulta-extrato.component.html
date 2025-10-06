@@ -38,7 +38,7 @@
               <label class="block text-sm font-medium text-[#1A4E79] mb-2">Agência</label>
               <select 
                 [(ngModel)]="filtros.agencia"
-                (ngModelChange)="onFiltroChange()"
+                (ngModelChange)="onAgenciaChange($event)"
                 [disabled]="!filtros.banco"
                 class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all disabled:bg-gray-100 disabled:cursor-not-allowed">
                 <option *ngFor="let agencia of agenciasOptions" [value]="agencia.value">
@@ -49,15 +49,15 @@
 
             <div>
               <label class="block text-sm font-medium text-[#1A4E79] mb-2">Conta</label>
-              <input 
-                type="text"
+              <select 
                 [(ngModel)]="filtros.conta"
-                (input)="onFiltroChange()"
-                maxlength="15"
-                class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all"
-                placeholder="Número da conta"
-                required
-              />
+                (ngModelChange)="onFiltroChange()"
+                [disabled]="!filtros.banco"
+                class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all disabled:bg-gray-100 disabled:cursor-not-allowed">
+                <option *ngFor="let conta of contasOptions" [value]="conta.value">
+                  {{ conta.label }}
+                </option>
+              </select>
             </div>
 
             <div>
