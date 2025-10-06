@@ -61,6 +61,18 @@ export interface RespostaBancos {
   bancos: Banco[];
 }
 
+export interface Agencia {
+  COD: string;
+  AGENCIAS: string;
+}
+
+export interface RespostaAgencias {
+  success: boolean;
+  message: string;
+  total: number;
+  agencias: Agencia[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -118,6 +130,20 @@ export class ExtratoBancarioService {
     console.log('Listando bancos:', url);
 
     return this.http.get<RespostaBancos>(url, this.getHttpOptions())
+      .pipe(
+        catchError(error => {
+          return this.handleError(error);
+        })
+      );
+  }
+
+  listarAgencias(codigoBanco: string): Observable<RespostaAgencias> {
+    this.checkAuthentication();
+    
+    const url = this.configService.getRestEndpoint('/EXTRATOBANCARIO/bancos/agencias');
+    const body = { id: codigoBanco };
+    
+    return this.http.post<RespostaAgencias>(url, body, this.getHttpOptions())
       .pipe(
         catchError(error => {
           return this.handleError(error);

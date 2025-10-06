@@ -20,7 +20,8 @@ import {
   FiltrosExtrato, 
   MovimentoBancario, 
   RespostaExtrato, 
-  Banco 
+  Banco,
+  Agencia
 } from './services/extrato-bancario.service';
 
 
@@ -59,6 +60,7 @@ export class ConsultaExtratoComponent implements OnInit, OnDestroy {
   movimentos: MovimentoBancario[] = [];
   bancos: Banco[] = [];
   bancosOptions: PoSelectOption[] = [];
+  agenciasOptions: PoSelectOption[] = [];
   
   // Estados
   isLoading = false;
@@ -178,6 +180,33 @@ export class ConsultaExtratoComponent implements OnInit, OnDestroy {
     } catch (error) {
       this.notification.error('Erro ao carregar bancos');
       console.error('Erro ao carregar bancos:', error);
+    }
+  }
+
+  onBancoChange(codigoBanco: string) {
+    this.filtros.banco = codigoBanco;
+    this.filtros.agencia = '';
+    this.agenciasOptions = [];
+    
+    if (codigoBanco) {
+      this.carregarAgencias(codigoBanco);
+    }
+  }
+
+  async carregarAgencias(codigoBanco: string) {
+    try {
+      const response = await this.extratoService.listarAgencias(codigoBanco).toPromise();
+      if (response?.success) {
+        this.agenciasOptions = [
+          { label: 'Todas as agências', value: '' },
+          ...response.agencias.map(agencia => ({
+            label: agencia.AGENCIAS,
+            value: agencia.AGENCIAS
+          }))
+        ];
+      }
+    } catch (error) {
+      this.notification.error('Erro ao carregar agências');
     }
   }
 

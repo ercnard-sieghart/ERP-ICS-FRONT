@@ -24,7 +24,7 @@
               <label class="block text-sm font-medium text-[#1A4E79] mb-2">Banco</label>
               <select 
                 [(ngModel)]="filtros.banco"
-                (ngModelChange)="onFiltroChange()"
+                (ngModelChange)="onBancoChange($event)"
                 class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all"
                 required>
                 <option value="">Selecione o banco</option>
@@ -36,15 +36,15 @@
 
             <div>
               <label class="block text-sm font-medium text-[#1A4E79] mb-2">Agência</label>
-              <input 
-                type="text"
+              <select 
                 [(ngModel)]="filtros.agencia"
-                (input)="onFiltroChange()"
-                maxlength="10"
-                class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all"
-                placeholder="Código da agência"
-                required
-              />
+                (ngModelChange)="onFiltroChange()"
+                [disabled]="!filtros.banco"
+                class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all disabled:bg-gray-100 disabled:cursor-not-allowed">
+                <option *ngFor="let agencia of agenciasOptions" [value]="agencia.value">
+                  {{ agencia.label }}
+                </option>
+              </select>
             </div>
 
             <div>
