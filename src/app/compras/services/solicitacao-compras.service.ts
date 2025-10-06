@@ -43,7 +43,7 @@ export class SolicitacaoComprasService {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization'
     };
 
@@ -69,14 +69,14 @@ export class SolicitacaoComprasService {
       return throwError(() => new Error('Usuário não autenticado. Faça login novamente.'));
     }
 
-    const url = this.configService.getRestEndpoint('/pedidos-compra');
+    const url = this.configService.getRestEndpoint('/PEDIDOCOMPRAS');
     
     console.log('[SOLICITACAO-SERVICE] Fazendo requisição GET para:', url);
     console.log('[SOLICITACAO-SERVICE] Token presente:', !!this.authService.getToken());
     
     return this.http.get<any>(url, this.getHttpOptions()).pipe(
       map(response => {
-        console.log('Resposta da API /pedidos-compra:', response);
+        console.log('Resposta da API /PEDIDOCOMPRAS:', response);
         
         if (response && response.success && response.items && Array.isArray(response.items)) {
           console.log(`Encontrados ${response.items.length} pedidos de compra`);
@@ -96,7 +96,7 @@ export class SolicitacaoComprasService {
       return throwError(() => new Error('Usuário não autenticado. Faça login novamente.'));
     }
 
-    const url = this.configService.getRestEndpoint('/pedidos-compra');
+    const url = this.configService.getRestEndpoint('/PEDIDOCOMPRAS');
     
     console.log('[SOLICITACAO-SERVICE] Fazendo requisição POST para:', url);
     console.log('[SOLICITACAO-SERVICE] Dados da solicitação:', solicitacao);
@@ -112,12 +112,7 @@ export class SolicitacaoComprasService {
       return throwError(() => new Error('Usuário não autenticado. Faça login novamente.'));
     }
 
-    const url = this.configService.getRestEndpoint(`/pedidos-compra/${id}`);
-    
-    console.log('[SOLICITACAO-SERVICE] Fazendo requisição PUT para:', url);
-    console.log('[SOLICITACAO-SERVICE] ID da solicitação:', id);
-    console.log('[SOLICITACAO-SERVICE] Dados da atualização:', solicitacao);
-    console.log('[SOLICITACAO-SERVICE] Token presente:', !!this.authService.getToken());
+    const url = this.configService.getRestEndpoint(`/PEDIDOCOMPRAS/${id}`);
     
     return this.http.put<any>(url, solicitacao, this.getHttpOptions()).pipe(
       catchError(this.handleError)

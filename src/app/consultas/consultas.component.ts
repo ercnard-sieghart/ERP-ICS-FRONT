@@ -1,5 +1,5 @@
 import { Component, HostListener } from '@angular/core';
-import { CommonModule, NgFor, NgIf } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { ConsultaExtratoComponent } from './consulta-extrato.component';
@@ -16,7 +16,7 @@ interface Consulta {
   standalone: true,
   templateUrl: './consultas.component.html',
   styleUrls: ['./consultas.component.css'],
-  imports: [CommonModule, FormsModule, NgFor, NgIf, RouterModule, ConsultaExtratoComponent, PoIconModule]
+  imports: [CommonModule, FormsModule, RouterModule, ConsultaExtratoComponent, PoIconModule]
 })
 export class ConsultasComponent {
   modulos = [

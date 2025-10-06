@@ -78,7 +78,7 @@ export class ExtratoBancarioService {
     let headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization'
     });
 
@@ -96,62 +96,36 @@ export class ExtratoBancarioService {
     return true;
   }
 
-  /**
-   * Consultar extrato bancário
-   */
   consultarExtrato(filtros: FiltrosExtrato): Observable<RespostaExtrato> {
     this.checkAuthentication();
     
-    const url = `${this.configService.apiUrl}/extrato-bancario`;
+    const url = `${this.configService.apiUrl}/EXTRATOBANCARIO`;
     
-    console.log('🏦 Consultando extrato bancário:', {
-      url,
-      filtros,
-      hasToken: !!this.authService.getToken()
-    });
+    console.log('Consultando extrato bancário:', url);
 
     return this.http.post<RespostaExtrato>(url, filtros, this.getHttpOptions())
       .pipe(
-        map(response => {
-          console.log('✅ Extrato bancário obtido:', response);
-          return response;
-        }),
         catchError(error => {
-          console.error('❌ Erro ao consultar extrato:', error);
           return this.handleError(error);
         })
       );
   }
 
-  /**
-   * Listar bancos cadastrados
-   */
   listarBancos(): Observable<RespostaBancos> {
     this.checkAuthentication();
     
-    const url = `${this.configService.apiUrl}/extrato-bancario/bancos`;
+    const url = `${this.configService.apiUrl}/EXTRATOBANCARIO/bancos`;
     
-    console.log('🏪 Listando bancos:', {
-      url,
-      hasToken: !!this.authService.getToken()
-    });
+    console.log('Listando bancos:', url);
 
     return this.http.get<RespostaBancos>(url, this.getHttpOptions())
       .pipe(
-        map(response => {
-          console.log('✅ Bancos obtidos:', response);
-          return response;
-        }),
         catchError(error => {
-          console.error('❌ Erro ao listar bancos:', error);
           return this.handleError(error);
         })
       );
   }
 
-  /**
-   * Formatar data para o padrão da API (YYYYMMDD)
-   */
   formatarDataParaAPI(data: string): string {
     if (!data) return '';
     
@@ -164,9 +138,6 @@ export class ExtratoBancarioService {
     return data.replace(/-/g, '');
   }
 
-  /**
-   * Formatar data da API (YYYYMMDD) para exibição (DD/MM/YYYY)
-   */
   formatarDataParaExibicao(data: string): string {
     if (!data || data.length !== 8) return data;
     
@@ -177,9 +148,6 @@ export class ExtratoBancarioService {
     return `${dia}/${mes}/${ano}`;
   }
 
-  /**
-   * Formatar valor monetário
-   */
   formatarValor(valor: number): string {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -187,9 +155,6 @@ export class ExtratoBancarioService {
     }).format(valor || 0);
   }
 
-  /**
-   * Obter descrição do tipo de documento
-   */
   getTipoDocumentoDescricao(tipo: string): string {
     const tipos: { [key: string]: string } = {
       'CH': 'Cheque',
@@ -206,9 +171,6 @@ export class ExtratoBancarioService {
     return tipos[tipo] || tipo;
   }
 
-  /**
-   * Obter classe CSS para tipo de operação
-   */
   getClasseOperacao(recPag: string): string {
     return recPag === 'R' ? 'receita' : 'pagamento';
   }
