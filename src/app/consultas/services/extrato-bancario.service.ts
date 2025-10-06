@@ -73,16 +73,13 @@ export interface RespostaAgencias {
   agencias: Agencia[];
 }
 
-export interface Conta {
-  COD: string;
-  CONTAS: string;
-}
-
 export interface RespostaContas {
   success: boolean;
   message: string;
   total: number;
-  contas: Conta[];
+  banco: string;
+  agencia?: string;
+  contas: string[];
 }
 
 @Injectable({
@@ -153,7 +150,7 @@ export class ExtratoBancarioService {
     this.checkAuthentication();
     
     const url = this.configService.getRestEndpoint('/extratobancario/bancos/agencias');
-    const body = { id: codigoBanco };
+    const body = { banco: codigoBanco };
     
     return this.http.post<RespostaAgencias>(url, body, this.getHttpOptions())
       .pipe(
@@ -166,7 +163,7 @@ export class ExtratoBancarioService {
   listarContas(codigoBanco: string, codigoAgencia?: string): Observable<RespostaContas> {
     this.checkAuthentication();
     
-    const url = this.configService.getRestEndpoint('/bancos/contas');
+    const url = this.configService.getRestEndpoint('/extratobancario/bancos/agencias');
     const body: any = { banco: codigoBanco };
     
     if (codigoAgencia) {

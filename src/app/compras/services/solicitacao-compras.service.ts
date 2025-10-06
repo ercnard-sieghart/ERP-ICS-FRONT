@@ -124,10 +124,8 @@ export class SolicitacaoComprasService {
       const produtoCompleto = item.C7_PRODUTO || '';
       const produtoUltimos4 = produtoCompleto.length >= 4 ? produtoCompleto.slice(-4) : produtoCompleto;
       
-      // Formatar data C7_EMISSAO se existir, senão usar data atual
       let dataFormatada = new Date().toISOString().split('T')[0];
       if (item.C7_EMISSAO) {
-        // Assumindo formato YYYYMMDD da API
         const dataStr = item.C7_EMISSAO.toString();
         if (dataStr.length === 8) {
           const ano = dataStr.substring(0, 4);
@@ -135,7 +133,6 @@ export class SolicitacaoComprasService {
           const dia = dataStr.substring(6, 8);
           dataFormatada = `${ano}-${mes}-${dia}`;
         } else {
-          // Se já estiver no formato ISO ou outro, tentar converter
           try {
             dataFormatada = new Date(item.C7_EMISSAO).toISOString().split('T')[0];
           } catch {

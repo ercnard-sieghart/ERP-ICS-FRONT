@@ -21,8 +21,7 @@ import {
   MovimentoBancario, 
   RespostaExtrato, 
   Banco,
-  Agencia,
-  Conta
+  Agencia
 } from './services/extrato-bancario.service';
 
 
@@ -231,8 +230,8 @@ export class ConsultaExtratoComponent implements OnInit, OnDestroy {
         this.contasOptions = [
           { label: 'Todas as contas', value: '' },
           ...response.contas.map(conta => ({
-            label: conta.CONTAS,
-            value: conta.CONTAS
+            label: conta,
+            value: conta
           }))
         ];
       }
@@ -247,6 +246,8 @@ export class ConsultaExtratoComponent implements OnInit, OnDestroy {
     }
 
     this.isLoading = true;
+
+
 
     try {
       const response = await this.extratoService.consultarExtrato(this.filtros).toPromise();
