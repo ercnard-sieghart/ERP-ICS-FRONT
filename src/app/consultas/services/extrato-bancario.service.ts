@@ -167,16 +167,13 @@ export class ExtratoBancarioService {
     this.checkAuthentication();
     
     const url = this.configService.getRestEndpoint('/bancos/contas');
-    const params: any = { id: codigoBanco };
+    const body: any = { banco: codigoBanco };
     
     if (codigoAgencia) {
-      params.agencia = codigoAgencia;
+      body.agencia = codigoAgencia;
     }
     
-    return this.http.get<RespostaContas>(url, { 
-      ...this.getHttpOptions(),
-      params 
-    })
+    return this.http.post<RespostaContas>(url, body, this.getHttpOptions())
       .pipe(
         catchError(error => {
           return this.handleError(error);
