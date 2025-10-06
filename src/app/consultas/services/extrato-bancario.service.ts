@@ -5,7 +5,6 @@ import { catchError, map } from 'rxjs/operators';
 import { ConfigService } from '../../shared/services/config.service';
 import { AuthService } from '../../shared/services/auth.service';
 
-// Interfaces baseadas na documentação FK5
 export interface FiltrosExtrato {
   filial: string;
   banco: string;
@@ -99,7 +98,7 @@ export class ExtratoBancarioService {
   consultarExtrato(filtros: FiltrosExtrato): Observable<RespostaExtrato> {
     this.checkAuthentication();
     
-    const url = `${this.configService.apiUrl}/EXTRATOBANCARIO`;
+    const url = this.configService.getRestEndpoint('/EXTRATOBANCARIO');
     
     console.log('Consultando extrato bancário:', url);
 
@@ -114,7 +113,7 @@ export class ExtratoBancarioService {
   listarBancos(): Observable<RespostaBancos> {
     this.checkAuthentication();
     
-    const url = `${this.configService.apiUrl}/EXTRATOBANCARIO/bancos`;
+    const url = this.configService.getRestEndpoint('/EXTRATOBANCARIO/bancos');
     
     console.log('Listando bancos:', url);
 

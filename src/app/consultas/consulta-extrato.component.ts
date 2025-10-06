@@ -170,7 +170,7 @@ export class ConsultaExtratoComponent implements OnInit, OnDestroy {
         this.bancosOptions = [
           { label: 'Selecione um banco', value: '' },
           ...this.bancos.map(banco => ({
-            label: `${banco.codigo} - ${banco.nome}`,
+            label: `${banco.codigo} - ${banco.nomeReduzido}`,
             value: banco.codigo
           }))
         ];

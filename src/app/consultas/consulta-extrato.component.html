@@ -29,7 +29,7 @@
                 required>
                 <option value="">Selecione o banco</option>
                 <option *ngFor="let banco of bancos" [value]="banco.codigo">
-                  {{ banco.codigo }} - {{ banco.nome }}
+                  {{ banco.codigo }} - {{ banco.nomeReduzido }}
                 </option>
               </select>
             </div>
