@@ -21,7 +21,8 @@ import {
   MovimentoBancario, 
   RespostaExtrato, 
   Banco,
-  Agencia
+  Agencia,
+  ContaItem
 } from './services/extrato-bancario.service';
 
 
@@ -201,33 +202,23 @@ export class ConsultaExtratoComponent implements OnInit, OnDestroy {
     this.filtros.conta = '';
     this.contasOptions = [];
     
-    if (codigoAgencia === '') {
-      this.filtros.conta = '';
-      this.contasOptions = [{ label: 'Todas as contas', value: '' }];
-    } else if (this.filtros.banco) {
+    if (this.filtros.banco && codigoAgencia) {
       this.carregarContas(this.filtros.banco, codigoAgencia);
     }
   }
 
   onContaChange(codigoConta: string) {
     this.filtros.conta = codigoConta;
-    
-    if (codigoConta === '') {
-      this.filtros.agencia = '';
-    }
   }
 
   async carregarAgencias(codigoBanco: string) {
     try {
       const response = await this.extratoService.listarAgencias(codigoBanco).toPromise();
       if (response?.success) {
-        this.agenciasOptions = [
-          { label: 'Todas as agências', value: '' },
-          ...response.agencias.map(agencia => ({
-            label: agencia.AGENCIAS,
-            value: agencia.AGENCIAS
-          }))
-        ];
+        this.agenciasOptions = response.agencias.map(agencia => ({
+          label: agencia.AGENCIAS,
+          value: agencia.AGENCIAS
+        }));
       }
     } catch (error) {
       this.notification.error('Erro ao carregar agências');
@@ -238,13 +229,10 @@ export class ConsultaExtratoComponent implements OnInit, OnDestroy {
     try {
       const response = await this.extratoService.listarContas(codigoBanco, codigoAgencia).toPromise();
       if (response?.success) {
-        this.contasOptions = [
-          { label: 'Todas as contas', value: '' },
-          ...response.contas.map(conta => ({
-            label: conta,
-            value: conta
-          }))
-        ];
+        this.contasOptions = response.contas.map(contaItem => ({
+          label: contaItem.contas,
+          value: contaItem.contas
+        }));
       }
     } catch (error) {
       this.notification.error('Erro ao carregar contas');
