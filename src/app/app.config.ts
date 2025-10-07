@@ -10,9 +10,10 @@ import { PoHttpRequestModule } from '@po-ui/ng-components';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(),
     importProvidersFrom([PoHttpRequestModule]),
-    provideZoneChangeDetection({ eventCoalescing: true })
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideHttpClient(withInterceptorsFromDi())
   ],
   
 };

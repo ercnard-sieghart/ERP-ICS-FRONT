@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DetalheItemModalComponent } from './detalhe-item-modal.component';
 import { PoTableModule, PoTableColumn, PoModalModule } from '@po-ui/ng-components';
+import { MenuComponent } from "../shared/menu/menu.component";
 import { AnaliticosModalComponent } from './analiticos-modal.component';
 import { Router } from '@angular/router';
 
@@ -19,6 +20,7 @@ import { Router } from '@angular/router';
     FormsModule,
     PoTableModule,
     PoModalModule,
+    MenuComponent,
     UniqueCentroCustoPipe,
     FilterItemContabilPipe,
     FilterAnoPipe,

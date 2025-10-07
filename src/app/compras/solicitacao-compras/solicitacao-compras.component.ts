@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
@@ -13,8 +13,7 @@ import {
   PoTagModule,
   PoNotificationService
 } from '@po-ui/ng-components';
-import { debounceTime, Subject } from 'rxjs';
-
+import { MenuComponent } from '../../shared/menu/menu.component';
 import { SolicitacaoComprasService } from '../../compras/services/solicitacao-compras.service';
 
 interface SolicitacaoCompra {
@@ -43,16 +42,13 @@ interface SolicitacaoCompra {
     PoNotificationModule,
     PoToolbarModule,
     PoModalModule,
-    PoTagModule
+    PoTagModule,
+    MenuComponent
   ],
   providers: [SolicitacaoComprasService]
 })
-export class SolicitacaoComprasComponent implements OnInit, OnDestroy {
+export class SolicitacaoComprasComponent implements OnInit {
   loading: boolean = false;
-  
-  // Debounce subjects para performance
-  private ccSearchSubject = new Subject<string>();
-  private contatoSearchSubject = new Subject<string>();
   solicitacoes: SolicitacaoCompra[] = [];
   solicitacoesFiltradas: SolicitacaoCompra[] = [];
   registroSelecionado: SolicitacaoCompra | null = null;
@@ -152,31 +148,6 @@ export class SolicitacaoComprasComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.carregarSolicitacoes();
-    this.setupDebounce();
-  }
-
-  ngOnDestroy(): void {
-    this.ccSearchSubject.complete();
-    this.contatoSearchSubject.complete();
-  }
-
-  /**
-   * Configura debounce para inputs de busca
-   */
-  private setupDebounce(): void {
-    // Debounce para CC search
-    this.ccSearchSubject.pipe(
-      debounceTime(300)
-    ).subscribe(searchTerm => {
-      this.onCcInput(searchTerm);
-    });
-
-    // Debounce para Contato search  
-    this.contatoSearchSubject.pipe(
-      debounceTime(300)
-    ).subscribe(searchTerm => {
-      this.onContatoInput(searchTerm);
-    });
   }
 
   onRowSelect(selectedRows: SolicitacaoCompra[]): void {
@@ -510,12 +481,12 @@ export class SolicitacaoComprasComponent implements OnInit, OnDestroy {
 
   onCcInputChange(event: Event): void {
     const target = event.target as HTMLInputElement;
-    this.ccSearchSubject.next(target.value);
+    this.onCcInput(target.value);
   }
 
   onContatoInputChange(event: Event): void {
     const target = event.target as HTMLInputElement;
-    this.contatoSearchSubject.next(target.value);
+    this.onContatoInput(target.value);
   }
 
   onCcBlur(): void {
@@ -533,10 +504,12 @@ export class SolicitacaoComprasComponent implements OnInit, OnDestroy {
   }
 
   centralizarTabela(): void {
-    // Otimizado: usar requestAnimationFrame para melhor performance
-    requestAnimationFrame(() => {
-      const tabelaElement = document.getElementById('tabela-solicitacoes') || 
-                           document.querySelector('po-table');
+    // Centralização rápida com múltiplas tentativas
+    const tentarCentralizar = () => {
+      const tabelaElement = document.getElementById('secao-tabela') || 
+                           document.getElementById('tabela-solicitacoes') || 
+                           document.querySelector('po-table') || 
+                           document.querySelector('.po-table');
       
       if (tabelaElement) {
         tabelaElement.scrollIntoView({
@@ -544,17 +517,27 @@ export class SolicitacaoComprasComponent implements OnInit, OnDestroy {
           block: 'center',
           inline: 'nearest'
         });
-      } else {
-        // Fallback único se necessário
-        setTimeout(() => {
-          const posicaoTabela = window.innerHeight * 0.6;
-          window.scrollTo({
-            top: posicaoTabela,
-            behavior: 'smooth'
-          });
-        }, 100);
+        return true;
       }
-    });
+      return false;
+    };
+
+    // Tentar imediatamente
+    if (!tentarCentralizar()) {
+      // Se não encontrou, tentar após 100ms
+      setTimeout(() => {
+        if (!tentarCentralizar()) {
+          // Fallback final após 300ms
+          setTimeout(() => {
+            const posicaoTabela = window.innerHeight * 0.6;
+            window.scrollTo({
+              top: posicaoTabela,
+              behavior: 'smooth'
+            });
+          }, 300);
+        }
+      }, 100);
+    }
   }
 
   setLoading(isLoading: boolean): void {
@@ -569,45 +552,5 @@ export class SolicitacaoComprasComponent implements OnInit, OnDestroy {
       document.body.classList.remove('loading-active');
     }
   }
-
-  // ========== PERFORMANCE OPTIMIZATIONS ==========
-
-  /**
-   * TrackBy function for ngFor loops - melhora performance
-   */
-  trackByIndex(index: number, item: any): number {
-    return index;
-  }
-
-  /**
-   * TrackBy function for solicitações
-   */
-  trackBySolicitacao(index: number, item: SolicitacaoCompra): string {
-    return item.id || index.toString();
-  }
-
-  /**
-   * Otimizada: Filtra apenas quando necessário
-   */
-  private filtrarSolicitacoes(): void {
-    if (!this.solicitacoes?.length) {
-      this.solicitacoesFiltradas = [];
-      return;
-    }
-
-    // Usar cache para filtros
-    const cacheKey = JSON.stringify(this.filtros);
-    if (this.lastFilterCache === cacheKey) {
-      return; // Já filtrado
-    }
-    
-    this.lastFilterCache = cacheKey;
-    this.solicitacoesFiltradas = this.solicitacoes.filter(item => {
-      // Implementar filtros otimizados aqui se necessário
-      return true;
-    });
-  }
-
-  private lastFilterCache: string = '';
 
 }

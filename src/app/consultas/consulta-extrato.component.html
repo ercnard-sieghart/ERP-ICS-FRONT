@@ -1,242 +1,79 @@
-  <!-- Loading overlay - ocupa toda a tela -->
-  <div *ngIf="isLoading" class="fixed inset-0 bg-gradient-to-br from-[#1A4E79]/90 to-[#75C9C8]/90 backdrop-blur-sm z-[9999] flex items-center justify-center">
-    <div class="bg-white rounded-xl p-8 shadow-2xl text-center min-w-[280px] mx-4">
-      <div class="w-16 h-16 border-4 border-[#75C9C8]/30 border-t-[#1A4E79] rounded-full mx-auto mb-6 animate-spin"></div>
-      <div class="text-xl font-bold text-[#1A4E79] mb-2">Carregando...</div>
-      <div class="text-base text-[#1A4E79]/70">Consultando extrato bancário...</div>
+<div class="bg-white rounded-xl shadow-lg p-6 max-w-md mx-auto mt-8">
+  <h2 class="text-xl font-bold text-[#1A4E79] mb-4">Extrato</h2>
+  <form class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    <div class="md:col-span-1 flex flex-col gap-4">
+      <po-combo
+        name="filial"
+        [ngModel]="filtros.filial"
+        (ngModelChange)="filtros.filial = $event"
+        [p-options]="filiais"
+        p-label="Filial"
+      ></po-combo>
+      <po-combo
+        name="banco"
+        [ngModel]="filtros.banco"
+        (ngModelChange)="filtros.banco = $event"
+        [p-options]="bancos"
+        p-label="Banco"
+      ></po-combo>
+      <po-combo
+        name="conta"
+        [ngModel]="filtros.conta"
+        (ngModelChange)="filtros.conta = $event"
+        [p-options]="contas"
+        p-label="Conta"
+      ></po-combo>
     </div>
-  </div>
-
-  <!-- Conteúdo principal -->
-  <main class="h-screen p-6 bg-gradient-to-br from-[#1A4E79] to-[#75C9C8] overflow-y-auto">
-    
-    <div class="bg-white/95 backdrop-blur-sm rounded-xl shadow-xl p-8 border border-white/20">
-
-      <!-- Filtros -->
-      <div class="bg-white rounded-xl shadow-lg p-6 mb-6 border-l-4 border-[#75C9C8]">
-        <div class="filtros-container">
-          <h4 class="text-lg font-semibold text-[#1A4E79] mb-4 flex items-center">
-            <i class="po-icon po-icon-filter mr-2"></i>
-            Filtros de Consulta
-          </h4>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-[#1A4E79] mb-2">Banco</label>
-              <select 
-                [(ngModel)]="filtros.banco"
-                (ngModelChange)="onBancoChange($event)"
-                class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all"
-                required>
-                <option value="">Selecione o banco</option>
-                <option *ngFor="let banco of bancos" [value]="banco.codigo">
-                  {{ banco.codigo }} - {{ banco.nomeReduzido }}
-                </option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-[#1A4E79] mb-2">Agência</label>
-              <select 
-                [(ngModel)]="filtros.agencia"
-                (ngModelChange)="onAgenciaChange($event)"
-                [disabled]="!filtros.banco"
-                class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all disabled:bg-gray-100 disabled:cursor-not-allowed">
-                <option *ngFor="let agencia of agenciasOptions" [value]="agencia.value">
-                  {{ agencia.label }}
-                </option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-[#1A4E79] mb-2">Conta</label>
-              <select 
-                [(ngModel)]="filtros.conta"
-                (ngModelChange)="onContaChange($event)"
-                [disabled]="!filtros.banco"
-                class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all disabled:bg-gray-100 disabled:cursor-not-allowed">
-                <option *ngFor="let conta of contasOptions" [value]="conta.value">
-                  {{ conta.label }}
-                </option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-[#1A4E79] mb-2">Filial</label>
-              <input 
-                type="text"
-                [(ngModel)]="filtros.filial"
-                class="w-full p-3 border border-[#75C9C8]/30 rounded-lg bg-gray-50"
-                value="01"
-                disabled
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-[#1A4E79] mb-2">Data Inicial</label>
-              <input 
-                type="date"
-                [(ngModel)]="filtros.dataInicio"
-                (ngModelChange)="onFiltroChange()"
-                class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all"
-                required
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-[#1A4E79] mb-2">Data Final</label>
-              <input 
-                type="date"
-                [(ngModel)]="filtros.dataFim"
-                (ngModelChange)="onFiltroChange()"
-                class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all"
-                required
-              />
-            </div>
-          </div>
-          
-          <div class="flex gap-3 mt-4 pt-4 border-t border-[#75C9C8]/20">
-            <button 
-              (click)="consultarExtrato()"
-              [disabled]="isLoading"
-              class="bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white px-6 py-2 rounded-lg hover:shadow-lg transition-all font-medium disabled:opacity-50">
-              <i class="po-icon po-icon-search mr-2"></i>
-              Consultar
-            </button>
-            <button 
-              (click)="limparFiltros()"
-              [disabled]="isLoading"
-              class="bg-white border border-[#75C9C8] text-[#1A4E79] px-6 py-2 rounded-lg hover:bg-[#75C9C8]/10 transition-all font-medium disabled:opacity-50">
-              <i class="po-icon po-icon-close mr-2"></i>
-              Limpar
-            </button>
-          </div>
-        </div>
-  </div>
-
-      <!-- Resumo -->
-      <div *ngIf="movimentos.length > 0" class="bg-white rounded-xl shadow-lg p-6 mb-6 border-l-4 border-[#75C9C8]">
-        <h4 class="text-lg font-semibold text-[#1A4E79] mb-4 flex items-center">
-          <i class="po-icon po-icon-calculator mr-2"></i>
-          Resumo do Extrato
-        </h4>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="bg-gradient-to-r from-[#1A4E79]/10 to-[#75C9C8]/10 p-4 rounded-lg text-center">
-            <div class="text-2xl font-bold text-[#1A4E79]">
-              {{ qtdMovimentos }}
-            </div>
-            <div class="text-sm text-[#1A4E79]/70">
-              Movimentos
-            </div>
-          </div>
-
-          <div class="bg-gradient-to-r from-green-500/10 to-green-600/10 p-4 rounded-lg text-center">
-            <div class="text-2xl font-bold text-green-600">
-              {{ totalCredito | currency:'BRL':'symbol':'1.2-2' }}
-            </div>
-            <div class="text-sm text-green-600/70">
-              Total Entradas
-            </div>
-          </div>
-
-          <div class="bg-gradient-to-r from-red-500/10 to-red-600/10 p-4 rounded-lg text-center">
-            <div class="text-2xl font-bold text-red-600">
-              {{ totalDebito | currency:'BRL':'symbol':'1.2-2' }}
-            </div>
-            <div class="text-sm text-red-600/70">
-              Total Saídas
-            </div>
-          </div>
-
-          <div class="p-4 rounded-lg text-center"
-               [ngClass]="totalSaldo >= 0 ? 'bg-gradient-to-r from-green-500/10 to-green-600/10' : 'bg-gradient-to-r from-red-500/10 to-red-600/10'">
-            <div class="text-2xl font-bold"
-                 [ngClass]="totalSaldo >= 0 ? 'text-green-600' : 'text-red-600'">
-              {{ totalSaldo | currency:'BRL':'symbol':'1.2-2' }}
-            </div>
-            <div class="text-sm"
-                 [ngClass]="totalSaldo >= 0 ? 'text-green-600/70' : 'text-red-600/70'">
-              Saldo Líquido
-            </div>
-          </div>
-        </div>
+    <div class="md:col-span-1 flex flex-col gap-2">
+      <div class="w-full bg-[#f3f6fa] rounded-lg p-2 mb-2">
+        <po-datepicker
+          name="periodoInicio"
+          [(ngModel)]="filtros.periodoInicio"
+          p-label="Período Início"
+        ></po-datepicker>
       </div>
-
-        <!-- Tabela de Movimentos -->
-      <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-[#75C9C8]/20">
-        <div class="bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] p-4">
-          <h3 class="text-white font-semibold text-lg flex items-center">
-            <i class="po-icon po-icon-table mr-2"></i>
-            Extrato Bancário
-          </h3>
-        </div>
-        
-        <div class="p-4">
-          <!-- Cabeçalho da tabela com ações -->
-          <div *ngIf="movimentos.length > 0" class="flex justify-between items-center mb-4 bg-gradient-to-r from-[#1A4E79]/5 to-[#75C9C8]/5 rounded-lg p-3 border border-[#75C9C8]/20">
-            <div class="flex items-center gap-3">
-              <span class="text-[#1A4E79] font-medium">{{ movimentos.length }} movimento(s) encontrado(s)</span>
-            </div>
-            <button 
-              (click)="exportarExtrato()"
-              [disabled]="isLoading || movimentos.length === 0"
-              class="bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all font-medium disabled:opacity-50">
-              <i class="po-icon po-icon-download mr-2"></i>
-              Exportar
-            </button>
-          </div>
-
-          <!-- Tabela -->
-          <div class="overflow-x-auto">
-            <table *ngIf="movimentos.length > 0" class="w-full border-collapse">
-              <thead>
-                <tr class="bg-gradient-to-r from-[#1A4E79]/10 to-[#75C9C8]/10">
-                  <th class="border border-[#75C9C8]/30 p-3 text-left font-semibold text-[#1A4E79]">Data</th>
-                  <th class="border border-[#75C9C8]/30 p-3 text-left font-semibold text-[#1A4E79]">Histórico</th>
-                  <th class="border border-[#75C9C8]/30 p-3 text-left font-semibold text-[#1A4E79]">Documento</th>
-                  <th class="border border-[#75C9C8]/30 p-3 text-left font-semibold text-[#1A4E79]">Beneficiário</th>
-                  <th class="border border-[#75C9C8]/30 p-3 text-right font-semibold text-[#1A4E79]">Entrada</th>
-                  <th class="border border-[#75C9C8]/30 p-3 text-right font-semibold text-[#1A4E79]">Saída</th>
-                  <th class="border border-[#75C9C8]/30 p-3 text-center font-semibold text-[#1A4E79]">Tipo</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let movimento of movimentos; trackBy: trackByMovimento" 
-                    class="hover:bg-gradient-to-r hover:from-[#1A4E79]/5 hover:to-[#75C9C8]/5 transition-all">
-                  <td class="border border-[#75C9C8]/30 p-3">{{ movimento.dataMov | date:'dd/MM/yyyy' }}</td>
-                  <td class="border border-[#75C9C8]/30 p-3">{{ movimento.historico }}</td>
-                  <td class="border border-[#75C9C8]/30 p-3">{{ movimento.documento }}</td>
-                  <td class="border border-[#75C9C8]/30 p-3">{{ movimento.beneficiario }}</td>
-                  <td class="border border-[#75C9C8]/30 p-3 text-right">
-                    <span *ngIf="movimento.entrada > 0" class="text-green-600 font-semibold">
-                      {{ movimento.entrada | currency:'BRL':'symbol':'1.2-2' }}
-                    </span>
-                  </td>
-                  <td class="border border-[#75C9C8]/30 p-3 text-right">
-                    <span *ngIf="movimento.saida > 0" class="text-red-600 font-semibold">
-                      {{ movimento.saida | currency:'BRL':'symbol':'1.2-2' }}
-                    </span>
-                  </td>
-                  <td class="border border-[#75C9C8]/30 p-3 text-center">
-                    <span *ngIf="movimento.recPag === 'R'" class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">
-                      Recebimento
-                    </span>
-                    <span *ngIf="movimento.recPag === 'P'" class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-semibold">
-                      Pagamento
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-
-            <!-- Estado vazio -->
-            <div *ngIf="!isLoading && movimentos.length === 0" class="text-center py-16">
-              <div class="inline-block p-8 bg-gradient-to-r from-[#1A4E79]/10 to-[#75C9C8]/10 rounded-full mb-4">
-                <i class="po-icon po-icon-search text-6xl text-[#1A4E79]/50"></i>
-              </div>
-                <h3 class="text-xl font-semibold text-[#1A4E79] mb-2 text-center">Nenhum movimento encontrado</h3>  <p class="text-[#1A4E79]/70">Ajuste os filtros e tente uma nova consulta</p>
-            </div>
-          </div>
-        </div>
+      <div class="w-full bg-[#f3f6fa] rounded-lg p-2">
+        <po-datepicker
+          name="periodoFim"
+          [(ngModel)]="filtros.periodoFim"
+          p-label="Período Fim"
+        ></po-datepicker>
       </div>
     </div>
-  </main>
+    <div class="col-span-1 md:col-span-2 flex justify-end">
+      <po-button
+        p-label="Buscar"
+        p-primary="true"
+        (p-click)="buscarRelatorio()"
+      ></po-button>
+    </div>
+  </form>
+  <div *ngIf="modalAberto" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+    <div class="bg-white rounded-xl shadow-lg p-6 max-w-3xl w-full relative">
+      <h3 class="text-lg font-bold text-[#1A4E79] mb-4">Extrato</h3>
+      <div *ngIf="carregando" class="text-center text-[#1A4E79] py-4">Carregando...</div>
+      <table *ngIf="dados.length > 0" class="w-full border mt-4">
+        <thead>
+          <tr class="bg-[#e6f7fa]">
+            <th class="p-2 border">Filial</th>
+            <th class="p-2 border">Banco</th>
+            <th class="p-2 border">Conta</th>
+            <th class="p-2 border">Período</th>
+            <th class="p-2 border">Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let linha of dados">
+            <td class="p-2 border">{{ linha.filial }}</td>
+            <td class="p-2 border">{{ linha.banco }}</td>
+            <td class="p-2 border">{{ linha.conta }}</td>
+            <td class="p-2 border">{{ linha.periodo }}</td>
+            <td class="p-2 border">{{ linha.valor | currency:'BRL' }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div *ngIf="!carregando && dados.length === 0" class="text-center text-gray-400 py-8">Nenhum dado encontrado.</div>
+      <button (click)="modalAberto = false" class="absolute top-2 right-2 text-[#1A4E79] hover:text-[#75C9C8] text-xl font-bold">&times;</button>
+    </div>
+  </div>
+</div>

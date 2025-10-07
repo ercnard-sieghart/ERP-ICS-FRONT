@@ -75,7 +75,6 @@ export class LoginComponent {
               
               if (loginBody && (loginBody.SUCCESS === true || loginBody.SUCCESS === 'true')) {
                 // Armazenar dados do usuário rapidamente
-                localStorage.setItem('user_name', loginData.login); // Salva o login do usuário
                 if (loginBody.USER_FULLNAME) localStorage.setItem('user_fullname', loginBody.USER_FULLNAME);
                 if (loginBody.USER_EMAIL) localStorage.setItem('user_email', loginBody.USER_EMAIL);
                 if (loginBody.USER_ID) localStorage.setItem('user_id', loginBody.USER_ID);
@@ -93,15 +92,7 @@ export class LoginComponent {
                 
                 setTimeout(() => {
                   this.showPopup = false;
-                  
-                  // Verifica se existe URL de redirecionamento salva
-                  const redirectUrl = sessionStorage.getItem('redirectUrl');
-                  if (redirectUrl) {
-                    sessionStorage.removeItem('redirectUrl');
-                    this.router.navigate([redirectUrl]);
-                  } else {
-                    this.router.navigate(['/home']);
-                  }
+                  this.router.navigate(['/home']);
                 }, 800); // Reduzido de 2000ms para 800ms
                 
               } else {

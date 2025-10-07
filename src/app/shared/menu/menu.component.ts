@@ -4,7 +4,6 @@ import { PoIconModule, PoAvatarModule } from '@po-ui/ng-components';
 import { PoMenuModule, PoMenuItem } from '@po-ui/ng-components';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { MenuStateService } from '../services/menu-state.service';
 import { Subscription } from 'rxjs';
 
 interface MenuItemWithSubmenu {
@@ -29,11 +28,7 @@ export class MenuComponent implements OnInit, OnDestroy {
   isMenuCollapsed: boolean = false;
   private userSubscription?: Subscription;
   
-  constructor(
-    private cdr: ChangeDetectorRef, 
-    private authService: AuthService,
-    private menuStateService: MenuStateService
-  ) {}
+  constructor(private cdr: ChangeDetectorRef, private authService: AuthService) {}
 
 
 
@@ -50,9 +45,6 @@ export class MenuComponent implements OnInit, OnDestroy {
     if (savedCollapsedState) {
       this.isMenuCollapsed = JSON.parse(savedCollapsedState);
     }
-    
-    // Comunicar estado inicial do menu
-    this.menuStateService.setMenuCollapsed(this.isMenuCollapsed);
   }
 
   ngOnDestroy(): void {
@@ -93,24 +85,9 @@ export class MenuComponent implements OnInit, OnDestroy {
       ]
     },
     { 
-      label: 'Consultas', 
-      icon: 'search', 
-      expanded: false,
-      submenus: [
-        { label: 'Extrato Bancário', icon: 'bank', link: '/consultas/extrato-bancario' },
-      //  { label: 'Relatórios', icon: 'chart', link: '/consultas/relatorios' },
-        { label: 'Histórico', icon: 'clock', link: '/consultas/historico' }
-      ]
-    },
-    { 
-      label: 'Gestão de Patentes', 
-      icon: 'document', 
-      expanded: false,
-      submenus: [
-        { label: 'Nova Patente', icon: 'plus', link: '#' },
-        { label: 'Consultar Patentes', icon: 'search', link: '#' },
-        { label: 'Relatórios', icon: 'chart', link: '#' }
-      ]
+      label: 'Gestão de Orçamentos', 
+      icon: 'money', 
+      link: '/orcamentos'
     }
     // Menus temporariamente ocultos
     /* 
@@ -123,11 +100,6 @@ export class MenuComponent implements OnInit, OnDestroy {
         { label: 'Relatórios', icon: 'chart', link: '/consultas/relatorios' },
         { label: 'Histórico', icon: 'clock', link: '/consultas/historico' }
       ]
-    },
-    { 
-      label: 'Gestão de Orçamentos', 
-      icon: 'money', 
-      link: '/orcamentos'
     },
     { 
       label: 'SharePoint', 
@@ -144,6 +116,16 @@ export class MenuComponent implements OnInit, OnDestroy {
       icon: 'calendar', 
       link: '#'
     },
+    { 
+      label: 'Gestão de Patentes', 
+      icon: 'document', 
+      expanded: false,
+      submenus: [
+        { label: 'Nova Patente', icon: 'plus', link: '#' },
+        { label: 'Consultar Patentes', icon: 'search', link: '#' },
+        { label: 'Relatórios', icon: 'chart', link: '#' }
+      ]
+    }
     */
   ];
 
@@ -155,10 +137,6 @@ export class MenuComponent implements OnInit, OnDestroy {
 
   toggleMenu() {
     this.isMenuCollapsed = !this.isMenuCollapsed;
-    this.menuStateService.setMenuCollapsed(this.isMenuCollapsed);
-    
-    // Salvar estado no localStorage
-    localStorage.setItem('menuCollapsed', JSON.stringify(this.isMenuCollapsed));
   }
 
   getIconSymbol(iconName: string): string {

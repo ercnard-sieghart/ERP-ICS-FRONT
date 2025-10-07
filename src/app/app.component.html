@@ -1,13 +1,4 @@
 <div class="po-wrapper">
-  <!-- Menu global - aparece em todas as rotas exceto login -->
-  <div class="min-h-screen bg-gradient-to-br from-[#1A4E79] to-[#75C9C8]" *ngIf="shouldShowMenu()">
-    <app-menu></app-menu>
-    <div class="transition-all duration-300" [style.margin-left]="menuCollapsed ? '64px' : '320px'">
-      <router-outlet></router-outlet>
-    </div>
-  </div>
-  
-  <!-- Router outlet sem menu para login -->
-  <router-outlet *ngIf="!shouldShowMenu()"></router-outlet>
+  <router-outlet></router-outlet>
 </div>
 <app-language-block [blocked]="blocked"></app-language-block>
