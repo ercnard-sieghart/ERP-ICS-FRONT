@@ -5,8 +5,12 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-consulta-relatorio',
   standalone: true,
-  templateUrl: './consulta-relatorio.component.html',
-  // styleUrls: ['./consulta-relatorio.component.css'],
+  template: `
+    <div class="p-4">
+      <h2 class="text-xl font-semibold text-[#1A4E79] mb-4">Consulta de Relatório</h2>
+      <p class="text-[#1A4E79]/70">Componente temporário - implementar funcionalidade específica conforme necessário.</p>
+    </div>
+  `,
   imports: [CommonModule, FormsModule]
 })
 export class ConsultaRelatorioComponent {
@@ -18,17 +22,8 @@ export class ConsultaRelatorioComponent {
   };
 
   dados: any[] = [];
-  carregando = false;
 
   buscarRelatorio() {
-    this.carregando = true;
-    // Simulação de requisição ao backend
-    setTimeout(() => {
-      this.dados = [
-        { filial: '01', banco: 'Banco A', conta: '12345', periodo: '2025-08', valor: 1000 },
-        { filial: '02', banco: 'Banco B', conta: '67890', periodo: '2025-08', valor: 2000 }
-      ];
-      this.carregando = false;
-    }, 1200);
+    console.log('Buscar relatório com filtros:', this.filtros);
   }
 }

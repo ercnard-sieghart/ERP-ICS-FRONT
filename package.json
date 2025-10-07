@@ -5,6 +5,10 @@
     "ng": "ng",
     "start": "ng serve --proxy-config proxy.conf.json",
     "build": "ng build",
+    "build:prod": "ng build --configuration production",
+    "build:hostinger": "ng build --configuration production --base-href=/",
+    "build:yarn": "yarn build:hostinger",
+    "deploy:hostinger": "yarn build:hostinger && powershell \"Compress-Archive -Path 'dist/erp-ics-front/browser/*' -DestinationPath 'dist/erp-ics-front/erp-ics-hostinger-build.zip' -Force\"",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },

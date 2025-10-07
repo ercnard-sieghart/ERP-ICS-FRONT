@@ -20,7 +20,7 @@ export const routes: Routes = [
 			canActivate: [authGuard]
 		},
 		{
-			path: 'consultas/consulta1',
+			path: 'consultas/extrato-bancario',
 			loadComponent: () => import('./consultas/consulta-extrato.component').then(m => m.ConsultaExtratoComponent),
 			canActivate: [authGuard]
 		},

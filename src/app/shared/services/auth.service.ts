@@ -2,22 +2,21 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { ConfigService } from './config.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly API_BASE = '/rest';
-  private readonly ENDPOINTS = {
-    oauth: `${this.API_BASE}/api/oauth2/v1/token`,
-    login: `${this.API_BASE}/login`
-  };
 
   // Subject para notificar mudanças no usuário
   private userUpdateSubject = new BehaviorSubject<string>('Usuário');
   public userUpdate$ = this.userUpdateSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private configService: ConfigService
+  ) {}
 
   authenticate(username: string, password: string): Observable<any> {
     const headers = new HttpHeaders({
@@ -26,7 +25,8 @@ export class AuthService {
     
     const body = `grant_type=password&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
     
-    return this.http.post(this.ENDPOINTS.oauth, body, { headers, observe: 'response' })
+    const oauthUrl = this.configService.getRestEndpoint('/api/oauth2/v1/token');
+    return this.http.post(oauthUrl, body, { headers, observe: 'response' })
       .pipe(
         catchError(this.handleAuthError.bind(this, 'OAuth2 Authentication'))
       );
@@ -37,7 +37,8 @@ export class AuthService {
       'Authorization': `Bearer ${token}`
     });
     
-    return this.http.post(this.ENDPOINTS.login, {}, { headers, observe: 'response' })
+    const loginUrl = this.configService.getRestEndpoint('/login');
+    return this.http.post(loginUrl, {}, { headers, observe: 'response' })
       .pipe(
         catchError(this.handleAuthError.bind(this, 'Login Validation'))
       );
@@ -78,6 +79,40 @@ export class AuthService {
 
   isAuthenticated(): boolean {
     const token = this.getToken();
-    return !!token;
+    if (!token) {
+      return false;
+    }
+    
+    // Verifica se o token não está vazio ou com valor inválido
+    if (token.length < 10) {
+      this.logout(); // Remove token inválido
+      return false;
+    }
+    
+    return true;
+  }
+
+  // Método para verificar se o usuário tem uma sessão válida
+  hasValidSession(): boolean {
+    const token = this.getToken();
+    // Verifica apenas o token, pois user_name pode não estar sendo salvo
+    
+    if (!token || token.length < 10) {
+      return false;
+    }
+    
+    // Verificação adicional - token não pode ser apenas espaços ou string vazia
+    if (token.trim().length === 0) {
+      return false;
+    }
+    
+    return true;
+  }
+
+  // Método para limpar sessão inválida
+  clearInvalidSession(): void {
+    if (!this.hasValidSession()) {
+      this.logout();
+    }
   }
 }

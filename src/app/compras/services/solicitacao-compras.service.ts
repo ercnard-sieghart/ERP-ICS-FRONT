@@ -3,6 +3,7 @@ import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { AuthService } from '../../shared/services/auth.service';
+import { ConfigService } from '../../shared/services/config.service';
 
 export interface SolicitacaoCompraResponse {
   success: boolean;
@@ -29,11 +30,11 @@ export interface SolicitacaoCompraAPI {
   providedIn: 'root'
 })
 export class SolicitacaoComprasService {
-  private readonly baseUrl = '/rest';
 
   constructor(
     private http: HttpClient,
-    private authService: AuthService
+    private authService: AuthService,
+    private configService: ConfigService
   ) {}
 
   private getHttpOptions() {
@@ -42,7 +43,7 @@ export class SolicitacaoComprasService {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization'
     };
 
@@ -68,14 +69,14 @@ export class SolicitacaoComprasService {
       return throwError(() => new Error('Usuário não autenticado. Faça login novamente.'));
     }
 
-    const url = `${this.baseUrl}/pedidos-compra`;
+    const url = this.configService.getRestEndpoint('/PEDIDOCOMPRAS');
     
     console.log('[SOLICITACAO-SERVICE] Fazendo requisição GET para:', url);
     console.log('[SOLICITACAO-SERVICE] Token presente:', !!this.authService.getToken());
     
     return this.http.get<any>(url, this.getHttpOptions()).pipe(
       map(response => {
-        console.log('Resposta da API /pedidos-compra:', response);
+        console.log('Resposta da API /PEDIDOCOMPRAS:', response);
         
         if (response && response.success && response.items && Array.isArray(response.items)) {
           console.log(`Encontrados ${response.items.length} pedidos de compra`);
@@ -95,7 +96,7 @@ export class SolicitacaoComprasService {
       return throwError(() => new Error('Usuário não autenticado. Faça login novamente.'));
     }
 
-    const url = `${this.baseUrl}/pedidos-compra`;
+    const url = this.configService.getRestEndpoint('/PEDIDOCOMPRAS');
     
     console.log('[SOLICITACAO-SERVICE] Fazendo requisição POST para:', url);
     console.log('[SOLICITACAO-SERVICE] Dados da solicitação:', solicitacao);
@@ -111,12 +112,7 @@ export class SolicitacaoComprasService {
       return throwError(() => new Error('Usuário não autenticado. Faça login novamente.'));
     }
 
-    const url = `${this.baseUrl}/pedidos-compra/${id}`;
-    
-    console.log('[SOLICITACAO-SERVICE] Fazendo requisição PUT para:', url);
-    console.log('[SOLICITACAO-SERVICE] ID da solicitação:', id);
-    console.log('[SOLICITACAO-SERVICE] Dados da atualização:', solicitacao);
-    console.log('[SOLICITACAO-SERVICE] Token presente:', !!this.authService.getToken());
+    const url = this.configService.getRestEndpoint(`/PEDIDOCOMPRAS/${id}`);
     
     return this.http.put<any>(url, solicitacao, this.getHttpOptions()).pipe(
       catchError(this.handleError)
@@ -128,10 +124,8 @@ export class SolicitacaoComprasService {
       const produtoCompleto = item.C7_PRODUTO || '';
       const produtoUltimos4 = produtoCompleto.length >= 4 ? produtoCompleto.slice(-4) : produtoCompleto;
       
-      // Formatar data C7_EMISSAO se existir, senão usar data atual
       let dataFormatada = new Date().toISOString().split('T')[0];
       if (item.C7_EMISSAO) {
-        // Assumindo formato YYYYMMDD da API
         const dataStr = item.C7_EMISSAO.toString();
         if (dataStr.length === 8) {
           const ano = dataStr.substring(0, 4);
@@ -139,7 +133,6 @@ export class SolicitacaoComprasService {
           const dia = dataStr.substring(6, 8);
           dataFormatada = `${ano}-${mes}-${dia}`;
         } else {
-          // Se já estiver no formato ISO ou outro, tentar converter
           try {
             dataFormatada = new Date(item.C7_EMISSAO).toISOString().split('T')[0];
           } catch {

@@ -1,1 +1,38 @@
-/* Layout 100% Tailwind, ajuste fino opcional */
+/* Estilos específicos para o componente de extrato bancário */
+
+.table-scroll {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+/* Animação de loading */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Melhorias para responsividade */
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .overflow-x-auto {
+    font-size: 0.9rem;
+  }
+}
+
+/* Hover effects */
+.transition-all {
+  transition: all 0.3s ease;
+}
+
+/* Focus styles */
+input:focus, select:focus {
+  outline: none;
+}
+
+/* Scrollbar já aplicado globalmente através de styles.scss */
