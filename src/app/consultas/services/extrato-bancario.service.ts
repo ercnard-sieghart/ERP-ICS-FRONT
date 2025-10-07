@@ -73,17 +73,13 @@ export interface RespostaAgencias {
   agencias: Agencia[];
 }
 
-export interface ContaItem {
-  contas: string;
-}
-
 export interface RespostaContas {
   success: boolean;
   message: string;
   total: number;
   banco: string;
   agencia?: string;
-  contas: ContaItem[];
+  contas: string[];
 }
 
 @Injectable({
@@ -137,7 +133,21 @@ export class ExtratoBancarioService {
   }
 
   private processarFiltros(filtros: FiltrosExtrato): any {
-    return { ...filtros };
+    const filtrosProcessados = { ...filtros };
+    
+    if (!filtrosProcessados.conta) {
+      filtrosProcessados.conta = '*';
+    }
+    
+    if (filtrosProcessados.conta === '*' || !filtrosProcessados.conta) {
+      filtrosProcessados.agencia = '*';
+    }
+    
+    if (!filtrosProcessados.agencia) {
+      filtrosProcessados.agencia = '*';
+    }
+    
+    return filtrosProcessados;
   }
 
   listarBancos(): Observable<RespostaBancos> {
