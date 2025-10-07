@@ -9,8 +9,8 @@ export interface FiltrosExtrato {
   filial: string;
   banco: string;
   conta: string;
-  dataInicio: string; // YYYYMMDD
-  dataFim: string;    // YYYYMMDD
+  dataInicio: string;
+  dataFim: string;
   agencia?: string;
   natureza?: string;
   tipoDoc?: string;
@@ -28,7 +28,7 @@ export interface MovimentoBancario {
   dataMov: string;
   natureza: string;
   documento: string;
-  recPag: string; // R=Recebimento, P=Pagamento
+  recPag: string;
   valor: number;
   entrada: number;
   saida: number;
@@ -120,15 +120,34 @@ export class ExtratoBancarioService {
     this.checkAuthentication();
     
     const url = this.configService.getRestEndpoint('/EXTRATOBANCARIO');
+    const filtrosProcessados = this.processarFiltros(filtros);
     
     console.log('Consultando extrato bancário:', url);
 
-    return this.http.post<RespostaExtrato>(url, filtros, this.getHttpOptions())
+    return this.http.post<RespostaExtrato>(url, filtrosProcessados, this.getHttpOptions())
       .pipe(
         catchError(error => {
           return this.handleError(error);
         })
       );
+  }
+
+  private processarFiltros(filtros: FiltrosExtrato): any {
+    const filtrosProcessados = { ...filtros };
+    
+    if (!filtrosProcessados.conta) {
+      filtrosProcessados.conta = '*';
+    }
+    
+    if (filtrosProcessados.conta === '*' || !filtrosProcessados.conta) {
+      filtrosProcessados.agencia = '*';
+    }
+    
+    if (!filtrosProcessados.agencia) {
+      filtrosProcessados.agencia = '*';
+    }
+    
+    return filtrosProcessados;
   }
 
   listarBancos(): Observable<RespostaBancos> {
@@ -181,12 +200,10 @@ export class ExtratoBancarioService {
   formatarDataParaAPI(data: string): string {
     if (!data) return '';
     
-    // Se já estiver no formato YYYYMMDD, retorna como está
     if (/^\d{8}$/.test(data)) {
       return data;
     }
     
-    // Converter de YYYY-MM-DD para YYYYMMDD
     return data.replace(/-/g, '');
   }
 

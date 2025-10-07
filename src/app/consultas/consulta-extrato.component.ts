@@ -201,8 +201,19 @@ export class ConsultaExtratoComponent implements OnInit, OnDestroy {
     this.filtros.conta = '';
     this.contasOptions = [];
     
-    if (this.filtros.banco) {
+    if (codigoAgencia === '') {
+      this.filtros.conta = '';
+      this.contasOptions = [{ label: 'Todas as contas', value: '' }];
+    } else if (this.filtros.banco) {
       this.carregarContas(this.filtros.banco, codigoAgencia);
+    }
+  }
+
+  onContaChange(codigoConta: string) {
+    this.filtros.conta = codigoConta;
+    
+    if (codigoConta === '') {
+      this.filtros.agencia = '';
     }
   }
 
