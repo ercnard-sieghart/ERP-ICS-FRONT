@@ -12,7 +12,7 @@ import { ErrorPageComponent } from './error-page.component';
 
 export const routes: Routes = [
 	{ path: 'login', component: LoginComponent },
-		{ path: 'home', component: HomeComponent, canActivate: [authGuard] },
+		{ path: 'home', component: HomeComponent, canActivate: [] },
 		{ path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
 		{
 			path: 'consultas',
