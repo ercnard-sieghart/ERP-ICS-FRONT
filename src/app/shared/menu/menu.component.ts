@@ -5,6 +5,7 @@ import { PoMenuModule, PoMenuItem } from '@po-ui/ng-components';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { MenuStateService } from '../services/menu-state.service';
+import { PatentesService, MenuItem } from '../services/patentes.service';
 import { Subscription } from 'rxjs';
 
 interface MenuItemWithSubmenu {
@@ -27,12 +28,15 @@ export class MenuComponent implements OnInit, OnDestroy {
   avatarUrl: string = `https://i.pravatar.cc/150?u=${Math.random()}`;
   displayName: string = 'Usuário';
   isMenuCollapsed: boolean = false;
+  menuItems: MenuItemWithSubmenu[] = [];
   private userSubscription?: Subscription;
+  private menusSubscription?: Subscription;
   
   constructor(
     private cdr: ChangeDetectorRef, 
     private authService: AuthService,
-    private menuStateService: MenuStateService
+    private menuStateService: MenuStateService,
+    private patentesService: PatentesService
   ) {}
 
 
@@ -40,18 +44,19 @@ export class MenuComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.updateDisplayName();
     
-    // Subscrever às atualizações do usuário
     this.userSubscription = this.authService.userUpdate$.subscribe(() => {
       this.updateDisplayName();
     });
     
-    // Verificar estado salvo do menu
+    this.menusSubscription = this.patentesService.menusUsuario$.subscribe((menus: MenuItem[]) => {
+      this.buildMenuFromPatentes(menus);
+    });
+    
     const savedCollapsedState = localStorage.getItem('menuCollapsed');
     if (savedCollapsedState) {
       this.isMenuCollapsed = JSON.parse(savedCollapsedState);
     }
     
-    // Comunicar estado inicial do menu
     this.menuStateService.setMenuCollapsed(this.isMenuCollapsed);
   }
 
@@ -59,6 +64,73 @@ export class MenuComponent implements OnInit, OnDestroy {
     if (this.userSubscription) {
       this.userSubscription.unsubscribe();
     }
+    if (this.menusSubscription) {
+      this.menusSubscription.unsubscribe();
+    }
+  }
+
+  buildMenuFromPatentes(menus: MenuItem[]): void {
+    this.menuItems = [];
+    
+    const menuMap = new Map<string, MenuItemWithSubmenu>();
+    
+    menus.forEach(menu => {
+      if (menu.rota === '/home') {
+        this.menuItems.push({
+          label: menu.nome,
+          icon: 'home',
+          link: menu.rota
+        });
+      } else if (menu.rota === '/dashboard') {
+        this.menuItems.push({
+          label: menu.nome,
+          icon: 'chart',
+          link: menu.rota
+        });
+      } else if (menu.rota.startsWith('/compras')) {
+        let comprasMenu = menuMap.get('compras');
+        if (!comprasMenu) {
+          comprasMenu = {
+            label: 'Compras',
+            icon: 'shopping',
+            expanded: false,
+            submenus: []
+          };
+          menuMap.set('compras', comprasMenu);
+          this.menuItems.push(comprasMenu);
+        }
+        comprasMenu.submenus?.push({
+          label: menu.nome,
+          icon: 'cart',
+          link: menu.rota
+        });
+      } else if (menu.rota.startsWith('/consultas')) {
+        let consultasMenu = menuMap.get('consultas');
+        if (!consultasMenu) {
+          consultasMenu = {
+            label: 'Consultas',
+            icon: 'search',
+            expanded: false,
+            submenus: []
+          };
+          menuMap.set('consultas', consultasMenu);
+          this.menuItems.push(consultasMenu);
+        }
+        consultasMenu.submenus?.push({
+          label: menu.nome,
+          icon: 'bank',
+          link: menu.rota
+        });
+      } else if (menu.rota === '/orcamentos') {
+        this.menuItems.push({
+          label: menu.nome,
+          icon: 'money',
+          link: menu.rota
+        });
+      }
+    });
+    
+    this.cdr.detectChanges();
   }
 
   updateDisplayName(): void {
@@ -77,75 +149,6 @@ export class MenuComponent implements OnInit, OnDestroy {
   get userName(): string {
     return this.displayName;
   }
-
-  menuItems: MenuItemWithSubmenu[] = [
-    { 
-      label: 'Home', 
-      icon: 'home', 
-      link: '/home' 
-    },
-    { 
-      label: 'Compras', 
-      icon: 'shopping', 
-      expanded: false,
-      submenus: [
-        { label: 'Solicitação de Compras', icon: 'cart', link: '/compras/solicitacao' }
-      ]
-    },
-    { 
-      label: 'Consultas', 
-      icon: 'search', 
-      expanded: false,
-      submenus: [
-        { label: 'Extrato Bancário', icon: 'bank', link: '/consultas/extrato-bancario' },
-      //  { label: 'Relatórios', icon: 'chart', link: '/consultas/relatorios' },
-        { label: 'Histórico', icon: 'clock', link: '/consultas/historico' }
-      ]
-    },
-    { 
-      label: 'Gestão de Patentes', 
-      icon: 'document', 
-      expanded: false,
-      submenus: [
-        { label: 'Nova Patente', icon: 'plus', link: '#' },
-        { label: 'Consultar Patentes', icon: 'search', link: '#' },
-        { label: 'Relatórios', icon: 'chart', link: '#' }
-      ]
-    }
-    // Menus temporariamente ocultos
-    /* 
-    { 
-      label: 'Consultas', 
-      icon: 'search', 
-      expanded: false,
-      submenus: [
-        { label: 'Extrato', icon: 'list', link: '/consultas' },
-        { label: 'Relatórios', icon: 'chart', link: '/consultas/relatorios' },
-        { label: 'Histórico', icon: 'clock', link: '/consultas/historico' }
-      ]
-    },
-    { 
-      label: 'Gestão de Orçamentos', 
-      icon: 'money', 
-      link: '/orcamentos'
-    },
-    { 
-      label: 'SharePoint', 
-      icon: 'users', 
-      expanded: false,
-      submenus: [
-        { label: 'Documentos', icon: 'document', link: '#' },
-        { label: 'Bibliotecas', icon: 'folder', link: '#' },
-        { label: 'Sites', icon: 'globe', link: '#' }
-      ]
-    },
-    { 
-      label: 'Ramais', 
-      icon: 'calendar', 
-      link: '#'
-    },
-    */
-  ];
 
   toggleSubmenu(item: MenuItemWithSubmenu) {
     if (item.submenus && item.submenus.length > 0) {
