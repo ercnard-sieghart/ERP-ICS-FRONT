@@ -1,145 +1,27 @@
-/* Optimized CSS for Solicitação de Compras - Under 2KB */
+:host{--primary:#1A4E79;--secondary:#75C9C8;--gradient:linear-gradient(135deg,var(--primary) 0%,var(--secondary) 100%);--hover-bg:rgba(117,201,200,0.1)}
+.po-table{border-radius:12px;overflow:hidden;border:1px solid rgba(117,201,200,0.2)}
+.po-table .po-table-header{background:var(--gradient);color:white;font-weight:600;font-size:0.75rem!important}
+.po-table .po-table-header th{font-size:0.75rem!important;padding:8px 12px!important}
+.po-table tbody tr{cursor:pointer!important;transition:all 0.2s ease!important}
+.po-table tbody tr:hover,.po-table .po-table-row:hover{background-color:var(--hover-bg)!important;transform:translateY(-1px)!important;box-shadow:0 4px 12px rgba(117,201,200,0.2)!important}
+.selected-row{background-color:rgba(117,201,200,0.25)!important;border-left:4px solid var(--secondary)!important}
+.status-pendente{background-color:#FEF3C7;color:#92400E}
+.table-wrapper{max-height:500px;overflow-y:auto;border-radius:12px;border:1px solid rgba(117,201,200,0.2)}
+.status-aprovado{background-color:#D1FAE5;color:#065F46}
+.status-rejeitado{background-color:#FEE2E2;color:#991B1B}
+.status-em-analise{background-color:#E0E7FF;color:#3730A3}
+.btn-primary-blue{background:var(--gradient);border:none;color:white;padding:12px 24px;border-radius:8px;font-weight:600;transition:all 0.3s ease}
+.btn-primary-blue:hover,.po-button:hover{transform:translateY(-1px);box-shadow:0 4px 8px rgba(0,0,0,0.15)}
+.po-input:focus,.po-select:focus{outline:none;border-color:var(--secondary);box-shadow:0 0 0 3px var(--hover-bg)}
+.valor-monetario{font-weight:600;color:#10b981}
+.status-tag{font-weight:500;padding:4px 12px;border-radius:20px;font-size:12px}
 
-/* Base color variables */
-:host {
-  --primary: #1A4E79;
-  --secondary: #75C9C8; 
-  --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-  --hover-bg: rgba(117, 201, 200, 0.1);
-}
-
-/* Table styles */
-.po-table {
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid rgba(117, 201, 200, 0.2);
-}
-
-.po-table .po-table-header {
-  background: var(--gradient);
-  color: white;
-  font-weight: 600;
-  font-size: 0.75rem !important;
-}
-
-.po-table .po-table-header th {
-  font-size: 0.75rem !important;
-  padding: 8px 12px !important;
-}
-
-/* Row interactions */
-.po-table tbody tr {
-  cursor: pointer !important;
-  transition: all 0.2s ease !important;
-}
-
-.po-table tbody tr:hover,
-.po-table .po-table-row:hover {
-  background-color: var(--hover-bg) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 4px 12px rgba(117, 201, 200, 0.2) !important;
-}
-
-/* Selected row */
-.selected-row {
-  background-color: rgba(117, 201, 200, 0.25) !important;
-  border-left: 4px solid var(--secondary) !important;
-}
-
-/* Status badges */
-.status-pendente { background-color: #FEF3C7; color: #92400E; }
-
-/* Scroll and navigation improvements */
-.table-wrapper {
-  max-height: 500px;
-  overflow-y: auto;
-  border-radius: 12px;
-  border: 1px solid rgba(117, 201, 200, 0.2);
-}
-
-/* Scrollbar customizado já aplicado globalmente */
-.status-aprovado { background-color: #D1FAE5; color: #065F46; }
-.status-rejeitado { background-color: #FEE2E2; color: #991B1B; }
-.status-em-analise { background-color: #E0E7FF; color: #3730A3; }
-
-/* Buttons */
-.btn-primary-blue {
-  background: var(--gradient);
-  border: none;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.btn-primary-blue:hover,
-.po-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-/* Form inputs */
-.po-input:focus, .po-select:focus {
-  outline: none;
-  border-color: var(--secondary);
-  box-shadow: 0 0 0 3px var(--hover-bg);
-}
-
-/* Scrollbar já aplicado globalmente */
-
-/* Utilities */
-.valor-monetario { font-weight: 600; color: #10b981; }
-.status-tag { font-weight: 500; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
-
-/* Loading overlay */
-.loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(255, 255, 255, 0.9);
-  z-index: 9999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* Modal positioning */
-.modal-copy {
-  position: fixed !important;
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  z-index: 10000 !important;
-  max-height: 90vh !important;
-  overflow-y: auto !important;
-}
-
-/* Autocomplete */
-.autocomplete-container { position: relative; }
-.sugestoes-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  z-index: 1000;
-  max-height: 200px;
-  overflow-y: auto;
-}
-.sugestao-item { padding: 8px 12px; cursor: pointer; }
-.sugestao-item:hover { background-color: var(--hover-bg); }
-
-/* Animations */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.fade-in-up { animation: fadeInUp 0.5s ease-out; }
-
-body.loading-active { overflow: hidden !important; }
+.loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(255,255,255,0.9);z-index:9999;display:flex;justify-content:center;align-items:center}
+.modal-copy{position:fixed!important;top:50%!important;left:50%!important;transform:translate(-50%,-50%)!important;z-index:10000!important;max-height:90vh!important;overflow-y:auto!important}
+.autocomplete-container{position:relative}
+.sugestoes-dropdown{position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #ddd;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,0.1);z-index:1000;max-height:200px;overflow-y:auto}
+.sugestao-item{padding:8px 12px;cursor:pointer}
+.sugestao-item:hover{background-color:var(--hover-bg)}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.fade-in-up{animation:fadeInUp 0.5s ease-out}
+body.loading-active{overflow:hidden!important}

@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PoPageLoginModule, PoPageLogin } from '@po-ui/ng-templates';
 import { AuthService } from '../shared/services/auth.service';
+import { PatentesService } from '../shared/services/patentes.service';
 
 @Component({
   selector: 'app-login',
@@ -23,7 +24,11 @@ export class LoginComponent {
   popupMessage: string = '';
   popupType: 'success' | 'error' = 'success';
 
-  constructor(private authService: AuthService, private router: Router) {
+  constructor(
+    private authService: AuthService, 
+    private router: Router,
+    private patentesService: PatentesService
+  ) {
     this.setupInactivityTimer();
   }
 
@@ -56,53 +61,66 @@ export class LoginComponent {
   loginSubmit(loginData: any) {
     this.loading = true;
     
-    // Primeira requisição OAuth2 para obter tokens
     this.authService.authenticate(loginData.login, loginData.password).subscribe({
       next: (oauthResponse: any) => {
         const oauthBody = oauthResponse.body as any;
         
         if (oauthBody && oauthBody.access_token) {
-          // Armazenar tokens OAuth2
           localStorage.setItem('authToken', oauthBody.access_token);
           if (oauthBody.refresh_token) {
             localStorage.setItem('refreshToken', oauthBody.refresh_token);
           }
           
-          // Segunda requisição para completar o login
           this.authService.login(oauthBody.access_token).subscribe({
             next: (loginResponse: any) => {
               const loginBody = loginResponse.body as any;
               
               if (loginBody && (loginBody.SUCCESS === true || loginBody.SUCCESS === 'true')) {
-                // Armazenar dados do usuário rapidamente
-                localStorage.setItem('user_name', loginData.login); // Salva o login do usuário
+                localStorage.setItem('user_name', loginData.login);
                 if (loginBody.USER_FULLNAME) localStorage.setItem('user_fullname', loginBody.USER_FULLNAME);
                 if (loginBody.USER_EMAIL) localStorage.setItem('user_email', loginBody.USER_EMAIL);
                 if (loginBody.USER_ID) localStorage.setItem('user_id', loginBody.USER_ID);
                 if (loginBody.EMPRESA) localStorage.setItem('empresa', loginBody.EMPRESA);
                 if (loginBody.FILIAL) localStorage.setItem('filial', loginBody.FILIAL);
                 
-                // Atualizar display do usuário
                 this.authService.updateUserDisplay();
-                this.loading = false;
                 
-                // Mostrar popup de sucesso e navegar rapidamente
-                this.popupType = 'success';
-                this.popupMessage = loginBody.MESSAGE || 'Autenticação realizada com sucesso!';
-                this.showPopup = true;
-                
-                setTimeout(() => {
-                  this.showPopup = false;
-                  
-                  // Verifica se existe URL de redirecionamento salva
-                  const redirectUrl = sessionStorage.getItem('redirectUrl');
-                  if (redirectUrl) {
-                    sessionStorage.removeItem('redirectUrl');
-                    this.router.navigate([redirectUrl]);
-                  } else {
-                    this.router.navigate(['/home']);
+                const userId = loginBody.USER_ID || loginData.login;
+                this.patentesService.carregarMenusUsuario(userId).subscribe({
+                  next: (menus) => {
+                    console.log('Menus carregados:', menus);
+                    this.loading = false;
+                    this.popupType = 'success';
+                    this.popupMessage = loginBody.MESSAGE || 'Autenticação realizada com sucesso!';
+                    this.showPopup = true;
+                    
+                    setTimeout(() => {
+                      this.showPopup = false;
+                      
+
+                      const redirectUrl = sessionStorage.getItem('redirectUrl');
+                      if (redirectUrl) {
+                        sessionStorage.removeItem('redirectUrl');
+                        this.router.navigate([redirectUrl]);
+                      } else {
+                        this.router.navigate(['/home']);
+                      }
+                    }, 800);
+                  },
+                  error: (error) => {
+                    console.warn('Erro ao carregar menus, prosseguindo mesmo assim:', error);
+                    this.loading = false;
+                    
+                    this.popupType = 'success';
+                    this.popupMessage = 'Login realizado!';
+                    this.showPopup = true;
+                    
+                    setTimeout(() => {
+                      this.showPopup = false;
+                      this.router.navigate(['/home']);
+                    }, 800);
                   }
-                }, 800); // Reduzido de 2000ms para 800ms
+                });
                 
               } else {
                 this.handleLoginError(loginBody?.MESSAGE || 'Erro na autenticação.');
@@ -125,7 +143,7 @@ export class LoginComponent {
           this.popupMessage = 'Usuário ou senha inválidos.';
         }
         this.showPopup = true;
-        setTimeout(() => this.showPopup = false, 1500); // Reduzido para 1.5s
+        setTimeout(() => this.showPopup = false, 1500);
       }
     });
   }
@@ -135,6 +153,6 @@ export class LoginComponent {
     this.popupType = 'error';
     this.popupMessage = message;
     this.showPopup = true;
-    setTimeout(() => this.showPopup = false, 1500); // Reduzido para 1.5s
+    setTimeout(() => this.showPopup = false, 1500);
   }
 }

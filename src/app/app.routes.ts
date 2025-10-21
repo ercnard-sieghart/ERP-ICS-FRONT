@@ -37,5 +37,10 @@ export const routes: Routes = [
 	{ path: '', redirectTo: 'login', pathMatch: 'full' },
 		{ path: 'detalhe-item', loadComponent: () => import('./orcamentos/detalhe-item-modal.component').then(m => m.DetalheItemModalComponent), canActivate: [authGuard] },
 	{ path: 'error', component: ErrorPageComponent },
+	{
+		path: 'admin/patentes',
+		loadComponent: () => import('./patentes/patentes.component').then(m => m.PatentesComponent),
+		canActivate: [authGuard]
+	},
 	{ path: '**', redirectTo: 'error' }
 ];
