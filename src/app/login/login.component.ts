@@ -59,9 +59,9 @@ export class LoginComponent {
   }
 
   loginSubmit(loginData: any) {
-    this.loading = true;
-    
-    this.authService.authenticate(loginData.login, loginData.password).subscribe({
+  this.loading = true;
+  const loginLower = loginData.login ? loginData.login.toLowerCase() : '';
+  this.authService.authenticate(loginLower, loginData.password).subscribe({
       next: (oauthResponse: any) => {
         const oauthBody = oauthResponse.body as any;
         
@@ -76,7 +76,7 @@ export class LoginComponent {
               const loginBody = loginResponse.body as any;
               
               if (loginBody && (loginBody.SUCCESS === true || loginBody.SUCCESS === 'true')) {
-                localStorage.setItem('user_name', loginData.login);
+                localStorage.setItem('user_name', loginLower);
                 if (loginBody.USER_FULLNAME) localStorage.setItem('user_fullname', loginBody.USER_FULLNAME);
                 if (loginBody.USER_EMAIL) localStorage.setItem('user_email', loginBody.USER_EMAIL);
                 if (loginBody.USER_ID) localStorage.setItem('user_id', loginBody.USER_ID);
@@ -85,7 +85,7 @@ export class LoginComponent {
                 
                 this.authService.updateUserDisplay();
                 
-                const userId = loginBody.USER_ID || loginData.login;
+                const userId = loginBody.USER_ID || loginLower;
                 this.patentesService.carregarMenusUsuario(userId).subscribe({
                   next: (menus) => {
                     console.log('Menus carregados:', menus);
