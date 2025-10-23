@@ -9,8 +9,6 @@ export interface MenuItem {
   id: string;
   nome: string;
   rota: string;
-  icone?: string;
-  ordem?: number;
 }
 
 export interface RespostaPatentes {
@@ -161,8 +159,8 @@ export class PatentesService {
   }
 
   validarAcessoMenu(id: string): Observable<{ message: string, acess: boolean }> {
-    const url = this.configService.getRestEndpoint(`/patentes/validar?id=${encodeURIComponent(id)}`);
-    return this.http.get<{ message: string, acess: boolean }>(url, this.getHttpOptions());
+    const url = this.configService.getRestEndpoint('/patentes/validar');
+    return this.http.post<{ message: string, acess: boolean }>(url, { id }, this.getHttpOptions());
   }
 
   limparMenus(): void {
