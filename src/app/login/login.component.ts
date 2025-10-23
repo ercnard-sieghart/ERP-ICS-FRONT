@@ -86,39 +86,32 @@ export class LoginComponent {
                 this.authService.updateUserDisplay();
                 
                 const userId = loginBody.USER_ID || loginLower;
-                this.patentesService.carregarMenusUsuario(userId).subscribe({
-                  next: (menus) => {
-                    console.log('Menus carregados:', menus);
-                    this.loading = false;
-                    this.popupType = 'success';
-                    this.popupMessage = loginBody.MESSAGE || 'Autenticação realizada com sucesso!';
-                    this.showPopup = true;
-                    
-                    setTimeout(() => {
-                      this.showPopup = false;
-                      
 
-                      const redirectUrl = sessionStorage.getItem('redirectUrl');
-                      if (redirectUrl) {
-                        sessionStorage.removeItem('redirectUrl');
-                        this.router.navigate([redirectUrl]);
-                      } else {
-                        this.router.navigate(['/home']);
-                      }
-                    }, 800);
+                // Primeiro tenta obter menus do endpoint /patentes/menus (GET). Se falhar, faz fallback para carregarMenusUsuario
+                this.patentesService.getMenusServer().subscribe({
+                  next: (menus) => {
+                    console.log('Menus carregados (server /patentes/menus):', menus);
+                    this.finalizeLoginSuccess(loginBody);
                   },
                   error: (error) => {
-                    console.warn('Erro ao carregar menus, prosseguindo mesmo assim:', error);
-                    this.loading = false;
-                    
-                    this.popupType = 'success';
-                    this.popupMessage = 'Login realizado!';
-                    this.showPopup = true;
-                    
-                    setTimeout(() => {
-                      this.showPopup = false;
-                      this.router.navigate(['/home']);
-                    }, 800);
+                    console.warn('Falha ao obter /patentes/menus, tentando carregarMenusUsuario como fallback:', error);
+                    this.patentesService.carregarMenusUsuario(userId).subscribe({
+                      next: (menus) => {
+                        console.log('Menus carregados (fallback rotas):', menus);
+                        this.finalizeLoginSuccess(loginBody);
+                      },
+                      error: (err) => {
+                        console.warn('Erro ao carregar menus, prosseguindo mesmo assim:', err);
+                        this.loading = false;
+                        this.popupType = 'success';
+                        this.popupMessage = 'Login realizado!';
+                        this.showPopup = true;
+                        setTimeout(() => {
+                          this.showPopup = false;
+                          this.router.navigate(['/home']);
+                        }, 800);
+                      }
+                    });
                   }
                 });
                 
@@ -155,4 +148,24 @@ export class LoginComponent {
     this.showPopup = true;
     setTimeout(() => this.showPopup = false, 1500);
   }
+  
+  private finalizeLoginSuccess(loginBody: any) {
+    this.loading = false;
+    this.popupType = 'success';
+    this.popupMessage = loginBody.MESSAGE || 'Autenticação realizada com sucesso!';
+    this.showPopup = true;
+
+    setTimeout(() => {
+      this.showPopup = false;
+
+      const redirectUrl = sessionStorage.getItem('redirectUrl');
+      if (redirectUrl) {
+        sessionStorage.removeItem('redirectUrl');
+        this.router.navigate([redirectUrl]);
+      } else {
+        this.router.navigate(['/home']);
+      }
+    }, 800);
+  }
+
 }

@@ -13,6 +13,7 @@ import {
 import { LanguageBlockComponent, LanguageGuardService } from './language-block.component';
 import { MenuComponent } from './shared/menu/menu.component';
 import { MenuStateService } from './shared/services/menu-state.service';
+import { PatentesService } from './shared/services/patentes.service';
 
 @Component({
   selector: 'app-root',
@@ -42,6 +43,7 @@ export class AppComponent implements OnInit {
     private langGuard: LanguageGuardService,
     private router: Router,
     private menuStateService: MenuStateService
+    , private patentesService: PatentesService
   ) {}
 
   ngOnInit(): void {
@@ -59,6 +61,9 @@ export class AppComponent implements OnInit {
     this.menuStateService.menuCollapsed$.subscribe(collapsed => {
       this.menuCollapsed = collapsed;
     });
+
+    // Restaura menus do storage (se existirem) para evitar requisições desnecessárias ao reload
+    this.patentesService.initializeFromStorage();
   }
   
   shouldShowMenu(): boolean {
