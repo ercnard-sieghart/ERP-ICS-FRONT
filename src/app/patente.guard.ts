@@ -5,6 +5,16 @@ import { AuthService } from './shared/services/auth.service';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 
+
+const validatedMenuIds = new Set<string>();
+
+
+const originalLogout = AuthService.prototype.logout;
+AuthService.prototype.logout = function(...args: any[]) {
+  validatedMenuIds.clear();
+  return originalLogout.call(this);
+};
+
 // Guard de permissão de menu
 export const patenteGuard: CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
   const router = inject(Router);
@@ -30,9 +40,15 @@ export const patenteGuard: CanActivateFn = (route: ActivatedRouteSnapshot, state
     return false;
   }
 
+  // Se já validou esse menu nesta sessão, libera sem nova requisição
+  if (validatedMenuIds.has(idMenu)) {
+    return true;
+  }
+
   return patentesService.validarAcessoMenu(idMenu).pipe(
     map(resp => {
       if (resp.acess) {
+        validatedMenuIds.add(idMenu);
         return true;
       } else {
         router.navigate(['/error'], { queryParams: { message: resp.message || 'Acesso negado' } });
