@@ -87,7 +87,6 @@ export class LoginComponent {
                 
                 const userId = loginBody.USER_ID || loginLower;
 
-                // Primeiro tenta obter menus do endpoint /patentes/menus (GET). Se falhar, faz fallback para carregarMenusUsuario
                 this.patentesService.getMenusServer().subscribe({
                   next: (menus) => {
                     console.log('Menus carregados (server /patentes/menus):', menus);

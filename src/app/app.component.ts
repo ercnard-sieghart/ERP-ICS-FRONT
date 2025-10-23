@@ -47,7 +47,7 @@ export class AppComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // 🔹 Verifica o idioma ao iniciar o app
+  // Verifica o idioma ao iniciar o app
     this.blocked = this.langGuard.isBlocked();
     
     // Monitora mudanças de rota
@@ -61,8 +61,7 @@ export class AppComponent implements OnInit {
     this.menuStateService.menuCollapsed$.subscribe(collapsed => {
       this.menuCollapsed = collapsed;
     });
-
-    // Restaura menus do storage (se existirem) para evitar requisições desnecessárias ao reload
+    // Restaura menus do storage (se existirem)
     this.patentesService.initializeFromStorage();
   }
   

@@ -42,10 +42,6 @@ export class PatentesService {
     private authService: AuthService
   ) {}
 
-  /**
-   * Tenta restaurar menus do localStorage durante a inicialização do serviço.
-   * Isso evita chamadas repetidas no reload da página enquanto o usuário estiver logado.
-   */
   initializeFromStorage(): void {
     try {
       const raw = localStorage.getItem(this.STORAGE_KEY);
@@ -145,8 +141,7 @@ export class PatentesService {
     if (rota === '/detalhe-item') return 'Detalhe Item';
     if (rota === '/admin/patentes') return 'Patentes';
 
-    // Para rotas que não mapeamos explicitamente, usar o nome enviado pelo servidor
-    // tentando fazer uma limpeza simples de caracteres mojibake comuns
+  // Para rotas que não mapeamos explicitamente, usar o nome enviado pelo servidor
     const cleaned = serverMenuName
       .replace(/�/g, 'ã')
       .replace(/Ã¡/g, 'á')
