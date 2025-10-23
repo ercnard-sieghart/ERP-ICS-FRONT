@@ -1,7 +1,8 @@
-import { Component, Input } from '@angular/core';
 
+
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MenuComponent } from "./shared/menu/menu.component";
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-error-page',
@@ -12,4 +13,10 @@ import { MenuComponent } from "./shared/menu/menu.component";
 export class ErrorPageComponent {
   @Input() errorMessage: string = 'Desculpe, não foi possível completar sua solicitação.';
   @Input() errorCode: string = '';
+
+  constructor(private router: Router) {}
+
+  voltarHome() {
+    this.router.navigate(['/home']);
+  }
 }

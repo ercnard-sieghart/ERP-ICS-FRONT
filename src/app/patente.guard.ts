@@ -5,9 +5,7 @@ import { AuthService } from './shared/services/auth.service';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 
-
 const validatedMenuIds = new Set<string>();
-
 
 const originalLogout = AuthService.prototype.logout;
 AuthService.prototype.logout = function(...args: any[]) {
