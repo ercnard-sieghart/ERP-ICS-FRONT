@@ -71,17 +71,17 @@ export class MenuComponent implements OnInit, OnDestroy {
 
   buildMenuFromPatentes(menus: MenuItem[]): void {
     this.menuItems = [];
-    
+
+  this.menuItems.push({ label: 'Home', icon: 'home', link: '/home' });
+
     const menuMap = new Map<string, MenuItemWithSubmenu>();
-    
+
     menus.forEach(menu => {
       if (menu.rota === '/home') {
-        this.menuItems.push({
-          label: menu.nome,
-          icon: 'home',
-          link: menu.rota
-        });
-      } else if (menu.rota === '/dashboard') {
+        return;
+      }
+
+      if (menu.rota === '/dashboard') {
         this.menuItems.push({
           label: menu.nome,
           icon: 'chart',
@@ -160,7 +160,7 @@ export class MenuComponent implements OnInit, OnDestroy {
     this.isMenuCollapsed = !this.isMenuCollapsed;
     this.menuStateService.setMenuCollapsed(this.isMenuCollapsed);
     
-    // Salvar estado no localStorage
+  localStorage.setItem('menuCollapsed', JSON.stringify(this.isMenuCollapsed));
     localStorage.setItem('menuCollapsed', JSON.stringify(this.isMenuCollapsed));
   }
 
@@ -185,8 +185,7 @@ export class MenuComponent implements OnInit, OnDestroy {
   }
 
   logout() {
-    // Usar o service para logout
-    this.authService.logout();
+  this.authService.logout();
     window.location.href = '/login';
   }
 }

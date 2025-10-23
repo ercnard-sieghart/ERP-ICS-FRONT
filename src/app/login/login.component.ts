@@ -59,9 +59,9 @@ export class LoginComponent {
   }
 
   loginSubmit(loginData: any) {
-    this.loading = true;
-    
-    this.authService.authenticate(loginData.login, loginData.password).subscribe({
+  this.loading = true;
+  const loginLower = loginData.login ? loginData.login.toLowerCase() : '';
+  this.authService.authenticate(loginLower, loginData.password).subscribe({
       next: (oauthResponse: any) => {
         const oauthBody = oauthResponse.body as any;
         
@@ -76,7 +76,7 @@ export class LoginComponent {
               const loginBody = loginResponse.body as any;
               
               if (loginBody && (loginBody.SUCCESS === true || loginBody.SUCCESS === 'true')) {
-                localStorage.setItem('user_name', loginData.login);
+                localStorage.setItem('user_name', loginLower);
                 if (loginBody.USER_FULLNAME) localStorage.setItem('user_fullname', loginBody.USER_FULLNAME);
                 if (loginBody.USER_EMAIL) localStorage.setItem('user_email', loginBody.USER_EMAIL);
                 if (loginBody.USER_ID) localStorage.setItem('user_id', loginBody.USER_ID);
@@ -85,40 +85,32 @@ export class LoginComponent {
                 
                 this.authService.updateUserDisplay();
                 
-                const userId = loginBody.USER_ID || loginData.login;
-                this.patentesService.carregarMenusUsuario(userId).subscribe({
-                  next: (menus) => {
-                    console.log('Menus carregados:', menus);
-                    this.loading = false;
-                    this.popupType = 'success';
-                    this.popupMessage = loginBody.MESSAGE || 'Autenticação realizada com sucesso!';
-                    this.showPopup = true;
-                    
-                    setTimeout(() => {
-                      this.showPopup = false;
-                      
+                const userId = loginBody.USER_ID || loginLower;
 
-                      const redirectUrl = sessionStorage.getItem('redirectUrl');
-                      if (redirectUrl) {
-                        sessionStorage.removeItem('redirectUrl');
-                        this.router.navigate([redirectUrl]);
-                      } else {
-                        this.router.navigate(['/home']);
-                      }
-                    }, 800);
+                this.patentesService.getMenusServer().subscribe({
+                  next: (menus) => {
+                    console.log('Menus carregados (server /patentes/menus):', menus);
+                    this.finalizeLoginSuccess(loginBody);
                   },
                   error: (error) => {
-                    console.warn('Erro ao carregar menus, prosseguindo mesmo assim:', error);
-                    this.loading = false;
-                    
-                    this.popupType = 'success';
-                    this.popupMessage = 'Login realizado!';
-                    this.showPopup = true;
-                    
-                    setTimeout(() => {
-                      this.showPopup = false;
-                      this.router.navigate(['/home']);
-                    }, 800);
+                    console.warn('Falha ao obter /patentes/menus, tentando carregarMenusUsuario como fallback:', error);
+                    this.patentesService.carregarMenusUsuario(userId).subscribe({
+                      next: (menus) => {
+                        console.log('Menus carregados (fallback rotas):', menus);
+                        this.finalizeLoginSuccess(loginBody);
+                      },
+                      error: (err) => {
+                        console.warn('Erro ao carregar menus, prosseguindo mesmo assim:', err);
+                        this.loading = false;
+                        this.popupType = 'success';
+                        this.popupMessage = 'Login realizado!';
+                        this.showPopup = true;
+                        setTimeout(() => {
+                          this.showPopup = false;
+                          this.router.navigate(['/home']);
+                        }, 800);
+                      }
+                    });
                   }
                 });
                 
@@ -155,4 +147,24 @@ export class LoginComponent {
     this.showPopup = true;
     setTimeout(() => this.showPopup = false, 1500);
   }
+  
+  private finalizeLoginSuccess(loginBody: any) {
+    this.loading = false;
+    this.popupType = 'success';
+    this.popupMessage = loginBody.MESSAGE || 'Autenticação realizada com sucesso!';
+    this.showPopup = true;
+
+    setTimeout(() => {
+      this.showPopup = false;
+
+      const redirectUrl = sessionStorage.getItem('redirectUrl');
+      if (redirectUrl) {
+        sessionStorage.removeItem('redirectUrl');
+        this.router.navigate([redirectUrl]);
+      } else {
+        this.router.navigate(['/home']);
+      }
+    }, 800);
+  }
+
 }
