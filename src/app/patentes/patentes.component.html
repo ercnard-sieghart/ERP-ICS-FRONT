@@ -1,19 +1,41 @@
-<div class="patentes-container">
-  <h2>Gestão de Patentes</h2>
-  <form>
-    <label>Patente ID:</label>
-    <input [(ngModel)]="patenteId" name="patenteId" />
-    <br>
-    <label>Usuário (USR_ID):</label>
-    <input [(ngModel)]="usuarioId" name="usuarioId" />
-    <button type="button" (click)="atribuirPorUsuario()">Atribuir por Usuário</button>
-    <br>
-    <label>Função (RA_CODFUN):</label>
-    <input [(ngModel)]="funcaoCodigo" name="funcaoCodigo" />
-    <button type="button" (click)="atribuirPorFuncao()">Atribuir por Função</button>
-    <br>
-    <label>Grupo de Usuário (USR_CODIGO):</label>
-    <input [(ngModel)]="grupoCodigo" name="grupoCodigo" />
-    <button type="button" (click)="atribuirPorGrupo()">Atribuir por Grupo</button>
-  </form>
+<div class="patentes-container fade-in">
+  <div class="po-row po-mb-4 po-align-items-center po-justify-content-between">
+    <h2 class="po-font-title po-text-lg po-text-color-primary">Gestão de Patentes</h2>
+    <button po-button p-label="Atualizar" p-icon="po-icon po-icon-refresh" p-type="primary" (click)="carregarPatentes()" [disabled]="loading"></button>
+  </div>
+
+  <po-loading *ngIf="loading" [p-text]="'Carregando patentes...'" [p-size]="'md'"></po-loading>
+  <div *ngIf="erro && !loading" class="po-alert po-alert-danger po-mb-3">
+    <span>{{ erro }}</span>
+    <button po-button p-label="Tentar novamente" p-type="primary" (click)="carregarPatentes()"></button>
+  </div>
+
+  <div *ngIf="!loading && !erro">
+    <div class="po-row po-mt-2 po-gutter-md">
+      <div class="po-col po-col-12 po-col-md-6" *ngFor="let patente of patentes">
+        <div class="patente-item po-clickable po-p-3 po-mb-2" (click)="abrirColaboradores(patente)">
+          <div class="po-font-text po-text-md po-text-color po-font-bold">{{ patente.nome }}</div>
+          <div class="po-text-xs po-text-color-secondary">#{{ patente.id }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de colaboradores -->
+  <po-modal *ngIf="showColabModal" p-title="Colaboradores da patente: {{ patenteSelecionada?.nome }}" (p-close)="fecharColaboradores()">
+    <po-loading *ngIf="loadingColab" [p-text]="'Carregando colaboradores...'" [p-size]="'sm'"></po-loading>
+    <div *ngIf="erroColab && !loadingColab" class="po-alert po-alert-danger po-mb-2">
+      <span>{{ erroColab }}</span>
+    </div>
+    <div *ngIf="!loadingColab && !erroColab">
+      <div *ngFor="let colab of colaboradores" class="po-row po-align-items-center po-justify-content-between po-mb-2">
+        <span>{{ colab.nome }}</span>
+        <button po-button p-label="Remover" p-type="danger" (click)="removerColaborador(colab)"></button>
+      </div>
+      <div class="po-row po-mt-3 po-align-items-center">
+        <input [(ngModel)]="novoColaboradorId" placeholder="ID do colaborador" name="novoColaboradorId" class="po-input po-col po-col-8" />
+        <button po-button p-label="Adicionar" p-type="primary" class="po-col po-col-4" (click)="adicionarColaborador()"></button>
+      </div>
+    </div>
+  </po-modal>
 </div>

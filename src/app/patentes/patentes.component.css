@@ -1,33 +1,150 @@
+/* Container principal */
+/* Container principal atualizado para responsividade */
 .patentes-container {
-  max-width: 500px;
-  margin: 40px auto;
-  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 20px 28px 20px;
   background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border-radius: 18px;
+  box-shadow: 0 2px 16px rgba(26,78,121,0.10);
+  min-height: 400px;
+  animation: fadeIn 0.4s;
 }
-label {
-  font-weight: 500;
-  margin-top: 12px;
-  display: block;
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
-input {
-  margin-bottom: 8px;
-  padding: 6px 12px;
+
+.refresh-btn {
+  background: #e6f7fa;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.refresh-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.refresh-btn:hover:not(:disabled) {
+  background: #75C9C8;
+  color: #fff;
+}
+
+ul.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+@media (min-width: 640px) {
+  ul.grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.patente-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #e6f7fa;
+  border-radius: 10px;
+  padding: 18px 20px;
+  box-shadow: 0 1px 4px rgba(26,78,121,0.04);
+  transition: box-shadow 0.2s, transform 0.2s;
+  cursor: pointer;
+}
+.patente-item:hover {
+  background: #75C9C8;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(26,78,121,0.10);
+}
+.patente-nome {
+  font-weight: 600;
+  font-size: 1.1em;
+}
+.patente-id {
+  font-size: 0.95em;
+  color: #1A4E79;
+  background: #e6f7fa;
+  border-radius: 8px;
+  padding: 2px 10px;
+  margin-left: 8px;
+}
+
+/* Feedback visual para loading e erro já está no HTML */
+/* (Removido bloco com chaves extras e duplicadas) */
+
+/* Modal de colaboradores */
+.modal-bg {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.25);
+  display: flex;
+.add-colab {
+  margin-top: 18px;
+  display: flex;
+  gap: 8px;
+}
+@media (max-width: 600px) {
+  .patentes-container {
+    padding: 16px 4px 12px 4px;
+  }
+  .modal {
+    padding: 18px 6px 12px 6px;
+    min-width: unset;
+  }
+}
+  cursor: pointer;
+}
+.colab-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e6f7fa;
+}
+.remove-btn {
+  background: #c00;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 0.95em;
+}
+.remove-btn:hover {
+  background: #a00;
+}
+.add-colab {
+  margin-top: 18px;
+  display: flex;
+  gap: 8px;
+}
+.add-colab input {
+  flex: 1;
+  padding: 6px 10px;
   border-radius: 6px;
   border: 1px solid #ccc;
-  width: 100%;
 }
-button {
-  margin-bottom: 16px;
-  padding: 8px 16px;
-  border-radius: 6px;
+.add-colab button {
   background: #1A4E79;
   color: #fff;
   border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
   font-weight: 500;
   cursor: pointer;
 }
-button:hover {
+.add-colab button:hover {
   background: #75C9C8;
 }
