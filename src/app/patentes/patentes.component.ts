@@ -33,7 +33,6 @@ export class PatentesComponent {
   carregarPatentes() {
     this.loading = true;
     this.erro = '';
-    // Chamada ao webservice que retorna as patentes:
     // (O método getPatentes() faz a requisição HTTP para o backend)
     this.patentesApi.getPatentes().subscribe({
       next: (patentes) => {
