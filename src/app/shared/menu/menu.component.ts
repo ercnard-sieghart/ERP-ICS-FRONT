@@ -9,6 +9,7 @@ import { PatentesService, MenuItem } from '../services/patentes.service';
 import { Subscription } from 'rxjs';
 
 interface MenuItemWithSubmenu {
+  id?: string;
   label: string;
   icon: string;
   link?: string;
@@ -31,6 +32,37 @@ export class MenuComponent implements OnInit, OnDestroy {
   menuItems: MenuItemWithSubmenu[] = [];
   private userSubscription?: Subscription;
   private menusSubscription?: Subscription;
+  private validatedMenuIds = new Set<string>();
+  onMenuClick(item: MenuItemWithSubmenu) {
+    if (!item.id || item.id === 'home') {
+      // Home não precisa validar
+      this.navigateTo(item.link);
+      return;
+    }
+    if (this.validatedMenuIds.has(item.id)) {
+      this.navigateTo(item.link);
+      return;
+    }
+    this.patentesService.validarAcessoMenu(item.id).subscribe({
+      next: (resp) => {
+        if (resp.acess) {
+          this.validatedMenuIds.add(item.id!);
+          this.navigateTo(item.link);
+        } else {
+          alert(resp.message || 'Acesso negado');
+        }
+      },
+      error: () => {
+        alert('Erro ao validar acesso ao menu.');
+      }
+    });
+  }
+
+  private navigateTo(link?: string) {
+    if (link) {
+      window.location.href = link;
+    }
+  }
   
   constructor(
     private cdr: ChangeDetectorRef, 
@@ -72,7 +104,7 @@ export class MenuComponent implements OnInit, OnDestroy {
   buildMenuFromPatentes(menus: MenuItem[]): void {
     this.menuItems = [];
 
-  this.menuItems.push({ label: 'Home', icon: 'home', link: '/home' });
+  this.menuItems.push({ id: 'home', label: 'Home', icon: 'home', link: '/home' });
 
     const menuMap = new Map<string, MenuItemWithSubmenu>();
 
@@ -83,6 +115,7 @@ export class MenuComponent implements OnInit, OnDestroy {
 
       if (menu.rota === '/dashboard') {
         this.menuItems.push({
+          id: menu.id,
           label: menu.nome,
           icon: 'chart',
           link: menu.rota
@@ -91,6 +124,7 @@ export class MenuComponent implements OnInit, OnDestroy {
         let comprasMenu = menuMap.get('compras');
         if (!comprasMenu) {
           comprasMenu = {
+            id: undefined,
             label: 'Compras',
             icon: 'shopping',
             expanded: false,
@@ -100,6 +134,7 @@ export class MenuComponent implements OnInit, OnDestroy {
           this.menuItems.push(comprasMenu);
         }
         comprasMenu.submenus?.push({
+          id: menu.id,
           label: menu.nome,
           icon: 'cart',
           link: menu.rota
@@ -108,6 +143,7 @@ export class MenuComponent implements OnInit, OnDestroy {
         let consultasMenu = menuMap.get('consultas');
         if (!consultasMenu) {
           consultasMenu = {
+            id: undefined,
             label: 'Consultas',
             icon: 'search',
             expanded: false,
@@ -117,12 +153,14 @@ export class MenuComponent implements OnInit, OnDestroy {
           this.menuItems.push(consultasMenu);
         }
         consultasMenu.submenus?.push({
+          id: menu.id,
           label: menu.nome,
           icon: 'bank',
           link: menu.rota
         });
       } else if (menu.rota === '/orcamentos') {
         this.menuItems.push({
+          id: menu.id,
           label: menu.nome,
           icon: 'money',
           link: menu.rota

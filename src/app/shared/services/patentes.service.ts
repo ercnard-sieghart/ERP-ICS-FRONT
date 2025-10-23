@@ -123,10 +123,6 @@ export class PatentesService {
     } as MenuItem;
   }
 
-  /**
-   * Retorna o nome local (limpo) para a rota fornecida.
-   * Usa a rota como fonte de verdade para garantir rótulos consistentes com o front-end.
-   */
   private getLocalNameForRoute(rota: string, serverMenuName: string): string {
     if (!rota) return serverMenuName || '';
 
@@ -162,6 +158,11 @@ export class PatentesService {
 
   getMenus(): MenuItem[] {
     return this.menusUsuario.value;
+  }
+
+  validarAcessoMenu(id: string): Observable<{ message: string, acess: boolean }> {
+    const url = this.configService.getRestEndpoint(`/patentes/validar?id=${encodeURIComponent(id)}`);
+    return this.http.get<{ message: string, acess: boolean }>(url, this.getHttpOptions());
   }
 
   limparMenus(): void {
