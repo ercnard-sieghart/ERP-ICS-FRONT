@@ -104,70 +104,31 @@ export class MenuComponent implements OnInit, OnDestroy {
   buildMenuFromPatentes(menus: MenuItem[]): void {
     this.menuItems = [];
 
-  this.menuItems.push({ id: 'home', label: 'Home', icon: 'home', link: '/home' });
+    // Sempre adiciona o Home fixo
+    this.menuItems.push({ id: 'home', label: 'Home', icon: 'home', link: '/home' });
 
-    const menuMap = new Map<string, MenuItemWithSubmenu>();
+    // Adiciona todos os outros menus recebidos do backend, exceto o Home
 
     menus.forEach(menu => {
-      if (menu.rota === '/home') {
-        return;
-      }
+      if (menu.rota !== '/home') {
+        // Definir ícone por rota
+        let icon = 'list';
+        if (menu.rota === '/dashboard') icon = 'chart';
+        else if (menu.rota.startsWith('/compras')) icon = 'shopping';
+        else if (menu.rota.startsWith('/consultas')) icon = 'search';
+        else if (menu.rota === '/orcamentos') icon = 'money';
+        else if (menu.rota === '/admin/patentes') icon = 'users';
+        // Adicione mais regras conforme necessário
 
-      if (menu.rota === '/dashboard') {
         this.menuItems.push({
           id: menu.id,
           label: menu.nome,
-          icon: 'chart',
-          link: menu.rota
-        });
-      } else if (menu.rota.startsWith('/compras')) {
-        let comprasMenu = menuMap.get('compras');
-        if (!comprasMenu) {
-          comprasMenu = {
-            id: undefined,
-            label: 'Compras',
-            icon: 'shopping',
-            expanded: false,
-            submenus: []
-          };
-          menuMap.set('compras', comprasMenu);
-          this.menuItems.push(comprasMenu);
-        }
-        comprasMenu.submenus?.push({
-          id: menu.id,
-          label: menu.nome,
-          icon: 'cart',
-          link: menu.rota
-        });
-      } else if (menu.rota.startsWith('/consultas')) {
-        let consultasMenu = menuMap.get('consultas');
-        if (!consultasMenu) {
-          consultasMenu = {
-            id: undefined,
-            label: 'Consultas',
-            icon: 'search',
-            expanded: false,
-            submenus: []
-          };
-          menuMap.set('consultas', consultasMenu);
-          this.menuItems.push(consultasMenu);
-        }
-        consultasMenu.submenus?.push({
-          id: menu.id,
-          label: menu.nome,
-          icon: 'bank',
-          link: menu.rota
-        });
-      } else if (menu.rota === '/orcamentos') {
-        this.menuItems.push({
-          id: menu.id,
-          label: menu.nome,
-          icon: 'money',
+          icon,
           link: menu.rota
         });
       }
     });
-    
+
     this.cdr.detectChanges();
   }
 
