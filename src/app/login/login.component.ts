@@ -6,7 +6,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PoPageLoginModule, PoPageLogin } from '@po-ui/ng-templates';
 import { AuthService } from '../shared/services/auth.service';
-import { PatentesService } from '../shared/services/patentes.service';
 
 @Component({
   selector: 'app-login',
@@ -27,7 +26,6 @@ export class LoginComponent {
   constructor(
     private authService: AuthService, 
     private router: Router,
-    private patentesService: PatentesService
   ) {
     this.setupInactivityTimer();
   }
@@ -85,40 +83,15 @@ export class LoginComponent {
                 
                 this.authService.updateUserDisplay();
                 
-                const userId = loginBody.USER_ID || loginLower;
-                this.patentesService.carregarMenusUsuario(userId).subscribe({
-                  next: (menus) => {
-                    console.log('Menus carregados:', menus);
-                    this.loading = false;
-                    this.popupType = 'success';
-                    this.popupMessage = loginBody.MESSAGE || 'Autenticação realizada com sucesso!';
-                    this.showPopup = true;
-                    
-                    setTimeout(() => {
-                      this.showPopup = false;
-                      
-
-                      const redirectUrl = sessionStorage.getItem('redirectUrl');
-                      if (redirectUrl) {
-                        sessionStorage.removeItem('redirectUrl');
-                        this.router.navigate([redirectUrl]);
-                      } else {
-                        this.router.navigate(['/home']);
-                      }
-                    }, 800);
+                // Carregar menus liberados do usuário via GET /patentes/menus?usuario=ID
+                this.authService.carregarMenusLiberadosUsuario().subscribe({
+                  next: (menus: any[]) => {
+                    console.log('Menus carregados (liberados p/ usuário):', menus);
+                    this.finishLoginSuccess(loginBody);
                   },
-                  error: (error) => {
-                    console.warn('Erro ao carregar menus, prosseguindo mesmo assim:', error);
-                    this.loading = false;
-                    
-                    this.popupType = 'success';
-                    this.popupMessage = 'Login realizado!';
-                    this.showPopup = true;
-                    
-                    setTimeout(() => {
-                      this.showPopup = false;
-                      this.router.navigate(['/home']);
-                    }, 800);
+                  error: (error: any) => {
+                    console.warn('Erro ao carregar menus liberados do usuário:', error);
+                    this.finishLoginSuccess(loginBody);
                   }
                 });
                 
@@ -154,5 +127,23 @@ export class LoginComponent {
     this.popupMessage = message;
     this.showPopup = true;
     setTimeout(() => this.showPopup = false, 1500);
+  }
+
+  private finishLoginSuccess(loginBody: any) {
+    this.loading = false;
+    this.popupType = 'success';
+    this.popupMessage = loginBody.MESSAGE || 'Autenticação realizada com sucesso!';
+    this.showPopup = true;
+
+    setTimeout(() => {
+      this.showPopup = false;
+      const redirectUrl = sessionStorage.getItem('redirectUrl');
+      if (redirectUrl) {
+        sessionStorage.removeItem('redirectUrl');
+        this.router.navigate([redirectUrl]);
+      } else {
+        this.router.navigate(['/home']);
+      }
+    }, 800);
   }
 }

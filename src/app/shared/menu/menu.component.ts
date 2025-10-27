@@ -5,8 +5,17 @@ import { PoMenuModule } from '@po-ui/ng-components';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { MenuStateService } from '../services/menu-state.service';
-import { PatentesService, MenuItem } from '../services/patentes.service';
+
 import { Subscription } from 'rxjs';
+
+
+interface MenuItem {
+  id: string;
+  nome: string;
+  rota: string;
+  icone?: string;
+  ordem?: number;
+}
 
 interface MenuItemWithSubmenu {
   label: string;
@@ -38,33 +47,44 @@ export class MenuComponent implements OnInit, OnDestroy {
   constructor(
     private cdr: ChangeDetectorRef, 
     private authService: AuthService,
-    private menuStateService: MenuStateService,
-    private patentesService: PatentesService
+    private menuStateService: MenuStateService
   ) {}
 
   ngOnInit(): void {
     this.checkScreenSize();
     this.updateDisplayName();
-    
+
     this.userSubscription = this.authService.userUpdate$.subscribe(() => {
       this.updateDisplayName();
     });
-    
-    this.menusSubscription = this.patentesService.menusUsuario$.subscribe((menus: MenuItem[]) => {
-      this.buildMenuFromPatentes(menus);
+
+    // Restaurar menus do localStorage se existirem
+  const savedMenus = localStorage.getItem('app_menus_v1');
+    if (savedMenus) {
+      try {
+        const parsedMenus = JSON.parse(savedMenus);
+        if (Array.isArray(parsedMenus)) {
+          this.buildMenuFromPatentes(parsedMenus);
+        }
+      } catch {}
+    }
+
+    this.menusSubscription = this.authService.menusUsuario$.subscribe((menus: MenuItem[]) => {
+      if (Array.isArray(menus) && menus.length > 0) {
+        this.buildMenuFromPatentes(menus);
+      }
     });
-    
+
     // Carregar estado salvo
     const savedCollapsedState = localStorage.getItem('menuCollapsed');
     if (savedCollapsedState) {
       this.isMenuCollapsed = JSON.parse(savedCollapsedState);
-      
       // Em mobile, forçar menu fechado inicialmente
       if (this.isMobile) {
         this.isMenuCollapsed = true;
       }
     }
-    
+
     this.menuStateService.setMenuCollapsed(this.isMenuCollapsed);
     this.updateBodyClass();
   }
@@ -103,40 +123,40 @@ export class MenuComponent implements OnInit, OnDestroy {
   }
 
   buildMenuFromPatentes(menus: MenuItem[]): void {
-    this.menuItems = [];
+    // Sempre adiciona /home
+    this.menuItems = [{
+      label: 'Home',
+      icon: 'home',
+      link: '/home'
+    }];
     const menuMap = new Map<string, MenuItemWithSubmenu>();
-    
+
+    // Agrupa submenus por prefixo principal
+    const submenusByPrefix: { [prefix: string]: MenuItem[] } = {};
+    menus.forEach(menu => {
+      const parts = menu.rota.split('/').filter(Boolean);
+      if (parts.length > 1) {
+        const prefix = '/' + parts[0];
+        if (!submenusByPrefix[prefix]) submenusByPrefix[prefix] = [];
+        submenusByPrefix[prefix].push(menu);
+      }
+    });
+
     menus.forEach(menu => {
       if (menu.rota === '/home') {
-        this.menuItems.push({
-          label: menu.nome,
-          icon: 'home',
-          link: menu.rota
-        });
-      } else if (menu.rota === '/dashboard') {
+        // já adicionado
+        return;
+      }
+      if (menu.rota === '/dashboard') {
         this.menuItems.push({
           label: menu.nome,
           icon: 'chart',
           link: menu.rota
         });
-      } else if (menu.rota.startsWith('/compras')) {
-        let comprasMenu = menuMap.get('compras');
-        if (!comprasMenu) {
-          comprasMenu = {
-            label: 'Compras',
-            icon: 'shopping',
-            expanded: false,
-            submenus: []
-          };
-          menuMap.set('compras', comprasMenu);
-          this.menuItems.push(comprasMenu);
-        }
-        comprasMenu.submenus?.push({
-          label: menu.nome,
-          icon: 'cart',
-          link: menu.rota
-        });
-      } else if (menu.rota.startsWith('/consultas')) {
+        return;
+      }
+      // Menu principal /consultas
+      if (menu.rota === '/consultas') {
         let consultasMenu = menuMap.get('consultas');
         if (!consultasMenu) {
           consultasMenu = {
@@ -148,20 +168,81 @@ export class MenuComponent implements OnInit, OnDestroy {
           menuMap.set('consultas', consultasMenu);
           this.menuItems.push(consultasMenu);
         }
-        consultasMenu.submenus?.push({
-          label: menu.nome,
-          icon: 'bank',
-          link: menu.rota
+        // Adiciona todos submenus /consultas/...
+        (submenusByPrefix['/consultas'] || []).forEach(sub => {
+          if (sub.rota !== '/consultas') {
+            consultasMenu.submenus?.push({
+              label: sub.nome,
+              icon: 'bank',
+              link: sub.rota
+            });
+          }
         });
-      } else if (menu.rota === '/orcamentos') {
+        return;
+      }
+      // Menu principal /compras
+      if (menu.rota === '/compras') {
+        let comprasMenu = menuMap.get('compras');
+        if (!comprasMenu) {
+          comprasMenu = {
+            label: 'Compras',
+            icon: 'shopping',
+            expanded: false,
+            submenus: []
+          };
+          menuMap.set('compras', comprasMenu);
+          this.menuItems.push(comprasMenu);
+        }
+        (submenusByPrefix['/compras'] || []).forEach(sub => {
+          if (sub.rota !== '/compras') {
+            comprasMenu.submenus?.push({
+              label: sub.nome,
+              icon: 'cart',
+              link: sub.rota
+            });
+          }
+        });
+        return;
+      }
+      // Menu principal /orcamentos
+      if (menu.rota === '/orcamentos') {
         this.menuItems.push({
           label: menu.nome,
           icon: 'money',
           link: menu.rota
         });
+        return;
       }
+      // Submenus que não têm menu principal
+      // Exemplo: /consultas/solicitacao sem /consultas
+      const parts = menu.rota.split('/').filter(Boolean);
+      if (parts.length > 1) {
+        const prefix = '/' + parts[0];
+        let parentMenu = menuMap.get(parts[0]);
+        if (!parentMenu) {
+          parentMenu = {
+            label: parts[0].charAt(0).toUpperCase() + parts[0].slice(1),
+            icon: 'list',
+            expanded: false,
+            submenus: []
+          };
+          menuMap.set(parts[0], parentMenu);
+          this.menuItems.push(parentMenu);
+        }
+        parentMenu.submenus?.push({
+          label: menu.nome,
+          icon: 'list',
+          link: menu.rota
+        });
+        return;
+      }
+      // Se não se encaixa em nenhum caso, adiciona como menu simples
+      this.menuItems.push({
+        label: menu.nome,
+        icon: 'list',
+        link: menu.rota
+      });
     });
-    
     this.cdr.detectChanges();
   }
 

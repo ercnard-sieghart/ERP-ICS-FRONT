@@ -1,13 +1,57 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { map, catchError } from 'rxjs/operators';
 import { ConfigService } from './config.service';
+
+export interface MenuItem {
+  id: string;
+  nome: string;
+  rota: string;
+  icone?: string;
+  ordem?: number;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+  // ...existing code...
+  // Menus do usuário
+  private menusUsuario = new BehaviorSubject<any[]>([]);
+  public menusUsuario$ = this.menusUsuario.asObservable();
+
+  carregarMenusLiberadosUsuario(): Observable<any[]> {
+    const token = this.getToken();
+    const userId = localStorage.getItem('user_id');
+    const url = this.configService.getRestEndpoint(`/patentes/menus?usuario=${userId}`);
+    return this.http.get<any>(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
+      map(response => {
+        let menusRaw = Array.isArray(response) ? response : response.menus;
+        if (menusRaw && Array.isArray(menusRaw)) {
+          const menus = menusRaw.map((m: any) => ({
+            id: m.id,
+            nome: m.menu || m.nome,
+            rota: m.rota,
+            icone: m.icone,
+            ordem: m.ordem
+          }));
+          this.menusUsuario.next(menus);
+          return menus;
+        }
+        return [];
+      }),
+      catchError(this.handleAuthError.bind(this, 'Menus Liberados'))
+    );
+  }
+
+  limparMenus(): void {
+    this.menusUsuario.next([]);
+  }
 
   // Subject para notificar mudanças no usuário
   private userUpdateSubject = new BehaviorSubject<string>('Usuário');
@@ -55,16 +99,16 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user_name');
-    localStorage.removeItem('user_fullname');
-    localStorage.removeItem('user_email');
-    localStorage.removeItem('user_id');
-    localStorage.removeItem('empresa');
-    localStorage.removeItem('filial');
-    
-    this.userUpdateSubject.next('Usuário');
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('user_name');
+  localStorage.removeItem('user_fullname');
+  localStorage.removeItem('user_email');
+  localStorage.removeItem('user_id');
+  localStorage.removeItem('empresa');
+  localStorage.removeItem('filial');
+  localStorage.removeItem('menusUsuario');
+  this.userUpdateSubject.next('Usuário');
   }
 
   updateUserDisplay(): void {
@@ -83,25 +127,20 @@ export class AuthService {
       return false;
     }
     
-    // Verifica se o token não está vazio ou com valor inválido
     if (token.length < 10) {
-      this.logout(); // Remove token inválido
+      this.logout(); 
       return false;
     }
     
     return true;
   }
-
-  // Método para verificar se o usuário tem uma sessão válida
   hasValidSession(): boolean {
     const token = this.getToken();
-    // Verifica apenas o token, pois user_name pode não estar sendo salvo
     
     if (!token || token.length < 10) {
       return false;
     }
     
-    // Verificação adicional - token não pode ser apenas espaços ou string vazia
     if (token.trim().length === 0) {
       return false;
     }
