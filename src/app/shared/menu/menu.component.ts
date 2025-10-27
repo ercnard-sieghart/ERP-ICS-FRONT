@@ -1,7 +1,7 @@
-import { Component, OnInit, ChangeDetectorRef, OnDestroy, Input } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy, Input, HostListener, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PoIconModule, PoAvatarModule } from '@po-ui/ng-components';
-import { PoMenuModule, PoMenuItem } from '@po-ui/ng-components';
+import { PoMenuModule } from '@po-ui/ng-components';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { MenuStateService } from '../services/menu-state.service';
@@ -25,10 +25,13 @@ interface MenuItemWithSubmenu {
 })
 export class MenuComponent implements OnInit, OnDestroy {
   @Input() isLoading: boolean = false;
-  avatarUrl: string = `https://i.pravatar.cc/150?u=${Math.random()}`;
+  @Output() menuToggled = new EventEmitter<boolean>();
+  
   displayName: string = 'Usuário';
   isMenuCollapsed: boolean = false;
+  isMobile: boolean = false;
   menuItems: MenuItemWithSubmenu[] = [];
+  
   private userSubscription?: Subscription;
   private menusSubscription?: Subscription;
   
@@ -39,9 +42,8 @@ export class MenuComponent implements OnInit, OnDestroy {
     private patentesService: PatentesService
   ) {}
 
-
-
   ngOnInit(): void {
+    this.checkScreenSize();
     this.updateDisplayName();
     
     this.userSubscription = this.authService.userUpdate$.subscribe(() => {
@@ -52,26 +54,56 @@ export class MenuComponent implements OnInit, OnDestroy {
       this.buildMenuFromPatentes(menus);
     });
     
+    // Carregar estado salvo
     const savedCollapsedState = localStorage.getItem('menuCollapsed');
     if (savedCollapsedState) {
       this.isMenuCollapsed = JSON.parse(savedCollapsedState);
+      
+      // Em mobile, forçar menu fechado inicialmente
+      if (this.isMobile) {
+        this.isMenuCollapsed = true;
+      }
     }
     
     this.menuStateService.setMenuCollapsed(this.isMenuCollapsed);
+    this.updateBodyClass();
   }
 
   ngOnDestroy(): void {
-    if (this.userSubscription) {
-      this.userSubscription.unsubscribe();
+    this.userSubscription?.unsubscribe();
+    this.menusSubscription?.unsubscribe();
+    this.cleanupBodyClass();
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(): void {
+    this.checkScreenSize();
+  }
+
+  private checkScreenSize(): void {
+    const wasMobile = this.isMobile;
+    this.isMobile = window.innerWidth < 680;
+    
+    // Se mudou para mobile e o menu estava aberto, fecha o menu
+    if (!wasMobile && this.isMobile && !this.isMenuCollapsed) {
+      this.isMenuCollapsed = true;
+      this.updateBodyClass();
     }
-    if (this.menusSubscription) {
-      this.menusSubscription.unsubscribe();
+    
+    // Se mudou para desktop, restaura o estado salvo
+    if (wasMobile && !this.isMobile) {
+      const savedState = localStorage.getItem('menuCollapsed');
+      if (savedState) {
+        this.isMenuCollapsed = JSON.parse(savedState);
+      }
     }
+    
+    this.menuStateService.setMenuCollapsed(this.isMenuCollapsed);
+    this.cdr.detectChanges();
   }
 
   buildMenuFromPatentes(menus: MenuItem[]): void {
     this.menuItems = [];
-    
     const menuMap = new Map<string, MenuItemWithSubmenu>();
     
     menus.forEach(menu => {
@@ -135,14 +167,7 @@ export class MenuComponent implements OnInit, OnDestroy {
 
   updateDisplayName(): void {
     const fullName = localStorage.getItem('user_fullname');
-    
-    if (fullName) {
-      const nomes = fullName.split(' ');
-      this.displayName = nomes.slice(0, 2).join(' ');
-    } else {
-      this.displayName = 'Usuário';
-    }
-    
+    this.displayName = fullName ? fullName.split(' ').slice(0, 2).join(' ') : 'Usuário';
     this.cdr.detectChanges();
   }
 
@@ -150,42 +175,63 @@ export class MenuComponent implements OnInit, OnDestroy {
     return this.displayName;
   }
 
-  toggleSubmenu(item: MenuItemWithSubmenu) {
+  toggleSubmenu(item: MenuItemWithSubmenu): void {
     if (item.submenus && item.submenus.length > 0) {
       item.expanded = !item.expanded;
     }
   }
 
-  toggleMenu() {
+  handleMenuItemClick(): void {
+    // Fecha o menu automaticamente em mobile quando um item é clicado
+    if (this.isMobile && !this.isMenuCollapsed) {
+      this.closeMenu();
+    }
+  }
+
+  closeMenu(): void {
+    if (this.isMobile && !this.isMenuCollapsed) {
+      this.toggleMenu();
+    }
+  }
+
+  toggleMenu(): void {
     this.isMenuCollapsed = !this.isMenuCollapsed;
     this.menuStateService.setMenuCollapsed(this.isMenuCollapsed);
+    this.updateBodyClass();
     
-    // Salvar estado no localStorage
-    localStorage.setItem('menuCollapsed', JSON.stringify(this.isMenuCollapsed));
+    // Salvar estado (apenas em desktop)
+    if (!this.isMobile) {
+      localStorage.setItem('menuCollapsed', JSON.stringify(this.isMenuCollapsed));
+    }
+    
+    this.menuToggled.emit(this.isMenuCollapsed);
+  }
+
+  private updateBodyClass(): void {
+    if (this.isMobile && !this.isMenuCollapsed) {
+      document.body.classList.add('menu-open-mobile');
+    } else {
+      this.cleanupBodyClass();
+    }
+  }
+
+  private cleanupBodyClass(): void {
+    document.body.classList.remove('menu-open-mobile');
+    document.body.style.overflow = '';
   }
 
   getIconSymbol(iconName: string): string {
     const iconMap: { [key: string]: string } = {
-      'home': '🏠',
-      'money': '💰',
-      'shopping': '🛒',
-      'cart': '🛍️',
-      'search': '🔍',
-      'users': '👥',
-      'calendar': '📅',
-      'document': '📄',
-      'list': '📋',
-      'chart': '📊',
-      'clock': '🕒',
-      'folder': '📁',
-      'globe': '🌐',
-      'plus': '➕'
+      'home': '🏠', 'money': '💰', 'shopping': '🛒', 'cart': '🛍️',
+      'search': '🔍', 'users': '👥', 'calendar': '📅', 'document': '📄',
+      'list': '📋', 'chart': '📊', 'clock': '🕒', 'folder': '📁',
+      'globe': '🌐', 'plus': '➕', 'bank': '🏦'
     };
     return iconMap[iconName] || '📝';
   }
 
-  logout() {
-    // Usar o service para logout
+  logout(): void {
+    this.cleanupBodyClass();
     this.authService.logout();
     window.location.href = '/login';
   }

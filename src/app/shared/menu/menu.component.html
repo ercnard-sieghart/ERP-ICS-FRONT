@@ -1,93 +1,102 @@
-<div class="relative">
-  <aside [class]="'bg-white shadow-lg flex flex-col py-4 px-2 sm:px-4 rounded-r-2xl h-screen max-h-screen overflow-y-auto transition-all duration-300 z-40 fixed top-0 left-0 ' + (isMenuCollapsed ? 'w-12 sm:w-16' : 'w-56 sm:w-64 md:w-72 lg:w-80')">
-    <div class="mb-4 sm:mb-6 lg:mb-8" [class.hidden]="isMenuCollapsed">
-    <div class="bg-[#f3f6fa] rounded-xl shadow flex flex-col items-center py-2 sm:py-3 lg:py-4 px-2 sm:px-3">
-      <div class="flex flex-col items-center w-full justify-center">
-        <img src="assets/logo.png" alt="Logo" class="h-20 w-20 sm:h-24 sm:w-24 lg:h-28 lg:w-28 object-contain mb-1 sm:mb-2" />
-        <div class="flex items-center gap-2 sm:gap-3 w-full justify-center">
-          <span class="flex items-center justify-center h-6 w-6 sm:h-8 sm:w-8 lg:h-9 lg:w-9 rounded-full bg-[#75C9C8]">
-            <po-icon name="an-user" size="sm" class="an an-user text-white lg:text-base"></po-icon>
-          </span>
-          <span class="font-semibold text-[#1A4E79] text-xs sm:text-sm lg:text-base ml-1 sm:ml-2 truncate max-w-[120px] sm:max-w-[140px] lg:max-w-[160px]" [title]="userName">{{ userName }}</span>
-        </div>
-      </div>
-      <button (click)="logout()" class="mt-1 sm:mt-2 ml-auto flex items-center justify-center bg-transparent text-[#6A6A6A] px-1 sm:px-2 py-1 rounded hover:text-[#1A4E79] border border-transparent hover:border-[#75C9C8] transition text-xs sm:text-sm font-normal">
-        <po-icon name="exit" class="mr-1" size="sm"></po-icon>
-        <span class="hidden sm:inline">Logout</span>
-        <span class="sm:hidden">Sair</span>
-      </button>
-    </div>
+<div class="menu-wrapper">
+  <!-- Overlay para mobile - fecha o menu ao clicar fora -->
+  <div 
+    class="menu-overlay" 
+    [class.active]="!isMenuCollapsed && isMobile"
+    (click)="closeMenu()">
   </div>
   
-  <nav class="flex-1 overflow-y-auto">
-    <ul class="space-y-1 sm:space-y-2">
-      <li *ngFor="let item of menuItems">
-        <!-- Item de menu principal -->
-        <div class="group">
-          <a 
-            *ngIf="!item.submenus || item.submenus.length === 0; else hasSubmenus"
-            [href]="item.link" 
-            class="flex items-center justify-between text-[#1A4E79] hover:text-[#75C9C8] hover:bg-[#f3f6fa] transition-colors px-2 py-2 sm:px-3 sm:py-2 rounded-lg"
-            [title]="isMenuCollapsed ? item.label : ''"
-          >
-            <div class="flex items-center">
-              <span class="mr-2 sm:mr-3 text-base sm:text-lg">{{ getIconSymbol(item.icon) }}</span>
-              <span class="text-xs sm:text-sm font-medium truncate" [class.hidden]="isMenuCollapsed">{{ item.label }}</span>
+  <!-- Sidebar principal - CORREÇÃO: adicionado rounded-r-2xl -->
+  <aside 
+    class="menu-sidebar rounded-r-2xl"
+    [class.mobile-open]="!isMenuCollapsed && isMobile"
+    [class.desktop-collapsed]="isMenuCollapsed && !isMobile"
+    [class.desktop-expanded]="!isMenuCollapsed && !isMobile">
+    
+    <div class="menu-content">
+      <!-- Cabeçalho do usuário -->
+      <div class="user-section" *ngIf="!isMenuCollapsed || isMobile">
+        <div class="flex flex-col items-center w-full">
+          <img src="assets/logo.png" alt="Logo" class="h-16 w-16 object-contain mb-2" />
+          <div class="user-info w-full justify-center">
+            <div class="user-avatar">
+              <po-icon name="an-user" size="sm" class="text-white"></po-icon>
             </div>
-          </a>
-          
-          <!-- Template para itens com submenus -->
-          <ng-template #hasSubmenus>
-            <button 
-              (click)="toggleSubmenu(item)"
-              class="w-full flex items-center justify-between text-[#1A4E79] hover:text-[#75C9C8] hover:bg-[#f3f6fa] transition-colors px-2 py-2 sm:px-3 sm:py-2 rounded-lg text-left"
-              [title]="isMenuCollapsed ? item.label : ''"
-            >
-              <div class="flex items-center min-w-0 flex-1">
-                <span class="mr-2 sm:mr-3 text-base sm:text-lg flex-shrink-0">{{ getIconSymbol(item.icon) }}</span>
-                <span class="text-xs sm:text-sm font-medium truncate" [class.hidden]="isMenuCollapsed">{{ item.label }}</span>
-              </div>
-              <span 
-                class="text-xs transition-transform duration-300 flex-shrink-0 ml-1"
-                [class.rotate-180]="item.expanded"
-                [class.hidden]="isMenuCollapsed"
-                *ngIf="!isMenuCollapsed"
-              >▼</span>
-            </button>
-            
-            <!-- Submenus -->
-            <div 
-              class="overflow-hidden transition-all duration-300 ease-in-out"
-              [class.max-h-0]="!item.expanded || isMenuCollapsed"
-              [class.max-h-screen]="item.expanded && !isMenuCollapsed"
-            >
-              <ul class="mt-1 sm:mt-2 ml-4 sm:ml-6 space-y-1 border-l-2 border-[#f3f6fa] pl-2 sm:pl-4">
-                <li *ngFor="let submenu of item.submenus">
-                  <a 
-                    [href]="submenu.link" 
-                    class="flex items-center text-[#6A6A6A] hover:text-[#75C9C8] hover:bg-[#f9fafb] transition-colors px-1 sm:px-2 py-1 sm:py-1.5 rounded text-xs sm:text-sm"
-                    [title]="submenu.label"
-                  >
-                    <span class="mr-1 sm:mr-2 text-xs sm:text-sm flex-shrink-0">{{ getIconSymbol(submenu.icon) }}</span>
-                    <span class="truncate">{{ submenu.label }}</span>
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </ng-template>
+            <span class="user-name" [title]="userName">{{ userName }}</span>
+          </div>
         </div>
-      </li>
-    </ul>
-  </nav>
-</aside>
+        <button class="logout-btn" (click)="logout()">
+          <po-icon name="exit" class="mr-1" size="sm"></po-icon>
+          <span>Sair</span>
+        </button>
+      </div>
+      
+      <!-- Navegação -->
+      <nav class="menu-nav">
+        <ul class="menu-items">
+          <li *ngFor="let item of menuItems">
+            <div class="menu-group">
+              <!-- Item sem submenu -->
+              <a 
+                *ngIf="!item.submenus || item.submenus.length === 0; else hasSubmenus"
+                [href]="item.link" 
+                class="menu-item menu-item-with-icon"
+                [title]="isMenuCollapsed ? item.label : ''"
+                (click)="handleMenuItemClick()">
+                <span class="menu-icon">{{ getIconSymbol(item.icon) }}</span>
+                <span class="menu-label" [class.hidden]="isMenuCollapsed && !isMobile">{{ item.label }}</span>
+              </a>
+              
+              <!-- Item com submenu -->
+              <ng-template #hasSubmenus>
+                <button 
+                  (click)="toggleSubmenu(item)"
+                  class="submenu-toggle menu-item-with-icon"
+                  [title]="isMenuCollapsed ? item.label : ''">
+                  <div class="flex items-center flex-1 min-w-0">
+                    <span class="menu-icon">{{ getIconSymbol(item.icon) }}</span>
+                    <span class="menu-label" [class.hidden]="isMenuCollapsed && !isMobile">{{ item.label }}</span>
+                  </div>
+                  <span 
+                    class="submenu-arrow"
+                    [class.rotated]="item.expanded"
+                    [class.hidden]="isMenuCollapsed && !isMobile"
+                    *ngIf="!isMenuCollapsed || isMobile">▼</span>
+                </button>
+                
+                <!-- Subitens -->
+                <div 
+                  class="submenu-items"
+                  [class.max-h-0]="!item.expanded || (isMenuCollapsed && !isMobile)"
+                  [class.max-h-96]="item.expanded && (!isMenuCollapsed || isMobile)">
+                  <ul class="space-y-1">
+                    <li *ngFor="let submenu of item.submenus">
+                      <a 
+                        [href]="submenu.link" 
+                        class="submenu-item menu-item-with-icon"
+                        [title]="submenu.label"
+                        (click)="handleMenuItemClick()">
+                        <span class="menu-icon text-xs">{{ getIconSymbol(submenu.icon) }}</span>
+                        <span class="menu-label">{{ submenu.label }}</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </ng-template>
+            </div>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
 
-<!-- Botão toggle posicionado na ponta direita do menu -->
-<button 
-  (click)="toggleMenu()" 
-  [disabled]="isLoading"
-  [ngClass]="(isMenuCollapsed ? 'left-[36px] sm:left-[52px]' : 'left-[212px] sm:left-[244px] md:left-[276px] lg:left-[308px]')"
-  class="absolute top-6 z-[1050] bg-[#1A4E79] hover:bg-[#75C9C8] text-white rounded-full p-2 shadow-lg transition-all duration-300 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#1A4E79]"
->
-  <span class="text-sm font-bold">☰</span>
-</button>
+  <!-- Botão Toggle -->
+  <button 
+    (click)="toggleMenu()" 
+    [disabled]="isLoading"
+    class="toggle-button"
+    [class.desktop-collapsed]="isMenuCollapsed && !isMobile"
+    [class.desktop-expanded]="!isMenuCollapsed && !isMobile">
+    <span class="text-sm font-bold">☰</span>
+  </button>
 </div>

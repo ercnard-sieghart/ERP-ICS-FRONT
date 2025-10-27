@@ -1,0 +1,44 @@
+/* Garantir que em mobile o conteúdo ocupe toda a largura */
+@media (max-width: 679px) {
+  .min-h-screen > div:last-child {
+    margin-left: 0 !important;
+    width: 100%;
+  }
+}
+
+/* Transição suave para o conteúdo */
+.transition-all {
+  transition: margin-left 0.3s ease;
+}
+
+/* Garantir que o conteúdo não seja cortado em mobile */
+@media (max-width: 679px) {
+  .po-wrapper {
+    overflow-x: hidden;
+  }
+  
+  .min-h-screen {
+    width: 100vw;
+  }
+}
+
+/* Ajustes para diferentes tamanhos de tela */
+@media (min-width: 680px) and (max-width: 1023px) {
+  .ml-80 {
+    margin-left: 20rem; /* 320px */
+  }
+  
+  .ml-16 {
+    margin-left: 4rem; /* 64px */
+  }
+}
+
+@media (min-width: 1024px) {
+  .ml-80 {
+    margin-left: 20rem; /* 320px */
+  }
+  
+  .ml-16 {
+    margin-left: 4rem; /* 64px */
+  }
+}

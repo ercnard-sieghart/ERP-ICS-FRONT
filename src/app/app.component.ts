@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 
@@ -23,7 +23,7 @@ import { MenuStateService } from './shared/services/menu-state.service';
     PoMenuModule,
     PoPageModule,
     RouterOutlet,
-    LanguageBlockComponent, // 🔹 importa o componente do bloqueio
+    LanguageBlockComponent,
     MenuComponent
   ],
   templateUrl: './app.component.html',
@@ -34,9 +34,10 @@ export class AppComponent implements OnInit {
     { label: 'Home', action: this.onClick.bind(this) },
   ];
 
-  blocked = false; // 🔹 flag para controlar o bloqueio
+  blocked = false;
   currentRoute = '';
   menuCollapsed = false;
+  isMobile = false;
 
   constructor(
     private langGuard: LanguageGuardService,
@@ -45,8 +46,11 @@ export class AppComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // 🔹 Verifica o idioma ao iniciar o app
+    // Verifica o idioma ao iniciar o app
     this.blocked = this.langGuard.isBlocked();
+    
+    // Verifica o tamanho da tela inicial
+    this.checkScreenSize();
     
     // Monitora mudanças de rota
     this.router.events.pipe(
@@ -59,6 +63,45 @@ export class AppComponent implements OnInit {
     this.menuStateService.menuCollapsed$.subscribe(collapsed => {
       this.menuCollapsed = collapsed;
     });
+
+    // Carregar estado inicial do menu do localStorage
+    const savedState = localStorage.getItem('menuCollapsed');
+    if (savedState) {
+      this.menuCollapsed = JSON.parse(savedState);
+      
+      // Em mobile, forçar menu fechado
+      if (this.isMobile) {
+        this.menuCollapsed = true;
+        this.menuStateService.setMenuCollapsed(true);
+      }
+    }
+  }
+
+  @HostListener('window:resize', ['$event'])
+  checkScreenSize() {
+    const wasMobile = this.isMobile;
+    this.isMobile = window.innerWidth < 680;
+    
+    // Se mudou para mobile e o menu estava aberto, fecha o menu
+    if (!wasMobile && this.isMobile && !this.menuCollapsed) {
+      this.menuCollapsed = true;
+      this.menuStateService.setMenuCollapsed(true);
+      localStorage.setItem('menuCollapsed', 'true');
+    }
+    
+    // Se mudou para desktop, restaura o estado salvo
+    if (wasMobile && !this.isMobile) {
+      const savedState = localStorage.getItem('menuCollapsed');
+      if (savedState) {
+        this.menuCollapsed = JSON.parse(savedState);
+        this.menuStateService.setMenuCollapsed(this.menuCollapsed);
+      }
+    }
+  }
+
+  // CORREÇÃO: O método agora recebe um booleano diretamente
+  onMenuToggled(collapsed: boolean) {
+    this.menuCollapsed = collapsed;
   }
   
   shouldShowMenu(): boolean {
@@ -67,6 +110,17 @@ export class AppComponent implements OnInit {
            !this.currentRoute.includes('/error') &&
            this.currentRoute !== '' &&
            this.currentRoute !== '/';
+  }
+
+  // Método para obter as classes do conteúdo principal
+  getContentClasses(): string {
+    if (this.isMobile) {
+      return 'transition-all duration-300 ml-0';
+    } else {
+      return this.menuCollapsed ? 
+        'transition-all duration-300 ml-16' : 
+        'transition-all duration-300 ml-80';
+    }
   }
 
   private onClick() {

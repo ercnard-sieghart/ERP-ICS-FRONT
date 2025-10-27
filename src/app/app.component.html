@@ -1,8 +1,13 @@
 <div class="po-wrapper">
   <!-- Menu global - aparece em todas as rotas exceto login -->
   <div class="min-h-screen bg-gradient-to-br from-[#1A4E79] to-[#75C9C8]" *ngIf="shouldShowMenu()">
-    <app-menu></app-menu>
-    <div class="transition-all duration-300" [style.margin-left]="menuCollapsed ? '64px' : '320px'">
+    <app-menu (menuToggled)="onMenuToggled($event)"></app-menu>
+    
+    <!-- Conteúdo principal - SEM margin em mobile -->
+    <div class="transition-all duration-300" 
+         [class.ml-16]="menuCollapsed && !isMobile" 
+         [class.ml-80]="!menuCollapsed && !isMobile"
+         [class.ml-0]="isMobile">
       <router-outlet></router-outlet>
     </div>
   </div>
