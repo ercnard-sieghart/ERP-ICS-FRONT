@@ -62,6 +62,59 @@ export class AuthService {
     private configService: ConfigService
   ) {}
 
+  // Cache de acessos às patentes durante a sessão (persistido em sessionStorage)
+  private getPatenteAccessCache(): { [id: string]: boolean } {
+    try {
+      const raw = sessionStorage.getItem('patenteAccessCache');
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  }
+
+  private setPatenteAccessCache(cache: { [id: string]: boolean }): void {
+    try {
+      sessionStorage.setItem('patenteAccessCache', JSON.stringify(cache));
+    } catch {}
+  }
+
+  /**
+   * Valida se o usuário tem acesso à patente/menu especificado pelo id.
+   * Faz POST para /rest/patentes/validar com body { id }
+   * O resultado é cacheado em sessionStorage até logout.
+   */
+  validarAcessoPatente(id: string) {
+    const cache = this.getPatenteAccessCache();
+    if (cache.hasOwnProperty(id)) {
+      return new Observable<boolean>(subscriber => {
+        subscriber.next(!!cache[id]);
+        subscriber.complete();
+      });
+    }
+
+    const token = this.getToken();
+    const url = this.configService.getRestEndpoint('/patentes/validar');
+    const body = { id };
+    return this.http.post<any>(url, body, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    }).pipe(
+      map(response => {
+        // backend pode retornar { message: '', acess: true }
+        const acess = response && (response.acess === true || response.access === true);
+        cache[id] = !!acess;
+        this.setPatenteAccessCache(cache);
+        return !!acess;
+      }),
+      catchError(err => {
+        // Em caso de erro propaga o erro
+        return throwError(() => err);
+      })
+    );
+  }
+
   authenticate(username: string, password: string): Observable<any> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/x-www-form-urlencoded'
@@ -108,6 +161,7 @@ export class AuthService {
   localStorage.removeItem('empresa');
   localStorage.removeItem('filial');
   localStorage.removeItem('menusUsuario');
+  try { sessionStorage.removeItem('patenteAccessCache'); } catch {}
   this.userUpdateSubject.next('Usuário');
   }
 

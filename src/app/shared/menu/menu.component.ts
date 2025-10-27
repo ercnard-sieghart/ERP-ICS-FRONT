@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectorRef, OnDestroy, Input, HostListener, O
 import { CommonModule } from '@angular/common';
 import { PoIconModule, PoAvatarModule } from '@po-ui/ng-components';
 import { PoMenuModule } from '@po-ui/ng-components';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { MenuStateService } from '../services/menu-state.service';
 
@@ -18,6 +18,7 @@ interface MenuItem {
 }
 
 interface MenuItemWithSubmenu {
+  id?: string;
   label: string;
   icon: string;
   link?: string;
@@ -47,7 +48,8 @@ export class MenuComponent implements OnInit, OnDestroy {
   constructor(
     private cdr: ChangeDetectorRef, 
     private authService: AuthService,
-    private menuStateService: MenuStateService
+    private menuStateService: MenuStateService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -153,6 +155,7 @@ export class MenuComponent implements OnInit, OnDestroy {
       }
       if (menu.rota === '/dashboard') {
         this.menuItems.push({
+          id: menu.id,
           label: menu.nome,
           icon: 'chart',
           link: menu.rota
@@ -164,6 +167,7 @@ export class MenuComponent implements OnInit, OnDestroy {
         let consultasMenu = menuMap.get('consultas');
         if (!consultasMenu) {
           consultasMenu = {
+            id: menu.id,
             label: 'Consultas',
             icon: 'search',
             expanded: false,
@@ -176,6 +180,7 @@ export class MenuComponent implements OnInit, OnDestroy {
         (submenusByPrefix['/consultas'] || []).forEach(sub => {
           if (sub.rota !== '/consultas') {
             consultasMenu.submenus?.push({
+              id: sub.id,
               label: sub.nome,
               icon: 'bank',
               link: sub.rota
@@ -189,6 +194,7 @@ export class MenuComponent implements OnInit, OnDestroy {
         let comprasMenu = menuMap.get('compras');
         if (!comprasMenu) {
           comprasMenu = {
+            id: menu.id,
             label: 'Compras',
             icon: 'shopping',
             expanded: false,
@@ -200,6 +206,7 @@ export class MenuComponent implements OnInit, OnDestroy {
         (submenusByPrefix['/compras'] || []).forEach(sub => {
           if (sub.rota !== '/compras') {
             comprasMenu.submenus?.push({
+              id: sub.id,
               label: sub.nome,
               icon: 'cart',
               link: sub.rota
@@ -211,6 +218,7 @@ export class MenuComponent implements OnInit, OnDestroy {
       // Menu principal /orcamentos
       if (menu.rota === '/orcamentos') {
         this.menuItems.push({
+          id: menu.id,
           label: menu.nome,
           icon: 'money',
           link: menu.rota
@@ -234,6 +242,7 @@ export class MenuComponent implements OnInit, OnDestroy {
           this.menuItems.push(parentMenu);
         }
         parentMenu.submenus?.push({
+          id: menu.id,
           label: menu.nome,
           icon: 'list',
           link: menu.rota
@@ -242,6 +251,7 @@ export class MenuComponent implements OnInit, OnDestroy {
       }
       // Se não se encaixa em nenhum caso, adiciona como menu simples
       this.menuItems.push({
+        id: menu.id,
         label: menu.nome,
         icon: 'list',
         link: menu.rota
@@ -263,6 +273,40 @@ export class MenuComponent implements OnInit, OnDestroy {
   toggleSubmenu(item: MenuItemWithSubmenu): void {
     if (item.submenus && item.submenus.length > 0) {
       item.expanded = !item.expanded;
+    }
+  }
+
+  onMenuItemClicked(item: MenuItemWithSubmenu, event: MouseEvent): void {
+    event.preventDefault();
+    if (!item.link) return;
+
+    const navigate = () => {
+      try {
+        this.router.navigateByUrl(item.link!);
+      } catch {
+        window.location.href = item.link!;
+      }
+      // Fecha em mobile
+      if (this.isMobile) {
+        this.closeMenu();
+      }
+    };
+
+    if (item.id) {
+      this.authService.validarAcessoPatente(item.id).subscribe({
+        next: (allowed: boolean) => {
+          if (allowed) {
+            navigate();
+          } else {
+            window.alert('Acesso negado');
+          }
+        },
+        error: () => {
+          window.alert('Erro ao validar acesso');
+        }
+      });
+    } else {
+      navigate();
     }
   }
 
