@@ -129,6 +129,7 @@ export class MenuComponent implements OnInit, OnDestroy {
       icon: 'home',
       link: '/home'
     }];
+
     const menuMap = new Map<string, MenuItemWithSubmenu>();
 
     // Agrupa submenus por prefixo principal
@@ -143,6 +144,9 @@ export class MenuComponent implements OnInit, OnDestroy {
     });
 
     menus.forEach(menu => {
+      if (menu.rota === '/home') {
+        return;
+      }
       if (menu.rota === '/home') {
         // já adicionado
         return;

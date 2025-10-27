@@ -48,7 +48,7 @@
               <a 
                 *ngIf="!item.submenus || item.submenus.length === 0; else hasSubmenus"
                 [href]="item.link" 
-                class="menu-item menu-item-with-icon"
+                class="menu-item flex items-center gap-2"
                 [title]="isMenuCollapsed ? item.label : ''"
                 (click)="handleMenuItemClick()">
                 <span class="menu-icon">{{ getIconSymbol(item.icon) }}</span>
