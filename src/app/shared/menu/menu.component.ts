@@ -257,6 +257,32 @@ export class MenuComponent implements OnInit, OnDestroy {
         link: menu.rota
       });
     });
+    // Garantir que o menu "Patentes" exista (sem rota) e contenha o submenu "Coordenação"
+    const hasPatentes = this.menuItems.some(mi => mi.label && mi.label.toLowerCase() === 'patentes');
+    if (!hasPatentes) {
+      this.menuItems.push({
+        label: 'Patentes',
+        icon: 'users',
+        expanded: false,
+        submenus: [
+          {
+            label: 'Coordenação',
+            icon: 'list',
+            link: '/patentes/coordenacao'
+          }
+        ]
+      });
+    } else {
+      // se já existe, garantir que tenha submenu Coordenação
+      const patentes = this.menuItems.find(mi => mi.label && mi.label.toLowerCase() === 'patentes');
+      if (patentes) {
+        patentes.submenus = patentes.submenus || [];
+        const hasCoord = patentes.submenus.some(s => s.label && s.label.toLowerCase() === 'coordenação' || s.label.toLowerCase() === 'coordenacao');
+        if (!hasCoord) {
+          patentes.submenus.push({ label: 'Coordenação', icon: 'list', link: '/patentes/coordenacao' });
+        }
+      }
+    }
     this.cdr.detectChanges();
   }
 

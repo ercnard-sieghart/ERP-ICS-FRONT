@@ -208,4 +208,49 @@ export class AuthService {
       this.logout();
     }
   }
+
+  // --- Patentes related API helpers (list / manage patentes and assignments)
+  listarPatentes(): Observable<any[]> {
+    const token = this.getToken();
+    const url = this.configService.getRestEndpoint('/patentes');
+    return this.http.get<any>(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
+      map(resp => Array.isArray(resp) ? resp : (resp && resp.patentes) ? resp.patentes : []),
+      catchError(this.handleAuthError.bind(this, 'Listar Patentes'))
+    );
+  }
+
+  listarUsuariosPorPatente(patenteId: string): Observable<any[]> {
+    const token = this.getToken();
+    const url = this.configService.getRestEndpoint(`/patentes/${encodeURIComponent(patenteId)}/usuarios`);
+    return this.http.get<any>(url, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    }).pipe(
+      map(resp => Array.isArray(resp) ? resp : (resp && resp.usuarios) ? resp.usuarios : []),
+      catchError(this.handleAuthError.bind(this, 'Listar Usuários por Patente'))
+    );
+  }
+
+  atribuirUsuarioPatente(patenteId: string, usuarioId: string): Observable<any> {
+    const token = this.getToken();
+    const url = this.configService.getRestEndpoint(`/patentes/${encodeURIComponent(patenteId)}/usuarios`);
+    const body = { usuarioId };
+    return this.http.post<any>(url, body, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    }).pipe(catchError(this.handleAuthError.bind(this, 'Atribuir Usuário à Patente')));
+  }
+
+  removerUsuarioPatente(patenteId: string, usuarioId: string): Observable<any> {
+    const token = this.getToken();
+    const url = this.configService.getRestEndpoint(`/patentes/${encodeURIComponent(patenteId)}/usuarios/${encodeURIComponent(usuarioId)}`);
+    return this.http.delete<any>(url, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    }).pipe(catchError(this.handleAuthError.bind(this, 'Remover Usuário da Patente')));
+  }
 }

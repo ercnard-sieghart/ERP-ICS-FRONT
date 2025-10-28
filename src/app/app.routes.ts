@@ -34,6 +34,11 @@ export const routes: Routes = [
 			loadComponent: () => import('./compras/solicitacao-compras/solicitacao-compras.component').then(m => m.SolicitacaoComprasComponent),
 			canActivate: [authGuard]
 		},
+		{
+			path: 'patentes/coordenacao',
+			loadComponent: () => import('./admin/patentes/coordenacao.component').then(m => m.CoordenacaoComponent),
+			canActivate: [authGuard]
+		},
 	{ path: '', redirectTo: 'login', pathMatch: 'full' },
 		{ path: 'detalhe-item', loadComponent: () => import('./orcamentos/detalhe-item-modal.component').then(m => m.DetalheItemModalComponent), canActivate: [authGuard] },
 	{ path: 'error', component: ErrorPageComponent },

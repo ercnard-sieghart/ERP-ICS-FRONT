@@ -1,0 +1,2 @@
+/* Minimal styles; Tailwind used in markup. Keep file to match project conventions. */
+:host { display: block; }
