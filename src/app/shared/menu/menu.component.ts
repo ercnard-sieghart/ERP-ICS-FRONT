@@ -149,10 +149,6 @@ export class MenuComponent implements OnInit, OnDestroy {
       if (menu.rota === '/home') {
         return;
       }
-      if (menu.rota === '/home') {
-        // já adicionado
-        return;
-      }
       if (menu.rota === '/dashboard') {
         this.menuItems.push({
           id: menu.id,
@@ -171,22 +167,14 @@ export class MenuComponent implements OnInit, OnDestroy {
             label: 'Consultas',
             icon: 'search',
             expanded: false,
-            submenus: []
+            submenus: [
+              { label: 'Extrato Bancário', icon: 'bank', link: '/consultas/extrato-bancario' },
+              { label: 'Relatórios', icon: 'list', link: '/consultas/relatorio' }
+            ]
           };
           menuMap.set('consultas', consultasMenu);
           this.menuItems.push(consultasMenu);
         }
-        // Adiciona todos submenus /consultas/...
-        (submenusByPrefix['/consultas'] || []).forEach(sub => {
-          if (sub.rota !== '/consultas') {
-            consultasMenu.submenus?.push({
-              id: sub.id,
-              label: sub.nome,
-              icon: 'bank',
-              link: sub.rota
-            });
-          }
-        });
         return;
       }
       // Menu principal /compras
@@ -198,21 +186,13 @@ export class MenuComponent implements OnInit, OnDestroy {
             label: 'Compras',
             icon: 'shopping',
             expanded: false,
-            submenus: []
+            submenus: [
+              { label: 'Solicitação', icon: 'cart', link: '/compras/solicitacao' }
+            ]
           };
           menuMap.set('compras', comprasMenu);
           this.menuItems.push(comprasMenu);
         }
-        (submenusByPrefix['/compras'] || []).forEach(sub => {
-          if (sub.rota !== '/compras') {
-            comprasMenu.submenus?.push({
-              id: sub.id,
-              label: sub.nome,
-              icon: 'cart',
-              link: sub.rota
-            });
-          }
-        });
         return;
       }
       // Menu principal /orcamentos
@@ -221,7 +201,10 @@ export class MenuComponent implements OnInit, OnDestroy {
           id: menu.id,
           label: menu.nome,
           icon: 'money',
-          link: menu.rota
+          link: menu.rota,
+          submenus: [
+            { label: 'Analíticos', icon: 'list', link: '/orcamentos/analiticos' }
+          ]
         });
         return;
       }
