@@ -358,15 +358,7 @@ export class MenuComponent implements OnInit, OnDestroy {
     document.body.style.overflow = '';
   }
 
-  getIconSymbol(iconName: string): string {
-    const iconMap: { [key: string]: string } = {
-      'home': '🏠', 'money': '💰', 'shopping': '🛒', 'cart': '🛍️',
-      'search': '🔍', 'users': '👥', 'calendar': '📅', 'document': '📄',
-      'list': '📋', 'chart': '📊', 'clock': '🕒', 'folder': '📁',
-      'globe': '🌐', 'plus': '➕', 'bank': '🏦'
-    };
-    return iconMap[iconName] || '📝';
-  }
+  // Função de ícone removida. Use item.icon diretamente no template.
 
   logout(): void {
     this.cleanupBodyClass();

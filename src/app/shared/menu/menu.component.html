@@ -17,7 +17,7 @@
       <!-- Cabeçalho do usuário -->
       <div class="user-section" *ngIf="!isMenuCollapsed || isMobile">
         <div class="flex flex-col items-center w-full">
-          <img src="assets/logo.png" alt="Logo" class="h-16 w-16 object-contain mb-2" />
+          <img src="assets/logo.png" alt="Logo" class="h-24 w-24 object-contain mb-4" />
           <div class="user-info w-full justify-center">
             <div class="flex items-center justify-center mb-2">
               <span class="inline-flex items-center justify-center h-9 w-9 rounded-full bg-gradient-to-br from-[#1A4E79] to-[#75C9C8] shadow-md">
@@ -51,7 +51,9 @@
                 class="menu-item flex items-center gap-2"
                 [title]="isMenuCollapsed ? item.label : ''"
                 (click)="onMenuItemClicked(item, $event)">
-                <span class="menu-icon">{{ getIconSymbol(item.icon) }}</span>
+                <span class="menu-icon">
+                  <po-icon [p-icon]="item.icon" size="sm"></po-icon>
+                </span>
                 <span class="menu-label" [class.hidden]="isMenuCollapsed && !isMobile">{{ item.label }}</span>
               </a>
               
@@ -62,7 +64,9 @@
                   class="submenu-toggle menu-item-with-icon"
                   [title]="isMenuCollapsed ? item.label : ''">
                   <div class="flex items-center flex-1 min-w-0">
-                    <span class="menu-icon">{{ getIconSymbol(item.icon) }}</span>
+                    <span class="menu-icon">
+                      <po-icon [p-icon]="item.icon" size="sm"></po-icon>
+                    </span>
                     <span class="menu-label" [class.hidden]="isMenuCollapsed && !isMobile">{{ item.label }}</span>
                   </div>
                   <span 
@@ -84,7 +88,9 @@
                         class="submenu-item menu-item-with-icon"
                         [title]="submenu.label"
                         (click)="onMenuItemClicked(submenu, $event)">
-                        <span class="menu-icon text-xs">{{ getIconSymbol(submenu.icon) }}</span>
+                        <span class="menu-icon text-xs">
+                          <po-icon [p-icon]="submenu.icon" size="xs"></po-icon>
+                        </span>
                         <span class="menu-label">{{ submenu.label }}</span>
                       </a>
                     </li>
