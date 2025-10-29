@@ -183,7 +183,7 @@ export class MenuComponent implements OnInit, OnDestroy {
           comprasMenu = {
             id: menu.id,
             label: 'Compras',
-            icon: 'shopping-cart', // Animalia: an-shopping-cart
+            icon: 'shopping-cart',
             expanded: false,
             submenus: [
               { label: 'Solicitação', icon: 'cart', link: '/compras/solicitacao' }
@@ -196,9 +196,14 @@ export class MenuComponent implements OnInit, OnDestroy {
       }
       // Menu principal /orcamentos
       if (menu.rota === '/orcamentos') {
+        // Tratamento de encoding para o nome do menu Orçamentos
+        let nomeOrcamento = menu.nome;
+        if (!nomeOrcamento || nomeOrcamento.includes('�')) {
+          nomeOrcamento = 'Orçamentos';
+        }
         this.menuItems.push({
           id: menu.id,
-          label: menu.nome,
+          label: nomeOrcamento,
           icon: 'money',
           link: menu.rota,
           submenus: [
