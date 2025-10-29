@@ -146,9 +146,8 @@ export class MenuComponent implements OnInit, OnDestroy {
     });
 
     menus.forEach(menu => {
-      if (menu.rota === '/home') {
-        return;
-      }
+      // Remove menus indesejados de verdade
+      const nomeLower = (menu.nome || '').toLowerCase();
       if (menu.rota === '/dashboard') {
         this.menuItems.push({
           id: menu.id,
@@ -165,7 +164,7 @@ export class MenuComponent implements OnInit, OnDestroy {
           consultasMenu = {
             id: menu.id,
             label: 'Consultas',
-            icon: 'magnifying-glass', // Animalia: an-magnifying-glass
+            icon: 'magnifying-glass',
             expanded: false,
             submenus: [
               { label: 'Extrato Bancário', icon: 'bank', link: '/consultas/extrato-bancario' },
@@ -209,7 +208,6 @@ export class MenuComponent implements OnInit, OnDestroy {
         return;
       }
       // Submenus que não têm menu principal
-      // Exemplo: /consultas/solicitacao sem /consultas
       const parts = menu.rota.split('/').filter(Boolean);
       if (parts.length > 1) {
         const prefix = '/' + parts[0];
@@ -240,6 +238,7 @@ export class MenuComponent implements OnInit, OnDestroy {
         link: menu.rota
       });
     });
+
     // Garantir que o menu "Patentes" exista (sem rota) e contenha o submenu "Coordenação"
     const hasPatentes = this.menuItems.some(mi => mi.label && mi.label.toLowerCase() === 'patentes');
     if (!hasPatentes) {

@@ -29,8 +29,8 @@
         <div>
           <div class="flex flex-row items-center justify-between mb-4">
             <h2 class="text-lg font-bold truncate break-words max-w-[220px]" title="{{ item.nomeItemContabil }}">{{ item.nomeItemContabil }}</h2>
+            <!-- Botão de Ver Analíticos ajustado, sem chamada para detalhe-item -->
             <button
-              (click)="irParaDetalheItem(item)"
               class="px-3 py-2 rounded-lg font-semibold text-sm bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white shadow-md hover:scale-105 hover:from-[#155a8a] hover:to-[#5bbdbb] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#1A4E79] focus:ring-offset-2"
               aria-label="Ver Analíticos"
             >
@@ -62,14 +62,9 @@
     [items]="getAnaliticosTableData()"
     [sintetico]="selectedSintetico"
     (close)="closeAnaliticosModal()"
-    (rowClick)="onAnaliticoClick($event)"
   ></app-analiticos-modal>
 
-      <app-detalhe-item-modal
-        [show]="showDetalhesAnaliticoModal"
-        [item]="analiticoSelecionado"
-        (close)="closeDetalhesAnaliticoModal()"
-      ></app-detalhe-item-modal>
+      <!-- Modal de detalhe de item removido -->
 
       <po-modal
         *ngIf="showRemanejamentoModal"

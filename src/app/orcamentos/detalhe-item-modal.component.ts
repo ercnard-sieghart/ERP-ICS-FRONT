@@ -3,8 +3,7 @@ import { PoModalModule } from '@po-ui/ng-components';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-detalhe-item-modal',
-  templateUrl: './detalhe-item-modal.component.html',
+  // Componente removido
   standalone: true,
   imports: [CommonModule, PoModalModule]
 })
@@ -14,13 +13,9 @@ export class DetalheItemModalComponent {
   @Output() close = new EventEmitter<void>();
 
   constructor() {
-    // Se o componente for carregado via rota, pega o item do history.state
-    if (!this.item && typeof window !== 'undefined' && window.history.state && window.history.state.item) {
-      this.item = window.history.state.item;
-    }
+    // Componente DetalheItemModalComponent removido
   }
 
   onClose() {
-    this.close.emit();
-  }
+    // Método removido
 }

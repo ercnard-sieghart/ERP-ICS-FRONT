@@ -40,7 +40,7 @@ export const routes: Routes = [
 			canActivate: [authGuard]
 		},
 	{ path: '', redirectTo: 'login', pathMatch: 'full' },
-		{ path: 'detalhe-item', loadComponent: () => import('./orcamentos/detalhe-item-modal.component').then(m => m.DetalheItemModalComponent), canActivate: [authGuard] },
+    // Rota detalhe-item removida
 	{ path: 'error', component: ErrorPageComponent },
 	{ path: '**', redirectTo: 'error' }
 ];

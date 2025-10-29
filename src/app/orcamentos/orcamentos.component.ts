@@ -5,7 +5,7 @@ import { FilterAnoPipe } from './filter-ano.pipe';
 import { FilterCentroCustoPipe } from './filter-centro-custo.pipe';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DetalheItemModalComponent } from './detalhe-item-modal.component';
+// import removido: DetalheItemModalComponent
 import { PoTableModule, PoTableColumn, PoModalModule } from '@po-ui/ng-components';
 import { AnaliticosModalComponent } from './analiticos-modal.component';
 import { Router } from '@angular/router';
@@ -24,17 +24,12 @@ import { Router } from '@angular/router';
     FilterAnoPipe,
     FilterCentroCustoPipe,
   AnaliticosModalComponent,
-  DetalheItemModalComponent
+  // DetalheItemModalComponent removido
   ]
 })
 export class OrcamentosComponent {
-  irParaDetalheItem(item: any) {
-    this.router.navigate(['/detalhe-item'], { state: { item } });
-  }
-  abrirDetalhamento(item: any) {
-    this.analiticoSelecionado = item;
-    this.showDetalhesAnaliticoModal = true;
-  }
+  // Método irParaDetalheItem removido
+  // Método abrirDetalhamento removido
   constructor(private router: Router) {}
   irParaHome() {
     this.router.navigate(['/home']);
@@ -133,9 +128,9 @@ export class OrcamentosComponent {
   ];
   selectedSintetico: any = null;
   showAnaliticosModal: boolean = false;
-    showDetalhesAnaliticoModal: boolean = false;
+  // showDetalhesAnaliticoModal removido
     showRemanejamentoModal: boolean = false;
-    analiticoSelecionado: any = null;
+  // analiticoSelecionado removido
     remOrigem: string = '';
     remDestino: string = '';
     remValor: number | null = null;
@@ -161,15 +156,9 @@ PoButtonType: any;
     this.selectedSintetico = null;
   }
 
-    onAnaliticoClick(analitico: any) {
-      this.analiticoSelecionado = analitico;
-      this.showDetalhesAnaliticoModal = true;
-    }
+    // Método onAnaliticoClick removido
 
-    closeDetalhesAnaliticoModal() {
-      this.showDetalhesAnaliticoModal = false;
-      this.analiticoSelecionado = null;
-    }
+    // Método closeDetalhesAnaliticoModal removido
 
     openRemanejamentoModal() {
       this.showRemanejamentoModal = true;
