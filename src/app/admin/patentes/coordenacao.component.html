@@ -10,17 +10,32 @@
     <div class="bg-white/95 backdrop-blur-sm rounded-xl shadow-xl p-8 border border-white/20">
       <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-semibold text-[#1A4E79]">Coordenação - Patentes</h1>
-        <div class="flex items-center gap-2">
-          <button (click)="carregarPatentes()" class="bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white px-4 py-2 rounded-lg hover:shadow-md flex items-center gap-2">
-            <i class="po-icon po-icon-refresh"></i>
-            Atualizar
-          </button>
-        </div>
+        <!-- botão 'Atualizar' removido por solicitação -->
+      </div>
+
+  <!-- Mobile: accordion/lista de patentes compacta -->
+  <div *ngIf="isMobile" class="mb-4">
+        <details class="bg-white rounded-xl shadow-lg p-3 border-l-4 border-[#75C9C8]">
+          <summary class="flex items-center justify-between cursor-pointer">
+            <span class="font-medium text-[#1A4E79]">Patentes</span>
+            <span class="text-sm text-gray-500">{{ (patentes && patentes.length) || 0 }}</span>
+          </summary>
+          <ul class="mt-3">
+            <li *ngFor="let p of patentes" class="py-2 border-b last:border-b-0">
+              <button class="w-full text-left" (click)="selecionarPatente(p)">
+                <div class="flex items-center justify-between">
+                  <span class="font-medium text-[#1A4E79]">{{p.nome || p.label || p.id}}</span>
+                  <span class="text-sm text-gray-500">{{p.id}}</span>
+                </div>
+              </button>
+            </li>
+          </ul>
+        </details>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <!-- Lista de patentes (coluna esquerda) -->
-        <div class="lg:col-span-1 bg-white rounded-xl shadow-lg p-4 border-l-4 border-[#75C9C8]">
+  <!-- Lista de patentes (coluna esquerda) -->
+  <div *ngIf="!isMobile" class="lg:col-span-1 bg-white rounded-xl shadow-lg p-4 border-l-4 border-[#75C9C8]">
           <h2 class="text-lg font-semibold text-[#1A4E79] mb-3">Patentes</h2>
           <div *ngIf="!patentes || patentes.length === 0" class="text-sm text-[#1A4E79]/70">Nenhuma patente encontrada</div>
           <ul>
