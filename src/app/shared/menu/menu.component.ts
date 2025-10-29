@@ -128,7 +128,7 @@ export class MenuComponent implements OnInit, OnDestroy {
     // Sempre adiciona /home
     this.menuItems = [{
       label: 'Home',
-      icon: 'home',
+      icon: 'house', // Animalia: an-house
       link: '/home'
     }];
 
@@ -165,7 +165,7 @@ export class MenuComponent implements OnInit, OnDestroy {
           consultasMenu = {
             id: menu.id,
             label: 'Consultas',
-            icon: 'search',
+            icon: 'magnifying-glass', // Animalia: an-magnifying-glass
             expanded: false,
             submenus: [
               { label: 'Extrato Bancário', icon: 'bank', link: '/consultas/extrato-bancario' },

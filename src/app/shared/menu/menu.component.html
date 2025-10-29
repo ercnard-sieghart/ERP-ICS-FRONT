@@ -52,9 +52,9 @@
                 [title]="isMenuCollapsed ? item.label : ''"
                 (click)="onMenuItemClicked(item, $event)">
                 <span class="menu-icon">
-                  <po-icon [p-icon]="item.icon" size="sm"></po-icon>
+                  <po-icon p-icon="an an-{{item.icon}}" size="sm"></po-icon>
                 </span>
-                <span class="menu-label" [class.hidden]="isMenuCollapsed && !isMobile">{{ item.label }}</span>
+                <span class="ml-2 menu-label" [class.hidden]="isMenuCollapsed && !isMobile">{{ item.label }}</span>
               </a>
               
               <!-- Item com submenu -->
@@ -65,9 +65,9 @@
                   [title]="isMenuCollapsed ? item.label : ''">
                   <div class="flex items-center flex-1 min-w-0">
                     <span class="menu-icon">
-                      <po-icon [p-icon]="item.icon" size="sm"></po-icon>
+                      <po-icon p-icon="an an-{{item.icon}}" size="sm"></po-icon>
                     </span>
-                    <span class="menu-label" [class.hidden]="isMenuCollapsed && !isMobile">{{ item.label }}</span>
+                    <span class="ml-2 menu-label" [class.hidden]="isMenuCollapsed && !isMobile">{{ item.label }}</span>
                   </div>
                   <span 
                     class="submenu-arrow"
@@ -89,9 +89,9 @@
                         [title]="submenu.label"
                         (click)="onMenuItemClicked(submenu, $event)">
                         <span class="menu-icon text-xs">
-                          <po-icon [p-icon]="submenu.icon" size="xs"></po-icon>
+                          <po-icon p-icon="an an-{{submenu.icon}}" size="xs"></po-icon>
                         </span>
-                        <span class="menu-label">{{ submenu.label }}</span>
+                        <span class="ml-2 menu-label">{{ submenu.label }}</span>
                       </a>
                     </li>
                   </ul>
