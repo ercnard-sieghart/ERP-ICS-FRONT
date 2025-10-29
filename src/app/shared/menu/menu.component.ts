@@ -183,7 +183,7 @@ export class MenuComponent implements OnInit, OnDestroy {
           comprasMenu = {
             id: menu.id,
             label: 'Compras',
-            icon: 'shopping',
+            icon: 'shopping-cart', // Animalia: an-shopping-cart
             expanded: false,
             submenus: [
               { label: 'Solicitação', icon: 'cart', link: '/compras/solicitacao' }
