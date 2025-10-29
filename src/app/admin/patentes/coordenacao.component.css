@@ -1,2 +1,7 @@
 /* Minimal styles; Tailwind used in markup. Keep file to match project conventions. */
 :host { display: block; }
+
+/* Pequenas correções para o layout quando necessário */
+.sugestoes-dropdown { position: relative; z-index: 40; }
+.sugestao-item { padding: 8px; cursor: pointer; }
+.sugestao-item:hover { background: rgba(26,78,121,0.04); }
