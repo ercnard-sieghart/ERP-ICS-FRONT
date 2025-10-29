@@ -186,7 +186,7 @@ export class MenuComponent implements OnInit, OnDestroy {
             icon: 'shopping-cart',
             expanded: false,
             submenus: [
-              { label: 'Solicitação', icon: 'cart', link: '/compras/solicitacao' }
+              { label: 'Solicitação', icon: 'an an-note-pencil', link: '/compras/solicitacao' }
             ]
           };
           menuMap.set('compras', comprasMenu);
