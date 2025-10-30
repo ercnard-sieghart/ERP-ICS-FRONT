@@ -489,7 +489,7 @@ export class MenuComponent implements OnInit, OnDestroy {
     this.menuStateService.setMenuCollapsed(this.isMenuCollapsed);
     this.updateBodyClass();
     
-    // Salvar estado (apenas em desktop)
+
     if (!this.isMobile) {
       localStorage.setItem('menuCollapsed', JSON.stringify(this.isMenuCollapsed));
     }
@@ -510,7 +510,6 @@ export class MenuComponent implements OnInit, OnDestroy {
     document.body.style.overflow = '';
   }
 
-  // Função de ícone removida. Use item.icon diretamente no template.
 
   logout(): void {
     this.cleanupBodyClass();
