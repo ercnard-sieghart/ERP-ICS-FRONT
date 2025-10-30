@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError, BehaviorSubject } from 'rxjs';
+import { Observable, throwError, BehaviorSubject, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { ConfigService } from './config.service';
 
@@ -16,7 +16,6 @@ export interface MenuItem {
   providedIn: 'root'
 })
 export class AuthService {
-  // ...existing code...
   // Menus do usuário
   private menusUsuario = new BehaviorSubject<any[]>([]);
   public menusUsuario$ = this.menusUsuario.asObservable();
@@ -24,12 +23,17 @@ export class AuthService {
   carregarMenusLiberadosUsuario(): Observable<any[]> {
     const token = this.getToken();
     const userId = localStorage.getItem('user_id');
-    const url = this.configService.getRestEndpoint(`/patentes/menus?usuario=${userId}`);
-    return this.http.get<any>(url, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    }).pipe(
+
+    const url = this.configService.getRestEndpoint('/patentes/menus');
+    const headers: any = {
+      'Authorization': `Bearer ${token}`,
+      'X-Request-Name': 'patentes.menus.listByUser'
+    };
+    if (userId) {
+      headers['X-User-Id'] = userId;
+    }
+
+    return this.http.get<any>(url, { headers }).pipe(
       map(response => {
         let menusRaw = Array.isArray(response) ? response : response.menus;
         if (menusRaw && Array.isArray(menusRaw)) {
@@ -41,6 +45,10 @@ export class AuthService {
             ordem: m.ordem
           }));
           this.menusUsuario.next(menus);
+          try {
+            // Persistir menus no localStorage para uso por guards/componentes
+            localStorage.setItem('menusUsuario', JSON.stringify(menus));
+          } catch (e) {}
           return menus;
         }
         return [];
@@ -62,58 +70,6 @@ export class AuthService {
     private configService: ConfigService
   ) {}
 
-  // Cache de acessos às patentes durante a sessão (persistido em sessionStorage)
-  private getPatenteAccessCache(): { [id: string]: boolean } {
-    try {
-      const raw = sessionStorage.getItem('patenteAccessCache');
-      return raw ? JSON.parse(raw) : {};
-    } catch {
-      return {};
-    }
-  }
-
-  private setPatenteAccessCache(cache: { [id: string]: boolean }): void {
-    try {
-      sessionStorage.setItem('patenteAccessCache', JSON.stringify(cache));
-    } catch {}
-  }
-
-  /**
-   * Valida se o usuário tem acesso à patente/menu especificado pelo id.
-   * Faz POST para /rest/patentes/validar com body { id }
-   * O resultado é cacheado em sessionStorage até logout.
-   */
-  validarAcessoPatente(id: string) {
-    const cache = this.getPatenteAccessCache();
-    if (cache.hasOwnProperty(id)) {
-      return new Observable<boolean>(subscriber => {
-        subscriber.next(!!cache[id]);
-        subscriber.complete();
-      });
-    }
-
-    const token = this.getToken();
-    const url = this.configService.getRestEndpoint('/patentes/validar');
-    const body = { id };
-    return this.http.post<any>(url, body, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    }).pipe(
-      map(response => {
-        // backend pode retornar { message: '', acess: true }
-        const acess = response && (response.acess === true || response.access === true);
-        cache[id] = !!acess;
-        this.setPatenteAccessCache(cache);
-        return !!acess;
-      }),
-      catchError(err => {
-        // Em caso de erro propaga o erro
-        return throwError(() => err);
-      })
-    );
-  }
 
   authenticate(username: string, password: string): Observable<any> {
     const headers = new HttpHeaders({
@@ -161,7 +117,7 @@ export class AuthService {
   localStorage.removeItem('empresa');
   localStorage.removeItem('filial');
   localStorage.removeItem('menusUsuario');
-  try { sessionStorage.removeItem('patenteAccessCache'); } catch {}
+  try { localStorage.removeItem('patenteAccessCache'); } catch {}
   this.userUpdateSubject.next('Usuário');
   }
 
@@ -252,5 +208,47 @@ export class AuthService {
     return this.http.delete<any>(url, {
       headers: { 'Authorization': `Bearer ${token}` }
     }).pipe(catchError(this.handleAuthError.bind(this, 'Remover Usuário da Patente')));
+  }
+
+  /**
+   * Valida acesso a uma patente (menu) enviando POST /patentes/validar com body { id }.
+   * Resultado é cacheado em localStorage.patenteAccessCache para evitar chamadas repetidas.
+   */
+  validarAcessoPatente(menuId: string | null | undefined): Observable<boolean> {
+    // menuId pode ser vazio; mesmo assim devemos forçar a requisição ao backend
+    const cacheKey = 'patenteAccessCache';
+    const key = (menuId === null || menuId === undefined || menuId === '') ? '__EMPTY__' : menuId.toString();
+    try {
+      const raw = localStorage.getItem(cacheKey);
+      const cache = raw ? JSON.parse(raw) : {};
+      if (cache && cache.hasOwnProperty(key)) {
+        return of(!!cache[key]);
+      }
+    } catch {
+      // ignore parse errors
+    }
+
+    const token = this.getToken();
+    const url = this.configService.getRestEndpoint('/patentes/validar');
+    // Envia body mesmo quando id for vazio/null para forçar a validação no servidor
+    return this.http.post<any>(url, { id: menuId }, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'X-Request-Name': 'patentes.validar'
+      }
+    }).pipe(
+      map(response => {
+        const acess = response && (response.acess === true || response.access === true || response.acess === 'true');
+        try {
+          const raw = localStorage.getItem(cacheKey);
+          const cache = raw ? JSON.parse(raw) : {};
+          cache[key] = !!acess;
+          localStorage.setItem(cacheKey, JSON.stringify(cache));
+        } catch {}
+        return !!acess;
+      }),
+      catchError(() => of(false))
+    );
   }
 }

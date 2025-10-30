@@ -132,7 +132,7 @@ export class LoginComponent {
   private finishLoginSuccess(loginBody: any) {
     this.loading = false;
     this.popupType = 'success';
-    this.popupMessage = loginBody.MESSAGE || 'Autenticação realizada com sucesso!';
+    this.popupMessage = loginBody.MESSAGE || 'Login realizado com sucesso!';
     this.showPopup = true;
 
     setTimeout(() => {

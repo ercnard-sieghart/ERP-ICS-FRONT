@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../shared/services/auth.service';
@@ -12,6 +12,7 @@ import { AuthService } from '../../shared/services/auth.service';
 })
 export class CoordenacaoComponent implements OnInit {
   loading = false;
+  isMobile: boolean = false;
   patentes: any[] = [];
   selectedPatente: any | null = null;
   usuarios: any[] = [];
@@ -21,7 +22,17 @@ export class CoordenacaoComponent implements OnInit {
   constructor(private authService: AuthService) {}
 
   ngOnInit(): void {
+    this.checkScreenSize();
     this.carregarPatentes();
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(): void {
+    this.checkScreenSize();
+  }
+
+  private checkScreenSize(): void {
+    this.isMobile = window.innerWidth < 680;
   }
 
   carregarPatentes(): void {
