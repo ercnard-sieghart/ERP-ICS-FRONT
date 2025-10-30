@@ -425,15 +425,10 @@ export class MenuComponent implements OnInit, OnDestroy {
     // (exceto rotas públicas como /home e /login) fazemos a validação no primeiro acesso
     // enviando o id do menu pai. O guard continua protegendo a rota como segunda barreira.
     const publicRoutes = ['/home', '/login', '/error'];
-    // DEBUG: log menu click and resolution path for troubleshooting
-    // eslint-disable-next-line no-console
-    console.debug('[menu] item click', { link: item.link, id: item.id });
-
-    if (item.link && !publicRoutes.includes(item.link)) {
+  if (item.link && !publicRoutes.includes(item.link)) {
       // Determinar id do menu pai: preferir item.id, senão buscar em menusUsuario pelo prefixo
       let menuId = item.id as string | undefined;
-      // eslint-disable-next-line no-console
-      console.debug('[menu] inicio busca menuId, item.id=', menuId);
+      
       if (!menuId) {
         try {
           const raw = localStorage.getItem('menusUsuario');
@@ -441,15 +436,13 @@ export class MenuComponent implements OnInit, OnDestroy {
           const parts = (item.link || '').split('/').filter(Boolean);
           const prefix = parts.length > 0 ? '/' + parts[0] : item.link;
           const found = (menus || []).find((m: any) => (m.rota || '').toLowerCase() === prefix || (m.rota || '').toLowerCase().startsWith(prefix));
-          // eslint-disable-next-line no-console
-          console.debug('[menu] menusUsuario search', { prefix, found });
+          
           menuId = found && found.id ? found.id : undefined;
         } catch {}
       }
       if (!menuId) {
         // Não conseguimos determinar id do menu pai; ainda assim forçar validação com id vazio
-        // eslint-disable-next-line no-console
-        console.debug('[menu] validarAcessoPatente será chamado com id vazio');
+        
         this.authService.validarAcessoPatente('').subscribe(allowed => {
           if (allowed) {
             attemptNavigate();
