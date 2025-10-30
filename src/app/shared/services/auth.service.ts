@@ -174,7 +174,17 @@ export class AuthService {
         'Authorization': `Bearer ${token}`
       }
     }).pipe(
-      map(resp => Array.isArray(resp) ? resp : (resp && resp.patentes) ? resp.patentes : []),
+      map(resp => {
+        const raw = Array.isArray(resp) ? resp : (resp && resp.patentes) ? resp.patentes : [];
+        // Normalizar propriedades para garantir 'id' e 'nome' disponíveis no frontend
+        if (!Array.isArray(raw)) return [];
+        return raw.map((p: any) => ({
+          id: p.id || p.ID || p.codigo || '',
+          nome: p.nome || p.menu || p.label || p.name || p.descricao || p.description || p.ID || p.id || '',
+          // mantém as propriedades originais caso sejam necessárias
+          ...p
+        }));
+      }),
       catchError(this.handleAuthError.bind(this, 'Listar Patentes'))
     );
   }
