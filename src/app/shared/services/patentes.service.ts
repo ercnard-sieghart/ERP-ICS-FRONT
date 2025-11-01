@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { ConfigService } from './config.service';
 import { AuthService } from './auth.service';
@@ -79,7 +79,6 @@ export class PatentesService {
       console.debug('[patentes] /patentes/pertence request', { url, body: JSON.stringify(body), headers: safeHeaders });
     } catch {}
 
-    // Use POST to send JSON body; POST is more widely supported for payloads and avoids GET-with-body issues
     return this.http.post<any>(url, body, { headers }).pipe(
       map(resp => normalize(resp)),
       catchError(err => this.handleError('Listar Usuários (patentes/pertence)', err as HttpErrorResponse))
@@ -104,5 +103,21 @@ export class PatentesService {
     return this.http.delete<any>(url, {
       headers: { 'Authorization': `Bearer ${token}` }
     }).pipe(catchError(err => this.handleError('Remover Usuário da Patente', err)));
+  }
+
+  /**
+   * Busca de usuários por texto (autocomplete). Tentamos um endpoint de busca geral;
+   * em caso de erro retornamos lista vazia para não quebrar o frontend enquanto o
+   * backend não estiver disponível.
+   */
+  searchUsuarios(query: string): Observable<any[]> {
+    if (!query || query.trim().length === 0) return of([]);
+    const token = this.authService.getToken();
+    // Endpoint sugerido - ajustar se o backend expor outro caminho
+    const url = this.configService.getRestEndpoint(`/usuarios/search?query=${encodeURIComponent(query)}`);
+    return this.http.get<any>(url, { headers: { 'Authorization': `Bearer ${token}` } }).pipe(
+      map(resp => Array.isArray(resp) ? resp : (resp && resp.usuarios) ? resp.usuarios : []),
+      catchError(() => of([]))
+    );
   }
 }

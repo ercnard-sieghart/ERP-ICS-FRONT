@@ -1,7 +1,9 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PatentesService } from '../../shared/services/patentes.service';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-patentes-coordenacao',
@@ -19,12 +21,28 @@ export class CoordenacaoComponent implements OnInit {
   novoUsuarioId = '';
   mensagem = '';
   usersLoading: boolean = false; // loading apenas para lista de usuários
+  showAddUserForm = false;
+  userSearchQuery = '';
+  userSearchSuggestions: any[] = [];
+  private userSearch$ = new Subject<string>();
+  private userSearchSub?: Subscription;
 
   constructor(private patentesService: PatentesService) {}
 
   ngOnInit(): void {
     this.checkScreenSize();
     this.carregarPatentes();
+    this.userSearchSub = this.userSearch$.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(q => this.patentesService.searchUsuarios(q))
+    ).subscribe(results => {
+      this.userSearchSuggestions = Array.isArray(results) ? results : [];
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.userSearchSub?.unsubscribe();
   }
 
   @HostListener('window:resize', ['$event'])
@@ -81,19 +99,39 @@ export class CoordenacaoComponent implements OnInit {
   }
 
   abrirAdicionarUsuario(): void {
-    const id = prompt('Informe o id do usuário para atribuir:');
-    if (!id) return;
-    this.novoUsuarioId = id.trim();
-    this.confirmarAdicionarUsuario();
+    this.showAddUserForm = true;
+    this.userSearchQuery = '';
+    this.novoUsuarioId = '';
+  }
+
+  cancelarAdicionarUsuario(): void {
+    this.showAddUserForm = false;
+    this.userSearchQuery = '';
+    this.novoUsuarioId = '';
+  }
+
+  onUserQueryChange(q: string): void {
+    this.userSearchQuery = q;
+    this.userSearch$.next(q);
+  }
+
+  selectUserSuggestion(user: any): void {
+    this.userSearchQuery = user.nome || user.name || user.login || user.id || '';
+    this.novoUsuarioId = user.id || user.usuario_id || '';
+    this.userSearchSuggestions = [];
   }
 
   confirmarAdicionarUsuario(): void {
-    if (!this.selectedPatente || !this.selectedPatente.id || !this.novoUsuarioId) return;
-  this.patentesService.atribuirUsuarioPatente(this.selectedPatente.id, this.novoUsuarioId).subscribe({
+    const candidateName = (this.userSearchQuery || this.novoUsuarioId || '').toString().trim();
+    if (!this.selectedPatente || !this.selectedPatente.id || !candidateName) return;
+    // enviar o nome do usuário para o backend; backend deve resolver para ID
+    this.patentesService.atribuirUsuarioPatente(this.selectedPatente.id, candidateName).subscribe({
       next: (resp) => {
         // inserir localmente para resposta imediata
-        this.usuarios.push({ id: this.novoUsuarioId, nome: this.novoUsuarioId });
+        this.usuarios.push({ id: candidateName, nome: candidateName });
         this.novoUsuarioId = '';
+        this.userSearchQuery = '';
+        this.showAddUserForm = false;
       },
       error: () => alert('Erro ao atribuir usuário')
     });
