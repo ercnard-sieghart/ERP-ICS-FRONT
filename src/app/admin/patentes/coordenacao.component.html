@@ -64,10 +64,11 @@
             <div class="mb-4">
               <div class="flex items-center gap-2 mb-2">
                 <h3 class="font-medium text-[#1A4E79]">Usuários atribuídos</h3>
-                <button class="ml-auto bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white px-3 py-1 rounded flex items-center gap-2" (click)="abrirAdicionarUsuario()">
+                <button class="ml-auto bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white px-3 py-1 rounded flex items-center gap-2" (click)="abrirAdicionarUsuario()" [disabled]="usersLoading">
                   <i class="po-icon po-icon-plus"></i>
                   Adicionar
                 </button>
+                <span *ngIf="usersLoading" class="ml-3 text-sm text-gray-500">Carregando usuários...</span>
               </div>
 
               <ul>

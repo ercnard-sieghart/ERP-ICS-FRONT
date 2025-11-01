@@ -18,6 +18,7 @@ export class CoordenacaoComponent implements OnInit {
   usuarios: any[] = [];
   novoUsuarioId = '';
   mensagem = '';
+  usersLoading: boolean = false; // loading apenas para lista de usuários
 
   constructor(private authService: AuthService) {}
 
@@ -53,15 +54,16 @@ export class CoordenacaoComponent implements OnInit {
     this.selectedPatente = p;
     this.usuarios = [];
     if (!p || !p.id) return;
-    this.loading = true;
+    // Carrega usuários sem mostrar o overlay global de carregamento
+    this.usersLoading = true;
     this.authService.listarUsuariosPorPatente(p.id).subscribe({
       next: (dados) => {
         this.usuarios = Array.isArray(dados) ? dados : [];
-        this.loading = false;
+        this.usersLoading = false;
       },
       error: () => {
         this.mensagem = 'Erro ao carregar usuários desta patente';
-        this.loading = false;
+        this.usersLoading = false;
       }
     });
   }
