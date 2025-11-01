@@ -7,6 +7,8 @@ import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class PatentesService {
+  // Cache local para a lista completa de usuários do sistema (evita múltiplas requests)
+  private _usersCache: any[] | null = null;
   constructor(
     private http: HttpClient,
     private configService: ConfigService,
@@ -111,12 +113,36 @@ export class PatentesService {
    * backend não estiver disponível.
    */
   searchUsuarios(query: string): Observable<any[]> {
+    // Se query vazia, não sugerir nada
     if (!query || query.trim().length === 0) return of([]);
+    const q = query.trim().toLowerCase();
+
+    // Se já temos cache, filtra client-side e retorna imediatamente
+    if (this._usersCache && Array.isArray(this._usersCache)) {
+      const filtered = this._usersCache
+        .filter(u => {
+          const name = (u.USER_NAME ?? '').toString().toLowerCase();
+          return name.startsWith(q);
+        })
+        .map(u => ({ id: u.USER_ID ?? u.USERID ?? '', nome: u.USER_NAME ?? '', ...u }));
+      return of(filtered);
+    }
+
+    // Caso não tenhamos cache, buscar /sysusr/lista uma vez e armazenar
     const token = this.authService.getToken();
-    // Endpoint sugerido - ajustar se o backend expor outro caminho
-    const url = this.configService.getRestEndpoint(`/usuarios/search?query=${encodeURIComponent(query)}`);
+    const url = this.configService.getRestEndpoint('/sysusr/lista');
     return this.http.get<any>(url, { headers: { 'Authorization': `Bearer ${token}` } }).pipe(
-      map(resp => Array.isArray(resp) ? resp : (resp && resp.usuarios) ? resp.usuarios : []),
+      map(resp => {
+        const arr = resp && Array.isArray(resp.USERS) ? resp.USERS : [];
+        this._usersCache = Array.isArray(arr) ? arr : [];
+        const filtered = this._usersCache
+          .filter((u: any) => {
+            const name = (u.USER_NAME ?? '').toString().toLowerCase();
+            return name.startsWith(q);
+          })
+          .map((u: any) => ({ id: u.USER_ID, nome: u.USER_NAME, ...u }));
+        return filtered;
+      }),
       catchError(() => of([]))
     );
   }

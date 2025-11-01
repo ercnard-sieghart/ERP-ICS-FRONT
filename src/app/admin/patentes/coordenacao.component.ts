@@ -133,23 +133,34 @@ export class CoordenacaoComponent implements OnInit {
 
   onUserQueryChange(q: string): void {
     this.userSearchQuery = q;
+    // se o usuário digitar algo manualmente, zera o id selecionado anteriormente
+    this.novoUsuarioId = '';
     this.userSearch$.next(q);
   }
 
   selectUserSuggestion(user: any): void {
     this.userSearchQuery = user.nome || user.name || user.login || user.id || '';
-    this.novoUsuarioId = user.id || user.usuario_id || '';
+    // armazenar o id real retornado pelo backend para uso na inclusão
+    this.novoUsuarioId = user.id || user.USER_ID || user.usuario_id || user.USERID || '';
     this.userSearchSuggestions = [];
   }
 
   confirmarAdicionarUsuario(): void {
-    const candidateName = (this.userSearchQuery || this.novoUsuarioId || '').toString().trim();
-    if (!this.selectedPatente || !this.selectedPatente.id || !candidateName) return;
-    // enviar o nome do usuário para o backend; backend deve resolver para ID
-    this.patentesService.atribuirUsuarioPatente(this.selectedPatente.id, candidateName).subscribe({
+    const payload = (this.novoUsuarioId && this.novoUsuarioId.toString().trim()) || (this.userSearchQuery || '').toString().trim();
+    if (!this.selectedPatente || !this.selectedPatente.id || !payload) return;
+    // Preferimos enviar o ID quando disponível; caso contrário enviamos o texto digitado
+    this.patentesService.atribuirUsuarioPatente(this.selectedPatente.id, payload).subscribe({
       next: (resp) => {
-        // inserir localmente para resposta imediata
-        this.usuarios.push({ id: candidateName, nome: candidateName });
+        // tentar usar a resposta do servidor para adicionar à lista localmente
+        const added = resp && (resp.usuario || resp.user || resp.data) ? (resp.usuario || resp.user || resp.data) : null;
+        if (added && (added.id || added.USER_ID || added.usuario_id)) {
+          const id = added.id || added.USER_ID || added.usuario_id;
+          const nome = added.nome || added.USER_NAME || added.usuario_nome || added.name || this.userSearchQuery;
+          this.usuarios.push({ id, nome, ...added });
+        } else {
+          // fallback: usar payload como id/nome quando o backend não retornar detalhes
+          this.usuarios.push({ id: payload, nome: this.userSearchQuery || payload });
+        }
         this.novoUsuarioId = '';
         this.userSearchQuery = '';
         this.showAddUserForm = false;

@@ -5,3 +5,19 @@
 .sugestoes-dropdown { position: relative; z-index: 40; }
 .sugestao-item { padding: 8px; cursor: pointer; }
 .sugestao-item:hover { background: rgba(26,78,121,0.04); }
+
+/* Modal de remoção - estilos responsivos */
+.remove-modal-root { z-index: 60; }
+.remove-modal-overlay { backdrop-filter: blur(2px); }
+.remove-modal-card { max-width: 520px; border: 1px solid rgba(15,63,90,0.06); }
+.remove-modal-card h3 { color: #0f3f5a; }
+.remove-modal-card p { color: #425466; }
+.remove-modal-actions button { min-width: 96px; }
+
+/* Mobile: transformar modal em bottom sheet */
+@media (max-width: 640px) {
+	.remove-modal-root { align-items: flex-end; }
+	.remove-modal-card { border-bottom-left-radius: 0.75rem; border-bottom-right-radius: 0.75rem; border-top-left-radius: 0.75rem; border-top-right-radius: 0.75rem; width: 100%; max-width: 100%; margin: 0; padding: 16px; box-shadow: 0 -6px 30px rgba(15,63,90,0.12); }
+	.remove-modal-actions { flex-direction: column-reverse; gap: 8px; }
+	.remove-modal-actions button { width: 100%; }
+}
