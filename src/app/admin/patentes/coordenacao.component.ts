@@ -2,6 +2,7 @@ import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../shared/services/auth.service';
+import { PatentesService } from './patentes.service';
 
 @Component({
   selector: 'app-patentes-coordenacao',
@@ -20,7 +21,10 @@ export class CoordenacaoComponent implements OnInit {
   mensagem = '';
   usersLoading: boolean = false; // loading apenas para lista de usuários
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private patentesService: PatentesService
+  ) {}
 
   ngOnInit(): void {
     this.checkScreenSize();
@@ -38,7 +42,7 @@ export class CoordenacaoComponent implements OnInit {
 
   carregarPatentes(): void {
     this.loading = true;
-    this.authService.listarPatentes().subscribe({
+  this.patentesService.listarPatentes().subscribe({
       next: (dados) => {
         this.patentes = Array.isArray(dados) ? dados : [];
         this.loading = false;
@@ -56,7 +60,10 @@ export class CoordenacaoComponent implements OnInit {
     if (!p || !p.id) return;
     // Carrega usuários sem mostrar o overlay global de carregamento
     this.usersLoading = true;
-    this.authService.listarUsuariosPorPatente(p.id).subscribe({
+  // Busca usuários atribuídos via /patentes/pertence com body { ID }
+  // Alguns ambientes aceitam GET com body (Postman), mas navegadores podem não.
+  // Usamos POST no serviço para garantir compatibilidade com o browser.
+  this.patentesService.listarUsuariosPorPatentePertence(p.id).subscribe({
       next: (dados) => {
         this.usuarios = Array.isArray(dados) ? dados : [];
         this.usersLoading = false;
@@ -72,7 +79,7 @@ export class CoordenacaoComponent implements OnInit {
     if (!this.selectedPatente || !this.selectedPatente.id) return;
     const confirmar = confirm(`Remover ${usuario.nome || usuario.id} desta patente?`);
     if (!confirmar) return;
-    this.authService.removerUsuarioPatente(this.selectedPatente.id, usuario.id).subscribe({
+  this.patentesService.removerUsuarioPatente(this.selectedPatente.id, usuario.id).subscribe({
       next: () => {
         this.usuarios = this.usuarios.filter(u => u.id !== usuario.id);
       },
@@ -89,7 +96,7 @@ export class CoordenacaoComponent implements OnInit {
 
   confirmarAdicionarUsuario(): void {
     if (!this.selectedPatente || !this.selectedPatente.id || !this.novoUsuarioId) return;
-    this.authService.atribuirUsuarioPatente(this.selectedPatente.id, this.novoUsuarioId).subscribe({
+  this.patentesService.atribuirUsuarioPatente(this.selectedPatente.id, this.novoUsuarioId).subscribe({
       next: (resp) => {
         // inserir localmente para resposta imediata
         this.usuarios.push({ id: this.novoUsuarioId, nome: this.novoUsuarioId });

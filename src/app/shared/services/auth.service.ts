@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, BehaviorSubject, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { map, catchError, switchMap } from 'rxjs/operators';
 import { ConfigService } from './config.service';
 
 export interface MenuItem {
@@ -165,60 +165,7 @@ export class AuthService {
     }
   }
 
-  // --- Patentes related API helpers (list / manage patentes and assignments)
-  listarPatentes(): Observable<any[]> {
-    const token = this.getToken();
-    const url = this.configService.getRestEndpoint('/patentes');
-    return this.http.get<any>(url, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    }).pipe(
-      map(resp => {
-        const raw = Array.isArray(resp) ? resp : (resp && resp.patentes) ? resp.patentes : [];
-        // Normalizar propriedades para garantir 'id' e 'nome' disponíveis no frontend
-        if (!Array.isArray(raw)) return [];
-        return raw.map((p: any) => ({
-          id: p.id || p.ID || p.codigo || '',
-          nome: p.nome || p.menu || p.label || p.name || p.descricao || p.description || p.ID || p.id || '',
-          // mantém as propriedades originais caso sejam necessárias
-          ...p
-        }));
-      }),
-      catchError(this.handleAuthError.bind(this, 'Listar Patentes'))
-    );
-  }
-
-  listarUsuariosPorPatente(patenteId: string): Observable<any[]> {
-    const token = this.getToken();
-    const url = this.configService.getRestEndpoint(`/patentes/${encodeURIComponent(patenteId)}/usuarios`);
-    return this.http.get<any>(url, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    }).pipe(
-      map(resp => Array.isArray(resp) ? resp : (resp && resp.usuarios) ? resp.usuarios : []),
-      catchError(this.handleAuthError.bind(this, 'Listar Usuários por Patente'))
-    );
-  }
-
-  atribuirUsuarioPatente(patenteId: string, usuarioId: string): Observable<any> {
-    const token = this.getToken();
-    const url = this.configService.getRestEndpoint(`/patentes/${encodeURIComponent(patenteId)}/usuarios`);
-    const body = { usuarioId };
-    return this.http.post<any>(url, body, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    }).pipe(catchError(this.handleAuthError.bind(this, 'Atribuir Usuário à Patente')));
-  }
-
-  removerUsuarioPatente(patenteId: string, usuarioId: string): Observable<any> {
-    const token = this.getToken();
-    const url = this.configService.getRestEndpoint(`/patentes/${encodeURIComponent(patenteId)}/usuarios/${encodeURIComponent(usuarioId)}`);
-    return this.http.delete<any>(url, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    }).pipe(catchError(this.handleAuthError.bind(this, 'Remover Usuário da Patente')));
-  }
+  // Patente-related API methods moved to `PatentesService` (see src/app/admin/patentes/patentes.service.ts)
 
   /**
    * Valida acesso a uma patente (menu) enviando POST /patentes/validar com body { id }.
