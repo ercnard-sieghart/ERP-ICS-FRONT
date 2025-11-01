@@ -56,6 +56,10 @@
           <div *ngIf="!selectedPatente" class="text-sm text-[#1A4E79]/60">Selecione uma patente à esquerda</div>
 
           <div *ngIf="selectedPatente">
+            <!-- Mobile: botão voltar para a lista compacta -->
+            <div *ngIf="isMobile" class="mb-3">
+              <button class="text-sm text-[#1A4E79] flex items-center gap-2" (click)="voltarLista()">← Voltar</button>
+            </div>
             <div class="mb-4">
               <div class="text-xl font-semibold text-[#1A4E79]">{{selectedPatente.nome || selectedPatente.label || selectedPatente.id}}</div>
               <div class="text-sm text-gray-500">ID: {{selectedPatente.id}}</div>
@@ -64,24 +68,46 @@
             <div class="mb-4">
               <div class="flex items-center gap-2 mb-2">
                 <h3 class="font-medium text-[#1A4E79]">Usuários atribuídos</h3>
-                <button class="ml-auto bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white px-3 py-1 rounded flex items-center gap-2" (click)="abrirAdicionarUsuario()" [disabled]="usersLoading">
-                  <i class="po-icon po-icon-plus"></i>
-                  Adicionar
-                </button>
-                <span *ngIf="usersLoading" class="ml-3 text-sm text-gray-500">Carregando usuários...</span>
+                <div class="ml-auto flex items-center gap-2">
+                  <button class="bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white px-3 py-1 rounded flex items-center gap-2" (click)="abrirAdicionarUsuario()" [disabled]="usersLoading">
+                    <i class="po-icon po-icon-plus"></i>
+                    Adicionar
+                  </button>
+                  <span *ngIf="usersLoading" class="ml-3 text-sm text-gray-500">Carregando usuários...</span>
+                </div>
+              </div>
+              <!-- add user inline form -->
+                <div *ngIf="showAddUserForm" class="mb-3">
+                <div class="flex gap-2 items-center">
+                  <div class="relative flex-1">
+          <input type="text" [(ngModel)]="userSearchQuery" (ngModelChange)="onUserQueryChange($event)" placeholder="Pesquisar por nome do usuário" class="w-full border rounded px-3 py-2" autocomplete="off" />
+          <ul *ngIf="userSearchSuggestions?.length" class="bg-white border rounded mt-1 max-h-40 overflow-auto shadow-sm"
+            [class.absolute]="!isMobile" [class.z-50]="!isMobile" [class.left-0]="!isMobile" [class.right-0]="!isMobile" [class.block]="isMobile" [class.w-full]="isMobile">
+                      <li *ngFor="let s of userSearchSuggestions" class="px-3 py-2 hover:bg-[#f3f9f9] cursor-pointer" (click)="selectUserSuggestion(s)">
+                        <div class="text-sm font-medium text-[#0f3f5a]">{{s.nome || s.name || s.login || s.id}}</div>
+                        <div class="text-xs text-gray-500">{{s.email || ''}}</div>
+                      </li>
+                    </ul>
+                  </div>
+                  <button class="bg-white border border-[#1A4E79] text-[#1A4E79] px-3 py-2 rounded" (click)="confirmarAdicionarUsuario()" [disabled]="!userSearchQuery">Adicionar</button>
+                  <button class="text-sm text-gray-500 px-3 py-2" (click)="cancelarAdicionarUsuario()">Cancelar</button>
+                </div>
+                <div *ngIf="userSearchQuery" class="mt-2 text-sm text-gray-600">Digite o nome exato do usuário e pressione Adicionar. O servidor fará validação.</div>
               </div>
 
-              <ul>
-                <li *ngFor="let u of usuarios" class="flex items-center justify-between py-2 border-b last:border-b-0">
-                  <div>
-                    <div class="font-medium text-[#1A4E79]">{{u.nome || u.login || u.id}}</div>
-                    <div class="text-sm text-gray-500">{{u.email || ''}}</div>
-                  </div>
-                  <div>
-                    <button class="text-red-600 hover:underline" (click)="removerUsuario(u)">Remover</button>
-                  </div>
-                </li>
-              </ul>
+              <div class="overflow-hidden rounded-md border border-[#E6EEF2]">
+                <ul>
+                  <li *ngFor="let u of usuarios" class="flex items-center justify-between gap-4 py-3 px-4 bg-white hover:bg-[#f8fdfd] border-b last:border-b-0">
+                    <div>
+                      <div class="font-medium text-[#0f3f5a]">{{u.nome || u.login || u.id}}</div>
+                      <div class="text-sm text-gray-500">{{u.email || ''}}</div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <button class="text-sm text-red-600 border border-red-100 px-3 py-1 rounded hover:bg-red-50" (click)="removerUsuario(u)">Remover</button>
+                    </div>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
 

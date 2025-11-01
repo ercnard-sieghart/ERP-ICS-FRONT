@@ -136,4 +136,10 @@ export class CoordenacaoComponent implements OnInit {
       error: () => alert('Erro ao atribuir usuário')
     });
   }
+
+  voltarLista(): void {
+    this.selectedPatente = null;
+    this.userSearchSuggestions = [];
+    this.showAddUserForm = false;
+  }
 }
