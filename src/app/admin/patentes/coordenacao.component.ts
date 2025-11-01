@@ -24,6 +24,9 @@ export class CoordenacaoComponent implements OnInit {
   showAddUserForm = false;
   userSearchQuery = '';
   userSearchSuggestions: any[] = [];
+  // modal de remoção
+  showRemoveModal: boolean = false;
+  userToRemove: any = null;
   private userSearch$ = new Subject<string>();
   private userSearchSub?: Subscription;
 
@@ -87,14 +90,32 @@ export class CoordenacaoComponent implements OnInit {
   }
 
   removerUsuario(usuario: any): void {
-    if (!this.selectedPatente || !this.selectedPatente.id) return;
-    const confirmar = confirm(`Remover ${usuario.nome || usuario.id} desta patente?`);
-    if (!confirmar) return;
-  this.patentesService.removerUsuarioPatente(this.selectedPatente.id, usuario.id).subscribe({
+    // abre o modal de confirmação
+    this.openRemoveModal(usuario);
+  }
+
+  openRemoveModal(usuario: any): void {
+    this.userToRemove = usuario;
+    this.showRemoveModal = true;
+  }
+
+  cancelRemove(): void {
+    this.userToRemove = null;
+    this.showRemoveModal = false;
+  }
+
+  confirmRemoveUser(): void {
+    if (!this.selectedPatente || !this.selectedPatente.id || !this.userToRemove) return;
+    const usuario = this.userToRemove;
+    this.patentesService.removerUsuarioPatente(this.selectedPatente.id, usuario.id).subscribe({
       next: () => {
-        this.usuarios = this.usuarios.filter(u => u.id !== usuario.id);
+        this.usuarios = this.usuarios.filter((u: any) => u.id !== usuario.id);
+        this.cancelRemove();
       },
-      error: () => alert('Erro ao remover usuário')
+      error: () => {
+        alert('Erro ao remover usuário');
+        this.cancelRemove();
+      }
     });
   }
 
