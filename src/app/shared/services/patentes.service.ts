@@ -53,8 +53,7 @@ export class PatentesService {
   listarUsuariosPorPatentePertence(patenteId: string): Observable<any[]> {
     const token = this.authService.getToken();
     const url = this.configService.getRestEndpoint('/patentes/pertence');
-    const body = { Id: patenteId };
-    const bodyStringForServer = JSON.stringify(body);
+  const body = { Id: patenteId };
     const headers: any = {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
@@ -77,10 +76,11 @@ export class PatentesService {
       const safeHeaders = { ...headers };
       if (safeHeaders['Authorization']) safeHeaders['Authorization'] = 'Bearer ****';
       // eslint-disable-next-line no-console
-      console.debug('[patentes] /patentes/pertence request', { url, body: bodyStringForServer, headers: safeHeaders });
+      console.debug('[patentes] /patentes/pertence request', { url, body: JSON.stringify(body), headers: safeHeaders });
     } catch {}
 
-    return this.http.request<any>('GET', url, { body: bodyStringForServer, headers }).pipe(
+    // Use POST to send JSON body; POST is more widely supported for payloads and avoids GET-with-body issues
+    return this.http.post<any>(url, body, { headers }).pipe(
       map(resp => normalize(resp)),
       catchError(err => this.handleError('Listar Usuários (patentes/pertence)', err as HttpErrorResponse))
     );
