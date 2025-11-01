@@ -1,8 +1,7 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../shared/services/auth.service';
-import { PatentesService } from './patentes.service';
+import { PatentesService } from '../../shared/services/patentes.service';
 
 @Component({
   selector: 'app-patentes-coordenacao',
@@ -21,10 +20,7 @@ export class CoordenacaoComponent implements OnInit {
   mensagem = '';
   usersLoading: boolean = false; // loading apenas para lista de usuários
 
-  constructor(
-    private authService: AuthService,
-    private patentesService: PatentesService
-  ) {}
+  constructor(private patentesService: PatentesService) {}
 
   ngOnInit(): void {
     this.checkScreenSize();
@@ -60,9 +56,6 @@ export class CoordenacaoComponent implements OnInit {
     if (!p || !p.id) return;
     // Carrega usuários sem mostrar o overlay global de carregamento
     this.usersLoading = true;
-  // Busca usuários atribuídos via /patentes/pertence com body { ID }
-  // Alguns ambientes aceitam GET com body (Postman), mas navegadores podem não.
-  // Usamos POST no serviço para garantir compatibilidade com o browser.
   this.patentesService.listarUsuariosPorPatentePertence(p.id).subscribe({
       next: (dados) => {
         this.usuarios = Array.isArray(dados) ? dados : [];

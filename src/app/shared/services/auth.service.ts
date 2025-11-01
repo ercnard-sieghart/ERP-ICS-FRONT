@@ -165,12 +165,6 @@ export class AuthService {
     }
   }
 
-  // Patente-related API methods moved to `PatentesService` (see src/app/admin/patentes/patentes.service.ts)
-
-  /**
-   * Valida acesso a uma patente (menu) enviando POST /patentes/validar com body { id }.
-   * Resultado é cacheado em localStorage.patenteAccessCache para evitar chamadas repetidas.
-   */
   validarAcessoPatente(menuId: string | null | undefined): Observable<boolean> {
     // menuId pode ser vazio; mesmo assim devemos forçar a requisição ao backend
     const cacheKey = 'patenteAccessCache';

@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-import { ConfigService } from '../../shared/services/config.service';
-import { AuthService } from '../../shared/services/auth.service';
+import { ConfigService } from './config.service';
+import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class PatentesService {
