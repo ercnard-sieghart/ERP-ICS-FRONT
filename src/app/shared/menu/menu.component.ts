@@ -72,9 +72,9 @@ export class MenuComponent implements OnInit, OnDestroy {
     }
 
     this.menusSubscription = this.authService.menusUsuario$.subscribe((menus: MenuItem[]) => {
-      if (Array.isArray(menus) && menus.length > 0) {
-        this.buildMenuFromPatentes(menus);
-      }
+      // Sempre construir o menu (o método adiciona o 'Home' estático),
+      // mesmo quando a lista recebida estiver vazia — assim o Home aparece.
+      this.buildMenuFromPatentes(Array.isArray(menus) ? menus : []);
     });
 
     // Carregar estado salvo
