@@ -35,8 +35,14 @@ export class AuthService {
 
     return this.http.get<any>(url, { headers }).pipe(
       map(response => {
+      if (response && response.success === false) {
+          try { localStorage.setItem('menusUsuario', JSON.stringify([])); } catch {}
+          this.menusUsuario.next([]);
+          return [];
+        }
+
         let menusRaw = Array.isArray(response) ? response : response.menus;
-        if (menusRaw && Array.isArray(menusRaw)) {
+        if (menusRaw && Array.isArray(menusRaw) && menusRaw.length > 0) {
           const menus = menusRaw.map((m: any) => ({
             id: m.id,
             nome: m.menu || m.nome,
@@ -46,11 +52,15 @@ export class AuthService {
           }));
           this.menusUsuario.next(menus);
           try {
-            // Persistir menus no localStorage para uso por guards/componentes
             localStorage.setItem('menusUsuario', JSON.stringify(menus));
           } catch (e) {}
           return menus;
         }
+
+        // Caso não venha lista de menus, garantir limpeza do cache para evitar
+        // manter menus antigos visíveis para usuários sem patentes.
+        try { localStorage.setItem('menusUsuario', JSON.stringify([])); } catch {}
+        this.menusUsuario.next([]);
         return [];
       }),
       catchError(this.handleAuthError.bind(this, 'Menus Liberados'))
