@@ -35,7 +35,7 @@ export class AuthService {
 
     return this.http.get<any>(url, { headers }).pipe(
       map(response => {
-      if (response && response.success === false) {
+        if (response && response.success === false) {
           try { localStorage.setItem('menusUsuario', JSON.stringify([])); } catch {}
           this.menusUsuario.next([]);
           return [];
@@ -57,8 +57,7 @@ export class AuthService {
           return menus;
         }
 
-        // Caso não venha lista de menus, garantir limpeza do cache para evitar
-        // manter menus antigos visíveis para usuários sem patentes.
+        // Caso não venha lista de menus, garantir que não exibimos menus antigos
         try { localStorage.setItem('menusUsuario', JSON.stringify([])); } catch {}
         this.menusUsuario.next([]);
         return [];
@@ -79,6 +78,29 @@ export class AuthService {
     private http: HttpClient,
     private configService: ConfigService
   ) {}
+  
+  constructorInit(): void {
+    try {
+      const raw = localStorage.getItem('menusUsuario');
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (Array.isArray(parsed)) {
+        this.menusUsuario.next(parsed as any[]);
+      }
+    } catch {}
+  }
+
+  private _initOnce = (() => {
+    let done = false;
+    return () => {
+      if (!done) {
+        done = true;
+        this.constructorInit();
+      }
+    };
+  })();
+
+  // Chama inicialização imediatamente
+  private _ = this._initOnce();
 
 
   authenticate(username: string, password: string): Observable<any> {
