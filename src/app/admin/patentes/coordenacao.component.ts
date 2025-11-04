@@ -2,6 +2,7 @@ import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PatentesService } from '../../shared/services/patentes.service';
+import { PoNotificationService, PoToasterOrientation } from '@po-ui/ng-components';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
@@ -29,7 +30,8 @@ export class CoordenacaoComponent implements OnInit {
   private userSearch$ = new Subject<string>();
   private userSearchSub?: Subscription;
 
-  constructor(private patentesService: PatentesService) {}
+  constructor(private patentesService: PatentesService,
+              private poNotification: PoNotificationService) {}
 
   ngOnInit(): void {
     this.checkScreenSize();
@@ -105,13 +107,51 @@ export class CoordenacaoComponent implements OnInit {
     if (!this.selectedPatente || !this.selectedPatente.id || !this.userToRemove) return;
     const usuario = this.userToRemove;
     this.patentesService.removerUsuarioPatente(this.selectedPatente.id, usuario.id).subscribe({
-      next: () => {
-        this.usuarios = this.usuarios.filter((u: any) => u.id !== usuario.id);
+      next: (resp: any) => {
+        // Se o serviço indicar que já estava removido, avisar o usuário
+        if (resp && resp.alreadyRemoved) {
+          this.poNotification.warning({ message: 'Usuário já removido da patente', orientation: PoToasterOrientation.Bottom });
+          this.cancelRemove();
+          // atualizar lista via /patentes/pertence
+          this.refreshUsuariosForSelectedPatente();
+          return;
+        }
+  // Remoção bem-sucedida: atualizar lista local e mostrar popup de sucesso
+  this.usuarios = this.usuarios.filter((u: any) => u.id !== usuario.id);
+        this.poNotification.success({ message: 'Usuário removido da patente', duration: 4000, orientation: PoToasterOrientation.Bottom });
         this.cancelRemove();
+        // atualizar a lista a partir do backend para garantir consistência
+        this.refreshUsuariosForSelectedPatente();
+      },
+      error: (err: any) => {
+        // Se o servidor respondeu 404, interpretar como 'já removido' e mostrar popup
+        if (err && err.status === 404) {
+          this.poNotification.warning({ message: 'Usuário já removido da patente', orientation: PoToasterOrientation.Bottom });
+          this.cancelRemove();
+          // atualizar lista via /patentes/pertence
+          this.refreshUsuariosForSelectedPatente();
+          return;
+        }
+        this.poNotification.error({ message: 'Erro ao remover usuário', orientation: PoToasterOrientation.Bottom, showClose: true });
+        this.cancelRemove();
+      }
+    });
+  }
+
+  /**
+   * Recarrega a lista de usuários da patente selecionada usando o endpoint /patentes/pertence
+   */
+  private refreshUsuariosForSelectedPatente(): void {
+    if (!this.selectedPatente || !this.selectedPatente.id) return;
+    this.usersLoading = true;
+    this.patentesService.listarUsuariosPorPatentePertence(this.selectedPatente.id).subscribe({
+      next: (dados) => {
+        this.usuarios = Array.isArray(dados) ? dados : [];
+        this.usersLoading = false;
       },
       error: () => {
-        alert('Erro ao remover usuário');
-        this.cancelRemove();
+        // manter a lista atual em caso de falha, apenas limpar o loading
+        this.usersLoading = false;
       }
     });
   }

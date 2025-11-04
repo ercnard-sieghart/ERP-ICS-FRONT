@@ -100,18 +100,32 @@ export class PatentesService {
   }
 
   removerUsuarioPatente(patenteId: string, usuarioId: string): Observable<any> {
-    const token = this.authService.getToken();
-    const url = this.configService.getRestEndpoint(`/patentes/${encodeURIComponent(patenteId)}/usuarios/${encodeURIComponent(usuarioId)}`);
-    return this.http.delete<any>(url, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    }).pipe(catchError(err => this.handleError('Remover Usuário da Patente', err)));
+  const token = this.authService.getToken();
+  const urlPrimary = this.configService.getRestEndpoint(`/patentes/${encodeURIComponent(usuarioId)}/${encodeURIComponent(patenteId)}`);
+  const urlAlt = this.configService.getRestEndpoint(`/patentes/${encodeURIComponent(patenteId)}/${encodeURIComponent(usuarioId)}`);
+    const headers = { 'Authorization': `Bearer ${token}` };
+
+    return this.http.delete<any>(urlPrimary, { headers }).pipe(
+
+      catchError((err: any) => {
+        if (err && err.status === 404) {
+          // Já removido no servidor — tratar como sucesso idempotente
+          return of({ alreadyRemoved: true });
+        }
+        // Se o erro for outro (p.ex. rota diferente aceita pelo backend), tentar o caminho alternativo
+        return this.http.delete<any>(urlAlt, { headers }).pipe(
+          catchError((e: any) => {
+            if (e && e.status === 404) {
+              // Alternativa também diz que não existe: tratar como sucesso
+              return of({ alreadyRemoved: true });
+            }
+            return this.handleError('Remover Usuário da Patente', e);
+          })
+        );
+      })
+    );
   }
 
-  /**
-   * Busca de usuários por texto (autocomplete). Tentamos um endpoint de busca geral;
-   * em caso de erro retornamos lista vazia para não quebrar o frontend enquanto o
-   * backend não estiver disponível.
-   */
   searchUsuarios(query: string): Observable<any[]> {
     // Se query vazia, não sugerir nada
     if (!query || query.trim().length === 0) return of([]);
