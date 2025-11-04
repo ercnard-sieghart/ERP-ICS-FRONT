@@ -19,11 +19,11 @@ export class ErrorPageComponent {
     try {
       this.location.back();
     } catch (e) {
-      this.router.navigate(['/']);
+      this.router.navigate(['/home']);
     }
   }
 
   goHome(): void {
-    this.router.navigate(['/']);
+    this.router.navigate(['/home']);
   }
 }
