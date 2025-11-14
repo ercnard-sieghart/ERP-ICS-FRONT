@@ -60,8 +60,8 @@ export class MenuComponent implements OnInit, OnDestroy {
       this.updateDisplayName();
     });
 
-    // Restaurar menus do localStorage se existirem
-  const savedMenus = localStorage.getItem('app_menus_v1');
+    // Restaurar menus do localStorage se existirem (usar mesma chave do AuthService)
+    const savedMenus = localStorage.getItem('menusUsuario');
     if (savedMenus) {
       try {
         const parsedMenus = JSON.parse(savedMenus);
@@ -72,8 +72,7 @@ export class MenuComponent implements OnInit, OnDestroy {
     }
 
     this.menusSubscription = this.authService.menusUsuario$.subscribe((menus: MenuItem[]) => {
-      // Sempre construir o menu (o método adiciona o 'Home' estático),
-      // mesmo quando a lista recebida estiver vazia — assim o Home aparece.
+
       this.buildMenuFromPatentes(Array.isArray(menus) ? menus : []);
     });
 

@@ -15,7 +15,6 @@ export class ErrorPageComponent {
   constructor(private location: Location, private router: Router) {}
 
   goBack(): void {
-    // Tenta voltar no histórico do navegador; se não houver histórico, vai para home
     try {
       this.location.back();
     } catch (e) {
