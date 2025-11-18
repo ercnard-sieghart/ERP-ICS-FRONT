@@ -9,9 +9,17 @@ import { FormsModule } from '@angular/forms';
   template: `
   <main class="min-h-screen p-4 md:p-6 bg-gradient-to-br from-[#1A4E79] to-[#75C9C8]">
     <div class="max-w-full mx-auto px-4">
-      <div class="bg-white/95 backdrop-blur-sm rounded-xl shadow-xl border border-white/20">
-        <div class="bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] p-3 rounded-t-lg">
-          <h3 class="text-white font-semibold text-lg">Viagens</h3>
+      <div class="bg-white/95 backdrop-blur-sm rounded-xl shadow-xl border border-white/20 overflow-hidden">
+        <div class="bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] p-4 md:p-6 rounded-t-lg flex items-center justify-between border-b border-white/10">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center shadow-inner border border-white/10">
+              <i class="po-icon po-icon-plane text-white text-xl"></i>
+            </div>
+            <div>
+              <h1 class="text-white text-xl md:text-2xl font-bold leading-tight">Viagens</h1>
+              <p class="text-white/80 text-xs md:text-sm mt-1">Cadastro de viagens e comprovação de despesas</p>
+            </div>
+          </div>
         </div>
 
         <!-- Conteúdo com max-height para caber no viewport e rolagem interna -->
