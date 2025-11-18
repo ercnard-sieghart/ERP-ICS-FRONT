@@ -123,10 +123,6 @@ import { FormsModule } from '@angular/forms';
               </div>
             </div>
 
-            <div class="flex justify-end gap-3 mt-4">
-              <button type="button" (click)="voltar()" class="px-4 py-2 border rounded text-[#1A4E79] border-[#75C9C8] bg-white">Voltar</button>
-              <button type="button" (click)="salvar(viagemForm)" class="px-4 py-2 bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white rounded hover:shadow-lg">Salvar</button>
-            </div>
           </form>
         </div>
 
@@ -152,6 +148,11 @@ import { FormsModule } from '@angular/forms';
                   <div *ngIf="model.uploadedFileName" class="text-sm text-gray-700">Arquivo: {{ model.uploadedFileName }}</div>
                 </div>
               </div>
+            </div>
+            <!-- Ações: Voltar / Salvar (abaixo dos comprovantes) -->
+            <div class="flex justify-end gap-3 mt-4">
+              <button type="button" (click)="voltar()" class="px-4 py-2 border rounded text-[#1A4E79] border-[#75C9C8] bg-white">Voltar</button>
+              <button type="button" (click)="salvar()" class="px-4 py-2 bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white rounded hover:shadow-lg">Salvar</button>
             </div>
           </div>
         </div>
@@ -210,7 +211,7 @@ export class ViagensComponent implements OnInit {
     try { window.history.back(); } catch { }
   }
 
-  salvar(form: any): void {
+  salvar(form?: any): void {
     // validação mínima
     if (!this.model.empresaCobrar || !this.model.favorecido || this.centroCustoInvalid() || !this.model.titulo) {
       alert('Preencha os campos obrigatórios marcados com *');
