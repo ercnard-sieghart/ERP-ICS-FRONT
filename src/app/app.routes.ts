@@ -31,6 +31,16 @@ export const routes: Routes = [
 			canActivate: [authGuard]
 		},
 		{
+			path: 'financeiro',
+			loadComponent: () => import('./financeiro/viagens.component').then(m => m.ViagensComponent),
+			canActivate: [authGuard]
+		},
+		{
+			path: 'financeiro/viagens',
+			loadComponent: () => import('./financeiro/viagens.component').then(m => m.ViagensComponent),
+			canActivate: [authGuard]
+		},
+		{
 			path: 'compras/solicitacao',
 			loadComponent: () => import('./compras/solicitacao-compras/solicitacao-compras.component').then(m => m.SolicitacaoComprasComponent),
 			canActivate: [authGuard, patenteGuard]

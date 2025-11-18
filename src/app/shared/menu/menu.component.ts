@@ -382,6 +382,24 @@ export class MenuComponent implements OnInit, OnDestroy {
     });
 
     // Não adicionar menus 'Patentes' automaticamente — mostrar apenas o que o backend retornou
+    // Se houver rotas cliente para 'financeiro', assegurar que o menu Financeiro exista
+    try {
+      const financePrefix = 'financeiro';
+      const cfg = this.router && Array.isArray(this.router.config) ? this.router.config : [];
+      const children = cfg.filter((r: any) => r.path && r.path.startsWith(financePrefix + '/'));
+      const already = this.menuItems.some(mi => (mi.label && mi.label.toLowerCase() === 'financeiro') || (mi.link === '/financeiro'));
+      if (!already && children && children.length > 0) {
+        const submenus = children.map((r: any) => {
+          const path = (r.path || '').replace(/^\//, '');
+          const segs = path.split('/').filter(Boolean);
+          const last = segs.length > 0 ? segs[segs.length - 1] : path;
+          const label = last ? last.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) : (r.path || '');
+          return { id: undefined, label, icon: 'list', link: '/' + path } as MenuItemWithSubmenu;
+        });
+        this.menuItems.push({ label: 'Financeiro', icon: 'money', expanded: false, submenus });
+      }
+    } catch (e) {}
+
     this.cdr.detectChanges();
   }
 
