@@ -21,6 +21,23 @@ export class AuthService {
   public menusUsuario$ = this.menusUsuario.asObservable();
 
   carregarMenusLiberadosUsuario(): Observable<any[]> {
+    // First, try to return cached menus immediately for faster UX
+    try {
+      const raw = localStorage.getItem('menusUsuario');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // refresh in background but return cached immediately
+          this._refreshMenusFromServer();
+          // ensure BehaviorSubject has the cached value
+          this.menusUsuario.next(parsed as any[]);
+          return of(parsed as any[]);
+        }
+      }
+    } catch (e) {
+      // parsing failed, fallback to network
+    }
+
     const token = this.getToken();
     const userId = localStorage.getItem('user_id');
 
@@ -64,6 +81,44 @@ export class AuthService {
       }),
       catchError(this.handleAuthError.bind(this, 'Menus Liberados'))
     );
+  }
+
+  /**
+   * Refresh menus from server and update cache/subject. Runs in background.
+   */
+  private _refreshMenusFromServer(): void {
+    const token = this.getToken();
+    const userId = localStorage.getItem('user_id');
+    const url = this.configService.getRestEndpoint('/patentes/menus');
+    const headers: any = {
+      'Authorization': `Bearer ${token}`,
+      'X-Request-Name': 'patentes.menus.listByUser'
+    };
+    if (userId) {
+      headers['X-User-Id'] = userId;
+    }
+
+    this.http.get<any>(url, { headers }).pipe(
+      map(response => {
+        let menusRaw = Array.isArray(response) ? response : response.menus;
+        if (menusRaw && Array.isArray(menusRaw) && menusRaw.length > 0) {
+          const menus = menusRaw.map((m: any) => ({
+            id: m.id,
+            nome: m.menu || m.nome,
+            rota: m.rota,
+            icone: m.icone,
+            ordem: m.ordem
+          }));
+          this.menusUsuario.next(menus);
+          try { localStorage.setItem('menusUsuario', JSON.stringify(menus)); } catch {}
+        }
+      }),
+      catchError(err => {
+        // swallow errors on background refresh
+        console.warn('[AUTH] background menu refresh failed', err);
+        return of([]);
+      })
+    ).subscribe();
   }
 
   limparMenus(): void {

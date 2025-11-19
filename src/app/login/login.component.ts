@@ -82,16 +82,17 @@ export class LoginComponent {
                 if (loginBody.FILIAL) localStorage.setItem('filial', loginBody.FILIAL);
                 
                 this.authService.updateUserDisplay();
-                
-                // Carregar menus liberados do usuário via GET /patentes/menus?usuario=ID
+
+                // Optimistic: navigate immediately, load menus in background
+                this.finishLoginSuccess(loginBody);
+
+                // Load menus in background (do not block navigation)
                 this.authService.carregarMenusLiberadosUsuario().subscribe({
                   next: (menus: any[]) => {
-                    console.log('Menus carregados (liberados p/ usuário):', menus);
-                    this.finishLoginSuccess(loginBody);
+                    console.log('Menus carregados em background:', menus);
                   },
                   error: (error: any) => {
-                    console.warn('Erro ao carregar menus liberados do usuário:', error);
-                    this.finishLoginSuccess(loginBody);
+                    console.warn('Erro ao carregar menus liberados do usuário em background:', error);
                   }
                 });
                 
