@@ -183,8 +183,13 @@ export class CoordenacaoComponent implements OnInit {
   }
 
   confirmarAdicionarUsuario(): void {
-    const userIdentifier = (this.novoUsuarioId && this.novoUsuarioId.toString().trim()) || (this.userSearchQuery || '').toString().trim();
-    if (!this.selectedPatente?.id || !userIdentifier) return;
+    const userIdentifier = (this.novoUsuarioId && this.novoUsuarioId.toString().trim()) || '';
+    if (!this.selectedPatente?.id) return;
+    if (!userIdentifier) {
+      this.mensagem = 'Por favor selecione um usuário válido nas sugestões antes de confirmar.';
+      setTimeout(() => this.mensagem = '', 4000);
+      return;
+    }
 
     this.patentesService.atribuirUsuarioPatente(this.selectedPatente.id, userIdentifier).subscribe({
       next: (resp: any) => {
