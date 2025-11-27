@@ -2,6 +2,7 @@ import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PatentesService } from '../../shared/services/patentes.service';
+import type { Patente, Usuario } from '../../shared/models/patentes.models';
 import { PoNotificationService, PoToasterOrientation } from '@po-ui/ng-components';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
@@ -16,17 +17,17 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 export class CoordenacaoComponent implements OnInit {
   loading = false;
   isMobile: boolean = false;
-  patentes: any[] = [];
-  selectedPatente: any | null = null;
-  usuarios: any[] = [];
+  patentes: Patente[] = [];
+  selectedPatente: Patente | null = null;
+  usuarios: Usuario[] = [];
   novoUsuarioId = '';
   mensagem = '';
   usersLoading: boolean = false;
   showAddUserForm = false;
   userSearchQuery = '';
-  userSearchSuggestions: any[] = [];
+  userSearchSuggestions: Usuario[] = [];
   showRemoveModal: boolean = false;
-  userToRemove: any = null;
+  userToRemove: Usuario | null = null;
   private userSearch$ = new Subject<string>();
   private userSearchSub?: Subscription;
 
@@ -49,7 +50,7 @@ export class CoordenacaoComponent implements OnInit {
     this.userSearchSub?.unsubscribe();
   }
 
-  @HostListener('window:resize', ['$event'])
+  @HostListener('window:resize')
   onResize(): void {
     this.checkScreenSize();
   }
@@ -72,7 +73,7 @@ export class CoordenacaoComponent implements OnInit {
     });
   }
 
-  selecionarPatente(p: any): void {
+  selecionarPatente(p: Patente): void {
     this.selectedPatente = p;
     this.usuarios = [];
     if (!p || !p.id) return;
@@ -89,11 +90,11 @@ export class CoordenacaoComponent implements OnInit {
     });
   }
 
-  removerUsuario(usuario: any): void {
+  removerUsuario(usuario: Usuario): void {
     this.openRemoveModal(usuario);
   }
 
-  openRemoveModal(usuario: any): void {
+  openRemoveModal(usuario: Usuario | null): void {
     this.userToRemove = usuario;
     this.showRemoveModal = true;
   }
@@ -117,7 +118,7 @@ export class CoordenacaoComponent implements OnInit {
           return;
         }
   // Remoção bem-sucedida: atualizar lista local e mostrar popup de sucesso
-  this.usuarios = this.usuarios.filter((u: any) => u.id !== usuario.id);
+  this.usuarios = this.usuarios.filter((u: Usuario) => u.id !== usuario.id);
         this.poNotification.success({ message: 'Usuário removido da patente', duration: 4000, orientation: PoToasterOrientation.Bottom });
         this.cancelRemove();
         // atualizar a lista a partir do backend para garantir consistência
@@ -175,40 +176,34 @@ export class CoordenacaoComponent implements OnInit {
     this.userSearch$.next(q);
   }
 
-  selectUserSuggestion(user: any): void {
-    this.userSearchQuery = user.nome || user.name || user.login || user.id || '';
-    this.novoUsuarioId = user.id || user.USER_ID || user.usuario_id || user.USERID || '';
+  selectUserSuggestion(user: Partial<Usuario> | any): void {
+    this.userSearchQuery = (user.nome || user.name || user.login || user.id || '').toString();
+    this.novoUsuarioId = (user.id || user.USER_ID || user.usuario_id || user.USERID || '').toString();
     this.userSearchSuggestions = [];
   }
 
   confirmarAdicionarUsuario(): void {
-    const payload = (this.novoUsuarioId && this.novoUsuarioId.toString().trim()) || (this.userSearchQuery || '').toString().trim();
-    if (!this.selectedPatente || !this.selectedPatente.id || !payload) return;
-    
-    this.patentesService.atribuirUsuarioPatente(this.selectedPatente.id, payload).subscribe({
-      next: (resp) => {
-        
-        const added = resp && (resp.usuario || resp.user || resp.data) ? (resp.usuario || resp.user || resp.data) : null;
-        if (added && (added.id || added.USER_ID || added.usuario_id)) {
-          const id = added.id || added.USER_ID || added.usuario_id;
-          const nome = added.nome || added.USER_NAME || added.usuario_nome || added.name || this.userSearchQuery;
-          this.usuarios.push({ id, nome, ...added });
-        } else {
-          
-          this.usuarios.push({ id: payload, nome: this.userSearchQuery || payload });
-        }
-        this.novoUsuarioId = '';
-        this.userSearchQuery = '';
-        this.showAddUserForm = false;
-        // mensagem de sucesso visível por alguns segundos
-        this.mensagem = 'Usuário atribuído com sucesso.';
-        setTimeout(() => this.mensagem = '', 4000);
+    const userIdentifier = (this.novoUsuarioId && this.novoUsuarioId.toString().trim()) || (this.userSearchQuery || '').toString().trim();
+    if (!this.selectedPatente?.id || !userIdentifier) return;
+
+    this.patentesService.atribuirUsuarioPatente(this.selectedPatente.id, userIdentifier).subscribe({
+      next: (resp: any) => {
+        const added = resp?.usuario ?? resp?.user ?? resp?.data ?? resp ?? null;
+        const id = added?.id ?? added?.USER_ID ?? added?.usuario_id ?? userIdentifier;
+        const nome = added?.nome ?? added?.USER_NAME ?? added?.usuario_nome ?? added?.name ?? this.userSearchQuery ?? userIdentifier;
+        this.usuarios.push({ id, nome, ...added } as Usuario);
+        this.resetAddUserForm('Usuário atribuído com sucesso.', 4000);
       },
-      error: () => {
-        this.mensagem = 'Erro ao atribuir usuário. Verifique os dados e tente novamente.';
-        setTimeout(() => this.mensagem = '', 6000);
-      }
+      error: () => this.resetAddUserForm('Erro ao atribuir usuário. Verifique os dados e tente novamente.', 6000)
     });
+  }
+
+  private resetAddUserForm(message: string, timeoutMs: number): void {
+    this.novoUsuarioId = '';
+    this.userSearchQuery = '';
+    this.showAddUserForm = false;
+    this.mensagem = message;
+    setTimeout(() => this.mensagem = '', timeoutMs);
   }
 
   voltarLista(): void {
