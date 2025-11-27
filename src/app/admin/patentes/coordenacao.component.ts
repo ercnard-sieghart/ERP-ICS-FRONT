@@ -197,9 +197,13 @@ export class CoordenacaoComponent implements OnInit {
         const id = added?.id ?? added?.USER_ID ?? added?.usuario_id ?? userIdentifier;
         const nome = added?.nome ?? added?.USER_NAME ?? added?.usuario_nome ?? added?.name ?? this.userSearchQuery ?? userIdentifier;
         this.usuarios.push({ id, nome, ...added } as Usuario);
-        this.resetAddUserForm('Usuário atribuído com sucesso.', 4000);
+        this.poNotification.success({ message: 'Usuário atribuído com sucesso', duration: 4000, orientation: PoToasterOrientation.Bottom });
+        this.resetAddUserForm('', 0);
       },
-      error: () => this.resetAddUserForm('Erro ao atribuir usuário. Verifique os dados e tente novamente.', 6000)
+      error: () => {
+        this.poNotification.error({ message: 'Erro ao atribuir usuário. Verifique os dados e tente novamente.', orientation: PoToasterOrientation.Bottom, showClose: true });
+        this.resetAddUserForm('', 0);
+      }
     });
   }
 
@@ -207,8 +211,12 @@ export class CoordenacaoComponent implements OnInit {
     this.novoUsuarioId = '';
     this.userSearchQuery = '';
     this.showAddUserForm = false;
-    this.mensagem = message;
-    setTimeout(() => this.mensagem = '', timeoutMs);
+    if (message) {
+      this.mensagem = message;
+      if (timeoutMs && timeoutMs > 0) {
+        setTimeout(() => this.mensagem = '', timeoutMs);
+      }
+    }
   }
 
   voltarLista(): void {
