@@ -217,6 +217,31 @@ export class MenuComponent implements OnInit, OnDestroy {
           }
         return;
       }
+      // Menu principal /financeiro
+      if (menu.rota === '/financeiro') {
+        let financeiroMenu = menuMap.get('financeiro');
+        if (!financeiroMenu) {
+          financeiroMenu = {
+            id: menu.id,
+            label: 'Financeiro',
+            icon: 'finance',
+            expanded: false,
+            submenus: [
+              { id: menu.id, label: 'Viagens', icon: 'plane', link: '/financeiro/viagens' },
+              { id: menu.id, label: 'Prestação de Contas', icon: 'document', link: '/financeiro/prestacao-contas' }
+            ]
+          };
+          menuMap.set('financeiro', financeiroMenu);
+          this.menuItems.push(financeiroMenu);
+        } else {
+          const fm: any = financeiroMenu;
+          if (!fm.id) fm.id = menu.id;
+          if (fm.submenus && fm.submenus.length > 0) {
+            fm.submenus = fm.submenus.map((s: any) => ({ id: fm.id || s.id, label: s.label, icon: s.icon, link: s.link }));
+          }
+        }
+        return;
+      }
       // Menu principal /orcamentos
       if (menu.rota === '/orcamentos') {
         let nomeOrcamento = menu.nome;
@@ -389,14 +414,18 @@ export class MenuComponent implements OnInit, OnDestroy {
       const children = cfg.filter((r: any) => r.path && r.path.startsWith(financePrefix + '/'));
       const already = this.menuItems.some(mi => (mi.label && mi.label.toLowerCase() === 'financeiro') || (mi.link === '/financeiro'));
       if (!already && children && children.length > 0) {
+        const routeLabels: { [path: string]: string } = {
+          'financeiro/viagens': 'Viagens',
+          'financeiro/prestacao-contas': 'Prestação de Contas'
+        };
         const submenus = children.map((r: any) => {
           const path = (r.path || '').replace(/^\//, '');
           const segs = path.split('/').filter(Boolean);
           const last = segs.length > 0 ? segs[segs.length - 1] : path;
-          const label = last ? last.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) : (r.path || '');
+          const label = routeLabels[path] || (last ? last.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) : path);
           return { id: undefined, label, icon: 'list', link: '/' + path } as MenuItemWithSubmenu;
         });
-        this.menuItems.push({ label: 'Financeiro', icon: 'money', expanded: false, submenus });
+        this.menuItems.push({ label: 'Financeiro', icon: 'finance', expanded: false, submenus });
       }
     } catch (e) {}
 
