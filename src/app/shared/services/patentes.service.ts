@@ -98,30 +98,18 @@ export class PatentesService {
   }
 
   atribuirUsuarioPatente(patenteId: string, usuarioId: string): Observable<any> {
-    const token = this.authService.getToken();
-    const encodedPatente = encodeURIComponent(patenteId);
-    const encodedUsuario = encodeURIComponent(usuarioId);
-    const url = this.configService.getRestEndpoint(`/patentes/${encodedPatente}/${encodedUsuario}`);
-    const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
-    return this.http.post<any>(url, null, { headers }).pipe(catchError(err => this.handleError('Atribuir Usuário à Patente', err)));
+    const url = this.configService.getRestEndpoint(`/patentes/usuario/${encodeURIComponent(patenteId)}/${encodeURIComponent(usuarioId)}`);
+    return this.http.post<any>(url, null, { headers: this.getHeaders() }).pipe(
+      catchError(err => this.handleError('Atribuir Usuário à Patente', err))
+    );
   }
 
   removerUsuarioPatente(patenteId: string, usuarioId: string): Observable<any> {
-    const token = this.authService.getToken();
-    // tentar primeiro a rota preferida (patente/usuario), em seguida alternar se necessário
-    const urlPrimary = this.configService.getRestEndpoint(`/patentes/${encodeURIComponent(patenteId)}/${encodeURIComponent(usuarioId)}`);
-    const urlAlt = this.configService.getRestEndpoint(`/patentes/${encodeURIComponent(usuarioId)}/${encodeURIComponent(patenteId)}`);
-    const headers = { Authorization: `Bearer ${token}` };
-
-    return this.http.delete<any>(urlPrimary, { headers }).pipe(
+    const url = this.configService.getRestEndpoint(`/patentes/usuario/${encodeURIComponent(patenteId)}/${encodeURIComponent(usuarioId)}`);
+    return this.http.delete<any>(url, { headers: this.getHeaders() }).pipe(
       catchError((err: any) => {
         if (err && err.status === 404) return of({ alreadyRemoved: true });
-        return this.http.delete<any>(urlAlt, { headers }).pipe(
-          catchError((e: any) => {
-            if (e && e.status === 404) return of({ alreadyRemoved: true });
-            return this.handleError('Remover Usuário da Patente', e);
-          })
-        );
+        return this.handleError('Remover Usuário da Patente', err);
       })
     );
   }
