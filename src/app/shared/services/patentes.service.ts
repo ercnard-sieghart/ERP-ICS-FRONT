@@ -176,8 +176,8 @@ export class PatentesService {
   }
 
   listarAcessosPatente(patenteId: string): Observable<MenuAcessoPatente[]> {
-    const url = this.configService.getRestEndpoint(`/patentes/acessos/${encodeURIComponent(patenteId)}`);
-    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
+    const url = this.configService.getRestEndpoint('/patentes/acessos');
+    return this.http.post<any>(url, { PATENTE: patenteId }, { headers: this.getHeaders() }).pipe(
       map(res => {
         const raw: any[] = Array.isArray(res) ? res : (res?.acessos || []);
         return raw.map((a: any) => ({
