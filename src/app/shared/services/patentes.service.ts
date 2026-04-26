@@ -221,6 +221,27 @@ export class PatentesService {
     );
   }
 
+  criarMenuSZC(menu: string, descricao: string, rota: string): Observable<any> {
+    const url = this.configService.getRestEndpoint('/patentes/menus/novo');
+    return this.http.post<any>(url, { MENU: menu, DESC: descricao, ROTA: rota }, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleGestaoError)
+    );
+  }
+
+  atualizarMenuSZC(id: string, menu: string, descricao: string, rota: string): Observable<any> {
+    const url = this.configService.getRestEndpoint('/patentes/menus/editar');
+    return this.http.post<any>(url, { ID: id, MENU: menu, DESC: descricao, ROTA: rota }, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleGestaoError)
+    );
+  }
+
+  excluirMenuSZC(id: string): Observable<any> {
+    const url = this.configService.getRestEndpoint('/patentes/menus/excluir');
+    return this.http.post<any>(url, { ID: id }, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleGestaoError)
+    );
+  }
+
   private handleGestaoError(error: HttpErrorResponse): Observable<never> {
     const msg = error.error?.message || (error.status === 0 ? 'Erro de conexão.' : 'Erro interno do servidor.');
     return throwError(() => new Error(msg));
