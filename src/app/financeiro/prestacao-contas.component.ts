@@ -12,9 +12,12 @@ import {
   ClasseValorResult
 } from './services/prestacao-contas.service';
 
-const INPUT_CLASS = 'w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all shadow-sm';
-const DROPDOWN_CLASS = 'absolute z-20 w-full bg-white border border-[#75C9C8]/30 rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto';
-const DROPDOWN_ITEM_CLASS = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-gray-100 last:border-0 flex gap-2';
+const COMBOBOX_INPUT = 'flex-1 min-w-0 p-3 border border-[#75C9C8]/30 rounded-l-lg focus:outline-none transition-all';
+const COMBOBOX_BTN   = 'shrink-0 px-2.5 border border-l-0 border-[#75C9C8]/30 rounded-r-lg bg-white hover:bg-[#e6eef0] text-[#1A4E79] transition-all flex items-center justify-center';
+const COMBOBOX_WRAP  = 'relative flex focus-within:ring-2 focus-within:ring-[#75C9C8] rounded-lg shadow-sm';
+const DROPDOWN       = 'absolute z-20 top-full w-full bg-white border border-[#75C9C8]/30 rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto';
+const DROPDOWN_ITEM  = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-gray-100 last:border-0 flex gap-2';
+
 
 @Component({
   selector: 'app-prestacao-contas',
@@ -63,24 +66,31 @@ const DROPDOWN_ITEM_CLASS = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm
                       class="w-full p-3 bg-gray-100 border border-[#e6eef0] rounded-lg shadow-inner" />
                   </div>
 
-                  <!-- Participante (typeahead via API) -->
+                  <!-- ── Participante (combobox via API) ───────────────────── -->
                   <div>
                     <label class="block text-sm font-semibold text-[#1A4E79] mb-1">Participante *</label>
-                    <div class="relative">
+                    <div class="${COMBOBOX_WRAP}">
                       <input type="text" name="codParticipante" [(ngModel)]="model.codParticipante" required
                         autocomplete="off" placeholder="Digite código ou nome..."
                         (ngModelChange)="onParticipanteInput($event)"
                         (blur)="fecharParticipanteDropdown()"
-                        class="${INPUT_CLASS}" />
-                      <div *ngIf="showParticipanteDropdown && participanteResults.length > 0" class="${DROPDOWN_CLASS}">
+                        class="${COMBOBOX_INPUT}" />
+                      <button type="button" (mousedown)="toggleParticipanteDropdown($event)" class="${COMBOBOX_BTN}">
+                        <svg *ngIf="!isLoadingParticipante" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                        <svg *ngIf="isLoadingParticipante" class="animate-spin h-4 w-4 text-[#75C9C8]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                        </svg>
+                      </button>
+                      <div *ngIf="showParticipanteDropdown && participanteResults.length > 0" class="${DROPDOWN}">
                         <div *ngFor="let r of participanteResults"
-                          (mousedown)="selecionarParticipante(r)" class="${DROPDOWN_ITEM_CLASS}">
+                          (mousedown)="selecionarParticipante(r)" class="${DROPDOWN_ITEM}">
                           <span class="font-semibold text-[#1A4E79] shrink-0">{{ r.codigo }}</span>
                           <span class="text-gray-500 truncate">{{ r.nome }}</span>
                         </div>
                       </div>
-                      <div *ngIf="isLoadingParticipante"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#75C9C8]">Buscando...</div>
                     </div>
                   </div>
 
@@ -113,18 +123,23 @@ const DROPDOWN_ITEM_CLASS = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm
                       class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all" />
                   </div>
 
-                  <!-- Item Contábil (typeahead local) -->
+                  <!-- ── Item Contábil (combobox local) ───────────────────── -->
                   <div>
                     <label class="block text-sm font-medium text-[#1A4E79] mb-1">Item Contábil</label>
-                    <div class="relative">
+                    <div class="${COMBOBOX_WRAP}">
                       <input type="text" name="itemContabilSearch" [(ngModel)]="model.itemContabilSearch"
                         autocomplete="off" placeholder="Digite código ou descrição..."
                         (ngModelChange)="onItemContabilInput($event)"
                         (blur)="fecharItemContabilDropdown()"
-                        class="${INPUT_CLASS}" />
-                      <div *ngIf="showItemContabilDropdown && itemContabilFiltered.length > 0" class="${DROPDOWN_CLASS}">
+                        class="${COMBOBOX_INPUT}" />
+                      <button type="button" (mousedown)="toggleItemContabilDropdown($event)" class="${COMBOBOX_BTN}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                      </button>
+                      <div *ngIf="showItemContabilDropdown && itemContabilFiltered.length > 0" class="${DROPDOWN}">
                         <div *ngFor="let it of itemContabilFiltered"
-                          (mousedown)="selecionarItemContabil(it)" class="${DROPDOWN_ITEM_CLASS}">
+                          (mousedown)="selecionarItemContabil(it)" class="${DROPDOWN_ITEM}">
                           <span class="font-semibold text-[#1A4E79] shrink-0">{{ it.codigo }}</span>
                           <span class="text-gray-500 truncate">{{ it.descricao }}</span>
                         </div>
@@ -132,18 +147,23 @@ const DROPDOWN_ITEM_CLASS = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm
                     </div>
                   </div>
 
-                  <!-- Centro de Custo (typeahead local) -->
+                  <!-- ── Centro de Custo (combobox local) ─────────────────── -->
                   <div>
                     <label class="block text-sm font-medium text-[#1A4E79] mb-1">Centro de Custo</label>
-                    <div class="relative">
+                    <div class="${COMBOBOX_WRAP}">
                       <input type="text" name="centroCustoSearch" [(ngModel)]="model.centroCustoSearch"
                         autocomplete="off" placeholder="Digite código ou descrição..."
                         (ngModelChange)="onCentroCustoInput($event)"
                         (blur)="fecharCentroCustoDropdown()"
-                        class="${INPUT_CLASS}" />
-                      <div *ngIf="showCentroCustoDropdown && centroCustoFiltered.length > 0" class="${DROPDOWN_CLASS}">
+                        class="${COMBOBOX_INPUT}" />
+                      <button type="button" (mousedown)="toggleCentroCustoDropdown($event)" class="${COMBOBOX_BTN}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                      </button>
+                      <div *ngIf="showCentroCustoDropdown && centroCustoFiltered.length > 0" class="${DROPDOWN}">
                         <div *ngFor="let cc of centroCustoFiltered"
-                          (mousedown)="selecionarCentroCusto(cc)" class="${DROPDOWN_ITEM_CLASS}">
+                          (mousedown)="selecionarCentroCusto(cc)" class="${DROPDOWN_ITEM}">
                           <span class="font-semibold text-[#1A4E79] shrink-0">{{ cc.codigo }}</span>
                           <span class="text-gray-500 truncate">{{ cc.descricao }}</span>
                         </div>
@@ -151,18 +171,23 @@ const DROPDOWN_ITEM_CLASS = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm
                     </div>
                   </div>
 
-                  <!-- Classe Valor (typeahead local) -->
+                  <!-- ── Classe Valor (combobox local) ────────────────────── -->
                   <div>
                     <label class="block text-sm font-medium text-[#1A4E79] mb-1">Classe Valor</label>
-                    <div class="relative">
+                    <div class="${COMBOBOX_WRAP}">
                       <input type="text" name="classeValorSearch" [(ngModel)]="model.classeValorSearch"
                         autocomplete="off" placeholder="Digite código ou descrição..."
                         (ngModelChange)="onClasseValorInput($event)"
                         (blur)="fecharClasseValorDropdown()"
-                        class="${INPUT_CLASS}" />
-                      <div *ngIf="showClasseValorDropdown && classeValorFiltered.length > 0" class="${DROPDOWN_CLASS}">
+                        class="${COMBOBOX_INPUT}" />
+                      <button type="button" (mousedown)="toggleClasseValorDropdown($event)" class="${COMBOBOX_BTN}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                      </button>
+                      <div *ngIf="showClasseValorDropdown && classeValorFiltered.length > 0" class="${DROPDOWN}">
                         <div *ngFor="let cv of classeValorFiltered"
-                          (mousedown)="selecionarClasseValor(cv)" class="${DROPDOWN_ITEM_CLASS}">
+                          (mousedown)="selecionarClasseValor(cv)" class="${DROPDOWN_ITEM}">
                           <span class="font-semibold text-[#1A4E79] shrink-0">{{ cv.codigo }}</span>
                           <span class="text-gray-500 truncate">{{ cv.descricao }}</span>
                         </div>
@@ -202,24 +227,31 @@ const DROPDOWN_ITEM_CLASS = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm
                     </small>
                   </div>
 
-                  <!-- Cliente / Fornecedor (typeahead via API) -->
+                  <!-- ── Cliente / Fornecedor (combobox via API) ───────────── -->
                   <div>
                     <label class="block text-sm font-medium text-[#1A4E79] mb-1">Cliente / Fornecedor</label>
-                    <div class="relative">
+                    <div class="${COMBOBOX_WRAP}">
                       <input type="text" name="flf_clifor" [(ngModel)]="model.flf_clifor"
                         autocomplete="off" placeholder="Digite código ou nome..."
                         (ngModelChange)="onClienteInput($event)"
                         (blur)="fecharClienteDropdown()"
-                        class="${INPUT_CLASS}" />
-                      <div *ngIf="showClienteDropdown && clienteResults.length > 0" class="${DROPDOWN_CLASS}">
+                        class="${COMBOBOX_INPUT}" />
+                      <button type="button" (mousedown)="toggleClienteDropdown($event)" class="${COMBOBOX_BTN}">
+                        <svg *ngIf="!isLoadingCliente" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                        <svg *ngIf="isLoadingCliente" class="animate-spin h-4 w-4 text-[#75C9C8]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                        </svg>
+                      </button>
+                      <div *ngIf="showClienteDropdown && clienteResults.length > 0" class="${DROPDOWN}">
                         <div *ngFor="let r of clienteResults"
-                          (mousedown)="selecionarCliente(r)" class="${DROPDOWN_ITEM_CLASS}">
+                          (mousedown)="selecionarCliente(r)" class="${DROPDOWN_ITEM}">
                           <span class="font-semibold text-[#1A4E79] shrink-0">{{ r.codigo }}/{{ r.loja }}</span>
                           <span class="text-gray-500 truncate">{{ r.nome }}</span>
                         </div>
                       </div>
-                      <div *ngIf="isLoadingCliente"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#75C9C8]">Buscando...</div>
                     </div>
                   </div>
 
@@ -278,34 +310,34 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
   isGeneratingCode = false;
   isSaving = false;
 
-  // Autocomplete via API — participante
+  // Combobox via API — participante
   participanteResults: ParticipanteResult[] = [];
   showParticipanteDropdown = false;
   isLoadingParticipante = false;
   private participanteSearch$ = new Subject<string>();
   private participanteSub?: Subscription;
 
-  // Autocomplete via API — cliente/fornecedor
+  // Combobox via API — cliente/fornecedor
   clienteResults: ClienteResult[] = [];
   showClienteDropdown = false;
   isLoadingCliente = false;
   private clienteSearch$ = new Subject<string>();
   private clienteSub?: Subscription;
 
-  // Listas carregadas em memória (filtro local)
+  // Listas locais
   itensContabeis: ItemContabilResult[] = [];
   centrosCusto: CentroCustoResult[] = [];
   classesValor: ClasseValorResult[] = [];
 
-  // Typeahead local — item contábil
+  // Combobox local — item contábil
   itemContabilFiltered: ItemContabilResult[] = [];
   showItemContabilDropdown = false;
 
-  // Typeahead local — centro de custo
+  // Combobox local — centro de custo
   centroCustoFiltered: CentroCustoResult[] = [];
   showCentroCustoDropdown = false;
 
-  // Typeahead local — classe valor
+  // Combobox local — classe valor
   classeValorFiltered: ClasseValorResult[] = [];
   showClasseValorDropdown = false;
 
@@ -333,11 +365,7 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
         return this.prestacaoService.buscarParticipantePorTermo(termo);
       })
     ).subscribe({
-      next: res => {
-        this.participanteResults = res;
-        this.showParticipanteDropdown = res.length > 0;
-        this.isLoadingParticipante = false;
-      },
+      next: res => { this.participanteResults = res; this.showParticipanteDropdown = res.length > 0; this.isLoadingParticipante = false; },
       error: () => { this.isLoadingParticipante = false; }
     });
 
@@ -350,11 +378,7 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
         return this.prestacaoService.buscarClientePorTermo(termo);
       })
     ).subscribe({
-      next: res => {
-        this.clienteResults = res;
-        this.showClienteDropdown = res.length > 0;
-        this.isLoadingCliente = false;
-      },
+      next: res => { this.clienteResults = res; this.showClienteDropdown = res.length > 0; this.isLoadingCliente = false; },
       error: () => { this.isLoadingCliente = false; }
     });
   }
@@ -367,25 +391,15 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
 
   initModel(): void {
     this.model = {
-      flf_tipo: '2',
-      flf_presta: '',
-      codParticipante: '',
-      nomeParticipante: '',
-      flf_emissa: '',
-      flf_dtini: '',
-      flf_dtfim: '',
-      itemContabilSearch: '',
-      itemContabil: '',
-      centroCustoSearch: '',
-      centroCusto: '',
-      classeValorSearch: '',
-      classeValor: '',
+      flf_tipo: '2', flf_presta: '',
+      codParticipante: '', nomeParticipante: '',
+      flf_emissa: '', flf_dtini: '', flf_dtfim: '',
+      itemContabilSearch: '', itemContabil: '',
+      centroCustoSearch: '', centroCusto: '',
+      classeValorSearch: '', classeValor: '',
       motivo: '',
-      flf_fatcli: 0,
-      flf_fatemp: 0,
-      flf_clifor: '',
-      flf_floja: '',
-      nomeCliente: ''
+      flf_fatcli: 0, flf_fatemp: 0,
+      flf_clifor: '', flf_floja: '', nomeCliente: ''
     };
   }
 
@@ -414,6 +428,15 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
     this.participanteSearch$.next(valor);
   }
 
+  toggleParticipanteDropdown(event: MouseEvent): void {
+    event.preventDefault();
+    if (this.showParticipanteDropdown) {
+      this.showParticipanteDropdown = false;
+    } else {
+      this.showParticipanteDropdown = this.participanteResults.length > 0;
+    }
+  }
+
   selecionarParticipante(item: ParticipanteResult): void {
     this.model.codParticipante = item.codigo;
     this.model.nomeParticipante = item.nome;
@@ -430,11 +453,19 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
   onItemContabilInput(valor: string): void {
     this.model.itemContabil = '';
     if (!valor?.trim()) { this.showItemContabilDropdown = false; this.itemContabilFiltered = []; return; }
-    const t = valor.toLowerCase();
-    this.itemContabilFiltered = this.itensContabeis.filter(
-      i => i.codigo.toLowerCase().includes(t) || i.descricao.toLowerCase().includes(t)
-    );
+    this.itemContabilFiltered = this.filtrarLista(this.itensContabeis, valor);
     this.showItemContabilDropdown = this.itemContabilFiltered.length > 0;
+  }
+
+  toggleItemContabilDropdown(event: MouseEvent): void {
+    event.preventDefault();
+    if (this.showItemContabilDropdown) {
+      this.showItemContabilDropdown = false;
+    } else {
+      const t = (this.model.itemContabilSearch || '').trim();
+      this.itemContabilFiltered = t ? this.filtrarLista(this.itensContabeis, t) : [...this.itensContabeis];
+      this.showItemContabilDropdown = this.itemContabilFiltered.length > 0;
+    }
   }
 
   selecionarItemContabil(item: ItemContabilResult): void {
@@ -453,11 +484,19 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
   onCentroCustoInput(valor: string): void {
     this.model.centroCusto = '';
     if (!valor?.trim()) { this.showCentroCustoDropdown = false; this.centroCustoFiltered = []; return; }
-    const t = valor.toLowerCase();
-    this.centroCustoFiltered = this.centrosCusto.filter(
-      cc => cc.codigo.toLowerCase().includes(t) || cc.descricao.toLowerCase().includes(t)
-    );
+    this.centroCustoFiltered = this.filtrarLista(this.centrosCusto, valor);
     this.showCentroCustoDropdown = this.centroCustoFiltered.length > 0;
+  }
+
+  toggleCentroCustoDropdown(event: MouseEvent): void {
+    event.preventDefault();
+    if (this.showCentroCustoDropdown) {
+      this.showCentroCustoDropdown = false;
+    } else {
+      const t = (this.model.centroCustoSearch || '').trim();
+      this.centroCustoFiltered = t ? this.filtrarLista(this.centrosCusto, t) : [...this.centrosCusto];
+      this.showCentroCustoDropdown = this.centroCustoFiltered.length > 0;
+    }
   }
 
   selecionarCentroCusto(item: CentroCustoResult): void {
@@ -476,11 +515,19 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
   onClasseValorInput(valor: string): void {
     this.model.classeValor = '';
     if (!valor?.trim()) { this.showClasseValorDropdown = false; this.classeValorFiltered = []; return; }
-    const t = valor.toLowerCase();
-    this.classeValorFiltered = this.classesValor.filter(
-      cv => cv.codigo.toLowerCase().includes(t) || cv.descricao.toLowerCase().includes(t)
-    );
+    this.classeValorFiltered = this.filtrarLista(this.classesValor, valor);
     this.showClasseValorDropdown = this.classeValorFiltered.length > 0;
+  }
+
+  toggleClasseValorDropdown(event: MouseEvent): void {
+    event.preventDefault();
+    if (this.showClasseValorDropdown) {
+      this.showClasseValorDropdown = false;
+    } else {
+      const t = (this.model.classeValorSearch || '').trim();
+      this.classeValorFiltered = t ? this.filtrarLista(this.classesValor, t) : [...this.classesValor];
+      this.showClasseValorDropdown = this.classeValorFiltered.length > 0;
+    }
   }
 
   selecionarClasseValor(item: ClasseValorResult): void {
@@ -503,6 +550,15 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
     this.clienteSearch$.next(valor);
   }
 
+  toggleClienteDropdown(event: MouseEvent): void {
+    event.preventDefault();
+    if (this.showClienteDropdown) {
+      this.showClienteDropdown = false;
+    } else {
+      this.showClienteDropdown = this.clienteResults.length > 0;
+    }
+  }
+
   selecionarCliente(item: ClienteResult): void {
     this.model.flf_clifor = item.codigo;
     this.model.flf_floja = item.loja;
@@ -513,6 +569,13 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
 
   fecharClienteDropdown(): void {
     setTimeout(() => { this.showClienteDropdown = false; }, 150);
+  }
+
+  // ── Helpers ──────────────────────────────────────────────────────────────
+
+  private filtrarLista(lista: any[], termo: string): any[] {
+    const t = termo.toLowerCase();
+    return lista.filter(i => i.codigo.toLowerCase().includes(t) || i.descricao.toLowerCase().includes(t));
   }
 
   // ── Ações do formulário ──────────────────────────────────────────────────
