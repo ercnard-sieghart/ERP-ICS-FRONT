@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './auth.guard';
+import { patenteGuard } from './shared/guards/patente.guard';
 
 
 
@@ -30,14 +31,29 @@ export const routes: Routes = [
 			canActivate: [authGuard]
 		},
 		{
+			path: 'financeiro',
+			loadComponent: () => import('./financeiro/viagens.component').then(m => m.ViagensComponent),
+			canActivate: [authGuard]
+		},
+		{
+			path: 'financeiro/viagens',
+			loadComponent: () => import('./financeiro/viagens.component').then(m => m.ViagensComponent),
+			canActivate: [authGuard]
+		},
+		{
+			path: 'financeiro/prestacao-contas',
+			loadComponent: () => import('./financeiro/prestacao-contas.component').then(m => m.PrestacaoContasComponent),
+			canActivate: [authGuard]
+		},
+		{
 			path: 'compras/solicitacao',
 			loadComponent: () => import('./compras/solicitacao-compras/solicitacao-compras.component').then(m => m.SolicitacaoComprasComponent),
-			canActivate: [authGuard]
+			canActivate: [authGuard, patenteGuard]
 		},
 		{
 			path: 'patentes/coordenacao',
 			loadComponent: () => import('./admin/patentes/coordenacao.component').then(m => m.CoordenacaoComponent),
-			canActivate: [authGuard]
+			canActivate: [authGuard, patenteGuard]
 		},
 	{ path: '', redirectTo: 'login', pathMatch: 'full' },
     // Rota detalhe-item removida

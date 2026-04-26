@@ -1,53 +1,131 @@
-<div class="p-4">
-  <h1 class="text-2xl font-semibold mb-4">Coordenação - Patentes</h1>
-
-  <div class="flex gap-4">
-    <div class="w-1/3 bg-white rounded shadow p-3">
-      <h2 class="font-medium mb-2">Patentes</h2>
-      <div *ngIf="loading">Carregando...</div>
-      <ul>
-        <li *ngFor="let p of patentes" class="py-2 border-b last:border-b-0">
-          <button class="w-full text-left" (click)="selecionarPatente(p)">
-            <div class="flex items-center justify-between">
-              <span>{{p.nome || p.label || p.id}}</span>
-              <span class="text-sm text-gray-500">{{p.id}}</span>
-            </div>
-          </button>
-        </li>
-      </ul>
+  <div *ngIf="loading" class="fixed inset-0 bg-gradient-to-br from-[#1A4E79]/90 to-[#75C9C8]/90 backdrop-blur-sm z-[9999] flex items-center justify-center">
+    <div class="bg-white rounded-xl p-8 shadow-2xl text-center min-w-[280px] mx-4">
+      <div class="w-16 h-16 border-4 border-[#75C9C8]/30 border-t-[#1A4E79] rounded-full mx-auto mb-6 animate-spin"></div>
+      <div class="text-xl font-bold text-[#1A4E79] mb-2">Carregando...</div>
+      <div class="text-base text-[#1A4E79]/70">Aguarde</div>
     </div>
+  </div>
 
-    <div class="flex-1 bg-white rounded shadow p-3">
-      <h2 class="font-medium mb-2">Detalhes</h2>
-      <div *ngIf="!selectedPatente">Selecione uma patente à esquerda</div>
+  <main class="h-screen p-6 bg-gradient-to-br from-[#1A4E79] to-[#75C9C8] overflow-y-auto">
+    <div class="bg-white/95 backdrop-blur-sm rounded-xl shadow-xl p-8 border border-white/20">
+      <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-semibold text-[#1A4E79]">Coordenação - Patentes</h1>
+        <!-- botão 'Atualizar' removido por solicitação -->
+      </div>
 
-      <div *ngIf="selectedPatente">
-        <div class="mb-3">
-          <div class="text-lg font-semibold">{{selectedPatente.nome || selectedPatente.label || selectedPatente.id}}</div>
-          <div class="text-sm text-gray-500">ID: {{selectedPatente.id}}</div>
-        </div>
+  <!-- Mobile: accordion/lista de patentes compacta -->
+  <div *ngIf="isMobile" class="mb-4">
+        <details class="bg-white rounded-xl shadow-lg p-3 border-l-4 border-[#75C9C8]">
+          <summary class="flex items-center justify-between cursor-pointer">
+            <span class="font-medium text-[#1A4E79]">Patentes</span>
+            <span class="text-sm text-gray-500">{{ (patentes && patentes.length) || 0 }}</span>
+          </summary>
+          <ul class="mt-3">
+            <li *ngFor="let p of patentes" class="py-2 border-b last:border-b-0">
+              <button class="w-full text-left" (click)="selecionarPatente(p)">
+                <div class="flex items-center justify-between">
+                  <span class="font-medium text-[#1A4E79]">{{p.nome || p.label || p.id}}</span>
+                  <span class="text-sm text-gray-500">{{p.id}}</span>
+                </div>
+              </button>
+            </li>
+          </ul>
+        </details>
+      </div>
 
-        <div class="mb-3">
-          <div class="flex items-center gap-2 mb-2">
-            <h3 class="font-medium">Usuários atribuídos</h3>
-            <button class="ml-auto bg-blue-600 text-white px-3 py-1 rounded" (click)="abrirAdicionarUsuario()">Adicionar</button>
-          </div>
-
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+  <!-- Lista de patentes (coluna esquerda) -->
+  <div *ngIf="!isMobile" class="lg:col-span-1 bg-white rounded-xl shadow-lg p-4 border-l-4 border-[#75C9C8]">
+          <h2 class="text-lg font-semibold text-[#1A4E79] mb-3">Patentes</h2>
+          <div *ngIf="!patentes || patentes.length === 0" class="text-sm text-[#1A4E79]/70">Nenhuma patente encontrada</div>
           <ul>
-            <li *ngFor="let u of usuarios" class="flex items-center justify-between py-2 border-b last:border-b-0">
-              <div>
-                <div class="font-medium">{{u.nome || u.login || u.id}}</div>
-                <div class="text-sm text-gray-500">{{u.email || ''}}</div>
-              </div>
-              <div>
-                <button class="text-red-600" (click)="removerUsuario(u)">Remover</button>
-              </div>
+            <li *ngFor="let p of patentes" class="py-2 border-b last:border-b-0">
+              <button class="w-full text-left" (click)="selecionarPatente(p)">
+                <div class="flex items-center justify-between">
+                  <span class="font-medium text-[#1A4E79]">{{p.nome || p.label || p.id}}</span>
+                  <span class="text-sm text-gray-500">{{p.id}}</span>
+                </div>
+              </button>
             </li>
           </ul>
         </div>
-      </div>
 
-      <div *ngIf="mensagem" class="text-sm text-red-600">{{mensagem}}</div>
+        <!-- Detalhes (coluna direita) -->
+        <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-4 border border-[#75C9C8]/20">
+          <h2 class="text-lg font-semibold text-[#1A4E79] mb-3">Detalhes</h2>
+          <div *ngIf="!selectedPatente" class="text-sm text-[#1A4E79]/60">Selecione uma patente à esquerda</div>
+
+          <div *ngIf="selectedPatente">
+            <!-- Mobile: botão voltar para a lista compacta -->
+            <div *ngIf="isMobile" class="mb-3">
+              <button class="text-sm text-[#1A4E79] flex items-center gap-2" (click)="voltarLista()">← Voltar</button>
+            </div>
+            <div class="mb-4">
+              <div class="text-xl font-semibold text-[#1A4E79]">{{selectedPatente.nome || selectedPatente.label || selectedPatente.id}}</div>
+              <div class="text-sm text-gray-500">ID: {{selectedPatente.id}}</div>
+            </div>
+
+            <div class="mb-4">
+              <div class="flex items-center gap-2 mb-2">
+                <h3 class="font-medium text-[#1A4E79]">Usuários atribuídos</h3>
+                <div class="ml-auto flex items-center gap-2">
+                  <button class="bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white px-3 py-1 rounded flex items-center gap-2" (click)="abrirAdicionarUsuario()" [disabled]="usersLoading">
+                    <i class="po-icon po-icon-plus"></i>
+                    Adicionar
+                  </button>
+                  <span *ngIf="usersLoading" class="ml-3 text-sm text-gray-500">Carregando usuários...</span>
+                </div>
+              </div>
+              <!-- add user inline form -->
+                <div *ngIf="showAddUserForm" class="mb-3">
+                <div class="flex flex-col md:flex-row gap-2 items-center">
+                  <div class="relative flex-1 w-full">
+          <input type="text" [(ngModel)]="userSearchQuery" (ngModelChange)="onUserQueryChange($event)" placeholder="Pesquisar por nome do usuário" class="w-full border rounded px-3 py-3 md:py-2 text-base" autocomplete="off" />
+          <ul *ngIf="userSearchSuggestions?.length" class="bg-white border rounded mt-1 max-h-40 overflow-auto shadow-sm"
+            [class.absolute]="!isMobile" [class.z-50]="!isMobile" [class.left-0]="!isMobile" [class.right-0]="!isMobile" [class.block]="isMobile" [class.w-full]="isMobile">
+                      <li *ngFor="let s of userSearchSuggestions" class="px-3 py-2 hover:bg-[#f3f9f9] cursor-pointer" (click)="selectUserSuggestion(s)">
+                        <div class="text-sm font-medium text-[#0f3f5a]">{{s.nome || s['name'] || s.login || s.id}}</div>
+                        <div class="text-xs text-gray-500">{{s.email || ''}}</div>
+                      </li>
+                    </ul>
+                  </div>
+                  <button class="bg-white border border-[#1A4E79] text-[#1A4E79] px-3 py-2 rounded w-full md:w-auto" (click)="confirmarAdicionarUsuario()" [disabled]="!novoUsuarioId">Confirmar</button>
+                  <button class="text-sm text-gray-500 px-3 py-2 w-full md:w-auto" (click)="cancelarAdicionarUsuario()">Cancelar</button>
+                </div>
+                <div *ngIf="!novoUsuarioId && userSearchQuery" class="mt-2 text-sm text-gray-600">Selecione um usuário na lista de sugestões antes de confirmar.</div>
+              </div>
+
+              <div class="overflow-hidden rounded-md border border-[#E6EEF2]">
+                <ul>
+                  <li *ngFor="let u of usuarios" class="flex items-center justify-between gap-4 py-3 px-4 bg-white hover:bg-[#f8fdfd] border-b last:border-b-0">
+                    <div>
+                      <div class="font-medium text-[#0f3f5a]">{{u.nome || u.login || u.id}}</div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <button class="text-sm text-red-600 border border-red-100 px-3 py-1 rounded hover:bg-red-50" (click)="openRemoveModal(u)">Remover</button>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="mensagem" class="text-sm text-red-600">{{mensagem}}</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal de confirmação de remoção -->
+  <div *ngIf="showRemoveModal" class="remove-modal-root fixed inset-0 z-50 flex items-center justify-center">
+    <div class="remove-modal-overlay absolute inset-0 bg-black/50" (click)="cancelRemove()"></div>
+    <div class="remove-modal-card relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+      <h3 class="text-lg font-semibold text-[#1A4E79] mb-2">Remover usuário</h3>
+      <p class="text-sm text-gray-600 mb-4">Tem certeza que deseja remover <span class="font-medium text-[#0f3f5a]">{{userToRemove?.nome || userToRemove?.login || userToRemove?.id}}</span> desta patente?</p>
+      <div class="remove-modal-actions flex justify-end gap-3">
+        <button class="px-4 py-2 rounded text-sm bg-white border border-gray-200" (click)="cancelRemove()">Cancelar</button>
+        <button class="px-4 py-2 rounded text-sm bg-red-600 text-white" (click)="confirmRemoveUser()">Remover</button>
+      </div>
     </div>
   </div>
-</div>
+  

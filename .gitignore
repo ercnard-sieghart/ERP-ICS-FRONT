@@ -36,3 +36,8 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+CLAUDE.md
+anti-patterns.md
+decisions.md
+patterns.md
+rules.md
