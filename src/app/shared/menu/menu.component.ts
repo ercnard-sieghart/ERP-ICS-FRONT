@@ -262,29 +262,10 @@ export class MenuComponent implements OnInit, OnDestroy {
       // Menu principal /patentes
       if (menu.rota === '/patentes') {
         let patentesMenu = menuMap.get('patentes');
-        const mySub = submenusByPrefix['/patentes'] || [];
-        // Submenus vindos do backend (se houver)
-        let submenus: MenuItemWithSubmenu[] = mySub.map((m: any) => ({ id: menu.id, label: m.nome, icon: 'list', link: m.rota }));
-
-        // Se backend retornou apenas a rota principal, derivamos submenus das rotas do cliente
-        if (submenus.length === 0) {
-          try {
-            const prefix = 'patentes';
-            const cfg = this.router && Array.isArray(this.router.config) ? this.router.config : [];
-            const found = cfg.filter(r => r.path && r.path.startsWith(prefix + '/'));
-            if (found && found.length > 0) {
-              submenus = found.map((r: any) => {
-                const path = (r.path || '').replace(/^\//, '');
-                const segs = path.split('/').filter(Boolean);
-                const last = segs.length > 0 ? segs[segs.length - 1] : path;
-                const label = last ? last.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) : (r.path || '');
-                return { id: menu.id, label, icon: 'list', link: '/' + (r.path || '') } as MenuItemWithSubmenu;
-              });
-            }
-          } catch (e) {
-            // falha ao derivar rotas do router.config - ignore
-          }
-        }
+        const submenus: MenuItemWithSubmenu[] = [
+          { id: menu.id, label: 'Coordenação', icon: 'users', link: '/patentes/coordenacao' },
+          { id: menu.id, label: 'Gestão de Patentes', icon: 'lock-closed', link: '/patentes/gestao' }
+        ];
 
         if (!patentesMenu) {
           patentesMenu = {
@@ -292,7 +273,7 @@ export class MenuComponent implements OnInit, OnDestroy {
             label: menu.nome || 'Patentes',
             icon: 'users',
             expanded: false,
-            submenus: submenus
+            submenus
           };
           menuMap.set('patentes', patentesMenu);
           this.menuItems.push(patentesMenu);

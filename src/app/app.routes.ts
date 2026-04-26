@@ -55,6 +55,11 @@ export const routes: Routes = [
 			loadComponent: () => import('./admin/patentes/coordenacao.component').then(m => m.CoordenacaoComponent),
 			canActivate: [authGuard, patenteGuard]
 		},
+		{
+			path: 'patentes/gestao',
+			loadComponent: () => import('./admin/patentes/gestao-patentes.component').then(m => m.GestaoPatentesComponent),
+			canActivate: [authGuard, patenteGuard]
+		},
 	{ path: '', redirectTo: 'login', pathMatch: 'full' },
     // Rota detalhe-item removida
 	{ path: 'error', component: ErrorPageComponent },
