@@ -9,15 +9,12 @@ import {
   ClienteResult,
   ItemContabilResult,
   CentroCustoResult,
-  ClasseValorResult,
-  MotivoResult
+  ClasseValorResult
 } from './services/prestacao-contas.service';
 
-const AUTOCOMPLETE_INPUT_CLASS = `
-  w-full p-3 border border-[#75C9C8]/30 rounded-lg
-  focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent
-  transition-all shadow-sm
-`.replace(/\s+/g, ' ').trim();
+const INPUT_CLASS = 'w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all shadow-sm';
+const DROPDOWN_CLASS = 'absolute z-20 w-full bg-white border border-[#75C9C8]/30 rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto';
+const DROPDOWN_ITEM_CLASS = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-gray-100 last:border-0 flex gap-2';
 
 @Component({
   selector: 'app-prestacao-contas',
@@ -66,29 +63,24 @@ const AUTOCOMPLETE_INPUT_CLASS = `
                       class="w-full p-3 bg-gray-100 border border-[#e6eef0] rounded-lg shadow-inner" />
                   </div>
 
-                  <!-- Participante (autocomplete) -->
+                  <!-- Participante (typeahead via API) -->
                   <div>
                     <label class="block text-sm font-semibold text-[#1A4E79] mb-1">Participante *</label>
                     <div class="relative">
                       <input type="text" name="codParticipante" [(ngModel)]="model.codParticipante" required
-                        autocomplete="off"
-                        placeholder="Digite código ou nome..."
+                        autocomplete="off" placeholder="Digite código ou nome..."
                         (ngModelChange)="onParticipanteInput($event)"
                         (blur)="fecharParticipanteDropdown()"
-                        class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all shadow-sm" />
-                      <div *ngIf="showParticipanteDropdown && participanteResults.length > 0"
-                        class="absolute z-20 w-full bg-white border border-[#75C9C8]/30 rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto">
+                        class="${INPUT_CLASS}" />
+                      <div *ngIf="showParticipanteDropdown && participanteResults.length > 0" class="${DROPDOWN_CLASS}">
                         <div *ngFor="let r of participanteResults"
-                          (mousedown)="selecionarParticipante(r)"
-                          class="px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-gray-100 last:border-0 flex gap-2">
+                          (mousedown)="selecionarParticipante(r)" class="${DROPDOWN_ITEM_CLASS}">
                           <span class="font-semibold text-[#1A4E79] shrink-0">{{ r.codigo }}</span>
                           <span class="text-gray-500 truncate">{{ r.nome }}</span>
                         </div>
                       </div>
                       <div *ngIf="isLoadingParticipante"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#75C9C8]">
-                        Buscando...
-                      </div>
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#75C9C8]">Buscando...</div>
                     </div>
                   </div>
 
@@ -121,44 +113,72 @@ const AUTOCOMPLETE_INPUT_CLASS = `
                       class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all" />
                   </div>
 
-                  <!-- Centro de Custo -->
-                  <div>
-                    <label class="block text-sm font-medium text-[#1A4E79] mb-1">Centro de Custo</label>
-                    <select name="centroCusto" [(ngModel)]="model.centroCusto"
-                      class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all shadow-sm">
-                      <option value="">Selecione</option>
-                      <option *ngFor="let cc of centrosCusto" [value]="cc.codigo">{{ cc.codigo }} - {{ cc.descricao }}</option>
-                    </select>
-                  </div>
-
-                  <!-- Item Contábil -->
+                  <!-- Item Contábil (typeahead local) -->
                   <div>
                     <label class="block text-sm font-medium text-[#1A4E79] mb-1">Item Contábil</label>
-                    <select name="itemContabil" [(ngModel)]="model.itemContabil"
-                      class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all">
-                      <option value="">Selecione um item</option>
-                      <option *ngFor="let it of itensContabeis" [value]="it.codigo">{{ it.codigo }} - {{ it.descricao }}</option>
-                    </select>
+                    <div class="relative">
+                      <input type="text" name="itemContabilSearch" [(ngModel)]="model.itemContabilSearch"
+                        autocomplete="off" placeholder="Digite código ou descrição..."
+                        (ngModelChange)="onItemContabilInput($event)"
+                        (blur)="fecharItemContabilDropdown()"
+                        class="${INPUT_CLASS}" />
+                      <div *ngIf="showItemContabilDropdown && itemContabilFiltered.length > 0" class="${DROPDOWN_CLASS}">
+                        <div *ngFor="let it of itemContabilFiltered"
+                          (mousedown)="selecionarItemContabil(it)" class="${DROPDOWN_ITEM_CLASS}">
+                          <span class="font-semibold text-[#1A4E79] shrink-0">{{ it.codigo }}</span>
+                          <span class="text-gray-500 truncate">{{ it.descricao }}</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  <!-- Classe Valor -->
+                  <!-- Centro de Custo (typeahead local) -->
+                  <div>
+                    <label class="block text-sm font-medium text-[#1A4E79] mb-1">Centro de Custo</label>
+                    <div class="relative">
+                      <input type="text" name="centroCustoSearch" [(ngModel)]="model.centroCustoSearch"
+                        autocomplete="off" placeholder="Digite código ou descrição..."
+                        (ngModelChange)="onCentroCustoInput($event)"
+                        (blur)="fecharCentroCustoDropdown()"
+                        class="${INPUT_CLASS}" />
+                      <div *ngIf="showCentroCustoDropdown && centroCustoFiltered.length > 0" class="${DROPDOWN_CLASS}">
+                        <div *ngFor="let cc of centroCustoFiltered"
+                          (mousedown)="selecionarCentroCusto(cc)" class="${DROPDOWN_ITEM_CLASS}">
+                          <span class="font-semibold text-[#1A4E79] shrink-0">{{ cc.codigo }}</span>
+                          <span class="text-gray-500 truncate">{{ cc.descricao }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Classe Valor (typeahead local) -->
                   <div>
                     <label class="block text-sm font-medium text-[#1A4E79] mb-1">Classe Valor</label>
-                    <select name="classeValor" [(ngModel)]="model.classeValor"
-                      class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all">
-                      <option value="">Selecione</option>
-                      <option *ngFor="let c of classesValor" [value]="c.codigo">{{ c.codigo }} - {{ c.descricao }}</option>
-                    </select>
+                    <div class="relative">
+                      <input type="text" name="classeValorSearch" [(ngModel)]="model.classeValorSearch"
+                        autocomplete="off" placeholder="Digite código ou descrição..."
+                        (ngModelChange)="onClasseValorInput($event)"
+                        (blur)="fecharClasseValorDropdown()"
+                        class="${INPUT_CLASS}" />
+                      <div *ngIf="showClasseValorDropdown && classeValorFiltered.length > 0" class="${DROPDOWN_CLASS}">
+                        <div *ngFor="let cv of classeValorFiltered"
+                          (mousedown)="selecionarClasseValor(cv)" class="${DROPDOWN_ITEM_CLASS}">
+                          <span class="font-semibold text-[#1A4E79] shrink-0">{{ cv.codigo }}</span>
+                          <span class="text-gray-500 truncate">{{ cv.descricao }}</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  <!-- Motivo -->
+                  <!-- Motivo (memo 80 chars) -->
                   <div>
-                    <label class="block text-sm font-medium text-[#1A4E79] mb-1">Motivo</label>
-                    <select name="motivo" [(ngModel)]="model.motivo"
-                      class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all">
-                      <option value="">Selecione</option>
-                      <option *ngFor="let m of motivos" [value]="m.codigo">{{ m.codigo }} - {{ m.descricao }}</option>
-                    </select>
+                    <label class="block text-sm font-medium text-[#1A4E79] mb-1">
+                      Motivo
+                      <span class="text-gray-400 font-normal text-xs ml-1">({{ (model.motivo || '').length }}/80)</span>
+                    </label>
+                    <textarea name="motivo" [(ngModel)]="model.motivo" maxlength="80" rows="3"
+                      placeholder="Descreva o motivo da prestação..."
+                      class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all shadow-sm resize-none"></textarea>
                   </div>
 
                   <!-- Percentuais -->
@@ -182,29 +202,24 @@ const AUTOCOMPLETE_INPUT_CLASS = `
                     </small>
                   </div>
 
-                  <!-- Cliente / Fornecedor (autocomplete) -->
+                  <!-- Cliente / Fornecedor (typeahead via API) -->
                   <div>
                     <label class="block text-sm font-medium text-[#1A4E79] mb-1">Cliente / Fornecedor</label>
                     <div class="relative">
                       <input type="text" name="flf_clifor" [(ngModel)]="model.flf_clifor"
-                        autocomplete="off"
-                        placeholder="Digite código ou nome..."
+                        autocomplete="off" placeholder="Digite código ou nome..."
                         (ngModelChange)="onClienteInput($event)"
                         (blur)="fecharClienteDropdown()"
-                        class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all shadow-sm" />
-                      <div *ngIf="showClienteDropdown && clienteResults.length > 0"
-                        class="absolute z-20 w-full bg-white border border-[#75C9C8]/30 rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto">
+                        class="${INPUT_CLASS}" />
+                      <div *ngIf="showClienteDropdown && clienteResults.length > 0" class="${DROPDOWN_CLASS}">
                         <div *ngFor="let r of clienteResults"
-                          (mousedown)="selecionarCliente(r)"
-                          class="px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-gray-100 last:border-0 flex gap-2">
+                          (mousedown)="selecionarCliente(r)" class="${DROPDOWN_ITEM_CLASS}">
                           <span class="font-semibold text-[#1A4E79] shrink-0">{{ r.codigo }}/{{ r.loja }}</span>
                           <span class="text-gray-500 truncate">{{ r.nome }}</span>
                         </div>
                       </div>
                       <div *ngIf="isLoadingCliente"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#75C9C8]">
-                        Buscando...
-                      </div>
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#75C9C8]">Buscando...</div>
                     </div>
                   </div>
 
@@ -263,25 +278,36 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
   isGeneratingCode = false;
   isSaving = false;
 
-  // Autocomplete — participante
+  // Autocomplete via API — participante
   participanteResults: ParticipanteResult[] = [];
   showParticipanteDropdown = false;
   isLoadingParticipante = false;
   private participanteSearch$ = new Subject<string>();
   private participanteSub?: Subscription;
 
-  // Autocomplete — cliente/fornecedor
+  // Autocomplete via API — cliente/fornecedor
   clienteResults: ClienteResult[] = [];
   showClienteDropdown = false;
   isLoadingCliente = false;
   private clienteSearch$ = new Subject<string>();
   private clienteSub?: Subscription;
 
-  // Listas dos selects
+  // Listas carregadas em memória (filtro local)
   itensContabeis: ItemContabilResult[] = [];
   centrosCusto: CentroCustoResult[] = [];
   classesValor: ClasseValorResult[] = [];
-  motivos: MotivoResult[] = [];
+
+  // Typeahead local — item contábil
+  itemContabilFiltered: ItemContabilResult[] = [];
+  showItemContabilDropdown = false;
+
+  // Typeahead local — centro de custo
+  centroCustoFiltered: CentroCustoResult[] = [];
+  showCentroCustoDropdown = false;
+
+  // Typeahead local — classe valor
+  classeValorFiltered: ClasseValorResult[] = [];
+  showClasseValorDropdown = false;
 
   constructor(private prestacaoService: PrestacaoContasService) {}
 
@@ -337,7 +363,6 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
     this.prestacaoService.listarItensContabeis().subscribe({ next: items => this.itensContabeis = items, error: () => {} });
     this.prestacaoService.listarCentrosCusto().subscribe({ next: items => this.centrosCusto = items, error: () => {} });
     this.prestacaoService.listarClassesValor().subscribe({ next: items => this.classesValor = items, error: () => {} });
-    this.prestacaoService.listarMotivos().subscribe({ next: items => this.motivos = items, error: () => {} });
   }
 
   initModel(): void {
@@ -349,8 +374,11 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
       flf_emissa: '',
       flf_dtini: '',
       flf_dtfim: '',
-      centroCusto: '',
+      itemContabilSearch: '',
       itemContabil: '',
+      centroCustoSearch: '',
+      centroCusto: '',
+      classeValorSearch: '',
       classeValor: '',
       motivo: '',
       flf_fatcli: 0,
@@ -378,15 +406,11 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ── Autocomplete participante ────────────────────────────────────────────
+  // ── Participante (API) ───────────────────────────────────────────────────
 
   onParticipanteInput(valor: string): void {
     this.model.nomeParticipante = '';
-    if (!valor?.trim()) {
-      this.showParticipanteDropdown = false;
-      this.participanteResults = [];
-      return;
-    }
+    if (!valor?.trim()) { this.showParticipanteDropdown = false; this.participanteResults = []; return; }
     this.participanteSearch$.next(valor);
   }
 
@@ -401,16 +425,81 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
     setTimeout(() => { this.showParticipanteDropdown = false; }, 150);
   }
 
-  // ── Autocomplete cliente/fornecedor ──────────────────────────────────────
+  // ── Item Contábil (filtro local) ─────────────────────────────────────────
+
+  onItemContabilInput(valor: string): void {
+    this.model.itemContabil = '';
+    if (!valor?.trim()) { this.showItemContabilDropdown = false; this.itemContabilFiltered = []; return; }
+    const t = valor.toLowerCase();
+    this.itemContabilFiltered = this.itensContabeis.filter(
+      i => i.codigo.toLowerCase().includes(t) || i.descricao.toLowerCase().includes(t)
+    );
+    this.showItemContabilDropdown = this.itemContabilFiltered.length > 0;
+  }
+
+  selecionarItemContabil(item: ItemContabilResult): void {
+    this.model.itemContabil = item.codigo;
+    this.model.itemContabilSearch = `${item.codigo} - ${item.descricao}`;
+    this.itemContabilFiltered = [];
+    this.showItemContabilDropdown = false;
+  }
+
+  fecharItemContabilDropdown(): void {
+    setTimeout(() => { this.showItemContabilDropdown = false; }, 150);
+  }
+
+  // ── Centro de Custo (filtro local) ───────────────────────────────────────
+
+  onCentroCustoInput(valor: string): void {
+    this.model.centroCusto = '';
+    if (!valor?.trim()) { this.showCentroCustoDropdown = false; this.centroCustoFiltered = []; return; }
+    const t = valor.toLowerCase();
+    this.centroCustoFiltered = this.centrosCusto.filter(
+      cc => cc.codigo.toLowerCase().includes(t) || cc.descricao.toLowerCase().includes(t)
+    );
+    this.showCentroCustoDropdown = this.centroCustoFiltered.length > 0;
+  }
+
+  selecionarCentroCusto(item: CentroCustoResult): void {
+    this.model.centroCusto = item.codigo;
+    this.model.centroCustoSearch = `${item.codigo} - ${item.descricao}`;
+    this.centroCustoFiltered = [];
+    this.showCentroCustoDropdown = false;
+  }
+
+  fecharCentroCustoDropdown(): void {
+    setTimeout(() => { this.showCentroCustoDropdown = false; }, 150);
+  }
+
+  // ── Classe Valor (filtro local) ──────────────────────────────────────────
+
+  onClasseValorInput(valor: string): void {
+    this.model.classeValor = '';
+    if (!valor?.trim()) { this.showClasseValorDropdown = false; this.classeValorFiltered = []; return; }
+    const t = valor.toLowerCase();
+    this.classeValorFiltered = this.classesValor.filter(
+      cv => cv.codigo.toLowerCase().includes(t) || cv.descricao.toLowerCase().includes(t)
+    );
+    this.showClasseValorDropdown = this.classeValorFiltered.length > 0;
+  }
+
+  selecionarClasseValor(item: ClasseValorResult): void {
+    this.model.classeValor = item.codigo;
+    this.model.classeValorSearch = `${item.codigo} - ${item.descricao}`;
+    this.classeValorFiltered = [];
+    this.showClasseValorDropdown = false;
+  }
+
+  fecharClasseValorDropdown(): void {
+    setTimeout(() => { this.showClasseValorDropdown = false; }, 150);
+  }
+
+  // ── Cliente / Fornecedor (API) ───────────────────────────────────────────
 
   onClienteInput(valor: string): void {
     this.model.flf_floja = '';
     this.model.nomeCliente = '';
-    if (!valor?.trim()) {
-      this.showClienteDropdown = false;
-      this.clienteResults = [];
-      return;
-    }
+    if (!valor?.trim()) { this.showClienteDropdown = false; this.clienteResults = []; return; }
     this.clienteSearch$.next(valor);
   }
 
