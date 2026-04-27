@@ -142,8 +142,8 @@ export class AppComponent implements OnInit {
   }
   
   shouldShowMenu(): boolean {
-    // Não mostra menu na página de login e error
-    return !this.currentRoute.includes('/login') && 
+    return !this.currentRoute.includes('/login') &&
+           !this.currentRoute.includes('/change-password') &&
            !this.currentRoute.includes('/error') &&
            this.currentRoute !== '' &&
            this.currentRoute !== '/';

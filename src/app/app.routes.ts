@@ -13,6 +13,10 @@ import { ErrorPageComponent } from './error-page.component';
 
 export const routes: Routes = [
 	{ path: 'login', component: LoginComponent },
+	{
+		path: 'change-password',
+		loadComponent: () => import('./change-password/change-password.component').then(m => m.ChangePasswordComponent)
+	},
 		{ path: 'home', component: HomeComponent, canActivate: [authGuard] },
 		{ path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
 		{

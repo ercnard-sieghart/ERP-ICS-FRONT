@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError, BehaviorSubject, of } from 'rxjs';
+import { Observable, throwError, BehaviorSubject, of, from } from 'rxjs';
 import { map, catchError, switchMap } from 'rxjs/operators';
 import { ConfigService } from './config.service';
 
@@ -158,18 +158,38 @@ export class AuthService {
   private _ = this._initOnce();
 
 
+  changePassword(user: string, oldPassword: string, newPassword: string): Observable<any> {
+    const url = this.configService.getRestEndpoint('/api/framework/v1/changepassworduserservice');
+    return this.http.post<any>(url, { user, oldPassword, newPassword }, {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+    }).pipe(
+      catchError(this.handleAuthError.bind(this, 'Change Password'))
+    );
+  }
+
   authenticate(username: string, password: string): Observable<any> {
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/x-www-form-urlencoded'
-    });
-    
     const body = `grant_type=password&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
-    
     const oauthUrl = this.configService.getRestEndpoint('/api/oauth2/v1/token');
-    return this.http.post(oauthUrl, body, { headers, observe: 'response' })
-      .pipe(
-        catchError(this.handleAuthError.bind(this, 'OAuth2 Authentication'))
-      );
+
+    const fetchPromise = fetch(oauthUrl, {
+      method: 'POST',
+      redirect: 'manual',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body
+    }).then(async (response) => {
+      if (response.type === 'opaqueredirect') {
+        throw new HttpErrorResponse({ status: 302, url: oauthUrl });
+      }
+      if (!response.ok) {
+        throw new HttpErrorResponse({ status: response.status, url: response.url || oauthUrl });
+      }
+      const bodyData = await response.json();
+      return { url: response.url, body: bodyData, status: response.status };
+    });
+
+    return from(fetchPromise).pipe(
+      catchError(err => throwError(() => err))
+    );
   }
 
   login(token: string): Observable<any> {
