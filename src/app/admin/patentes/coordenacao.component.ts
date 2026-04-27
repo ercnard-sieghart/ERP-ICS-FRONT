@@ -28,82 +28,88 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
       {{ notifMsg }}
     </div>
 
-    <main class="min-h-screen bg-gradient-to-br from-[#1A4E79] to-[#75C9C8] p-3 md:p-6 overflow-y-auto">
-      <div class="max-w-5xl mx-auto">
-
-        <h1 class="text-xl md:text-2xl font-bold text-white mb-4">Coordenação de Patentes</h1>
-
-        <!-- ── MOBILE: accordion ── -->
-        <div class="flex flex-col gap-2 lg:hidden">
-          <div *ngIf="!loading && patentes.length === 0"
-               class="bg-white/90 rounded-xl p-6 text-center text-[#1A4E79]/60 text-sm">
-            Nenhuma patente cadastrada.
-          </div>
-          <div *ngFor="let p of patentes" class="bg-white rounded-xl shadow overflow-hidden">
-            <div class="flex items-center gap-2 px-4 py-3 cursor-pointer hover:bg-[#f8fdfd] active:bg-[#edf7f7]"
-                 (click)="toggleAccordion(p)">
-              <svg class="w-4 h-4 flex-shrink-0 text-[#75C9C8] transition-transform duration-200"
-                   [class.rotate-180]="selectedPatente?.id === p.id"
-                   fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
-              </svg>
-              <div class="flex-1 min-w-0">
-                <div class="font-semibold text-[#1A4E79] truncate">{{ p.nome || p.label || p.id }}</div>
-                <div class="text-xs text-gray-400">ID: {{ p.id }}</div>
-              </div>
-            </div>
-            <ng-container *ngIf="selectedPatente?.id === p.id">
-              <ng-container *ngTemplateOutlet="usersPanel"></ng-container>
-            </ng-container>
-          </div>
+    <main class="h-full flex flex-col bg-gradient-to-br from-[#1A4E79] to-[#75C9C8] overflow-hidden">
+      <div class="flex-shrink-0 px-3 md:px-6 pt-3 md:pt-6 pb-2">
+        <div class="max-w-5xl mx-auto">
+          <h1 class="text-xl md:text-2xl font-bold text-white">Coordenação de Patentes</h1>
         </div>
+      </div>
 
-        <!-- ── DESKTOP: split ── -->
-        <div class="hidden lg:grid lg:grid-cols-[280px,1fr] lg:gap-4 bg-white rounded-xl shadow overflow-hidden" style="min-height:520px">
-          <!-- Left: patent list -->
-          <div class="border-r border-[#E6EEF2] flex flex-col">
-            <div class="px-4 py-3 border-b border-[#E6EEF2] bg-[#f8fdfd]">
-              <span class="text-xs font-semibold text-[#1A4E79] uppercase tracking-wide">
-                Patentes ({{ patentes.length }})
-              </span>
+      <div class="flex-1 min-h-0 overflow-hidden flex flex-col px-3 md:px-6 pb-3 md:pb-6">
+        <div class="max-w-5xl mx-auto w-full flex-1 min-h-0 flex flex-col">
+
+          <!-- ── MOBILE: accordion ── -->
+          <div class="flex flex-col gap-2 lg:hidden flex-1 overflow-y-auto">
+            <div *ngIf="!loading && patentes.length === 0"
+                 class="bg-white/90 rounded-xl p-6 text-center text-[#1A4E79]/60 text-sm">
+              Nenhuma patente cadastrada.
             </div>
-            <div *ngIf="!loading && patentes.length === 0" class="p-4 text-sm text-[#1A4E79]/50">
-              Nenhuma cadastrada.
-            </div>
-            <ul class="flex-1 overflow-y-auto divide-y divide-[#E6EEF2]">
-              <li *ngFor="let p of patentes"
-                  (click)="selecionarPatente(p)"
-                  class="flex items-start gap-2 px-4 py-3 cursor-pointer hover:bg-[#f8fdfd] transition-colors"
-                  [class.bg-[#edf7f7]]="selectedPatente?.id === p.id"
-                  [class.border-l-2]="selectedPatente?.id === p.id"
-                  [class.border-l-[#75C9C8]]="selectedPatente?.id === p.id">
-                <div class="flex-1 min-w-0 pt-0.5">
-                  <div class="text-sm font-semibold text-[#1A4E79] truncate">{{ p.nome || p.label || p.id }}</div>
+            <div *ngFor="let p of patentes" class="bg-white rounded-xl shadow overflow-hidden">
+              <div class="flex items-center gap-2 px-4 py-3 cursor-pointer hover:bg-[#f8fdfd] active:bg-[#edf7f7]"
+                   (click)="toggleAccordion(p)">
+                <svg class="w-4 h-4 flex-shrink-0 text-[#75C9C8] transition-transform duration-200"
+                     [class.rotate-180]="selectedPatente?.id === p.id"
+                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+                </svg>
+                <div class="flex-1 min-w-0">
+                  <div class="font-semibold text-[#1A4E79] truncate">{{ p.nome || p.label || p.id }}</div>
                   <div class="text-xs text-gray-400">ID: {{ p.id }}</div>
                 </div>
-              </li>
-            </ul>
-          </div>
-
-          <!-- Right: users panel -->
-          <div class="flex flex-col">
-            <div *ngIf="!selectedPatente" class="flex-1 flex items-center justify-center text-sm text-[#1A4E79]/40">
-              <div class="text-center">
-                <svg class="w-10 h-10 mx-auto mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-                Selecione uma patente
               </div>
+              <ng-container *ngIf="selectedPatente?.id === p.id">
+                <ng-container *ngTemplateOutlet="usersPanel"></ng-container>
+              </ng-container>
             </div>
-            <ng-container *ngIf="selectedPatente">
-              <ng-container *ngTemplateOutlet="usersPanel"></ng-container>
-            </ng-container>
           </div>
-        </div>
 
-        <div *ngIf="mensagem" class="mt-3 bg-red-100 border border-red-300 rounded-lg p-3 text-sm text-red-700">
-          {{ mensagem }}
+          <!-- ── DESKTOP: split ── -->
+          <div class="hidden lg:flex flex-1 min-h-0 bg-white rounded-xl shadow overflow-hidden">
+            <!-- Left: patent list -->
+            <div class="w-[280px] flex-shrink-0 border-r border-[#E6EEF2] flex flex-col overflow-hidden">
+              <div class="px-4 py-3 border-b border-[#E6EEF2] bg-[#f8fdfd] flex-shrink-0">
+                <span class="text-xs font-semibold text-[#1A4E79] uppercase tracking-wide">
+                  Patentes ({{ patentes.length }})
+                </span>
+              </div>
+              <div *ngIf="!loading && patentes.length === 0" class="p-4 text-sm text-[#1A4E79]/50">
+                Nenhuma cadastrada.
+              </div>
+              <ul class="flex-1 overflow-y-auto divide-y divide-[#E6EEF2]">
+                <li *ngFor="let p of patentes"
+                    (click)="selecionarPatente(p)"
+                    class="flex items-start gap-2 px-4 py-3 cursor-pointer hover:bg-[#f8fdfd] transition-colors"
+                    [class.bg-[#edf7f7]]="selectedPatente?.id === p.id"
+                    [class.border-l-2]="selectedPatente?.id === p.id"
+                    [class.border-l-[#75C9C8]]="selectedPatente?.id === p.id">
+                  <div class="flex-1 min-w-0 pt-0.5">
+                    <div class="text-sm font-semibold text-[#1A4E79] truncate">{{ p.nome || p.label || p.id }}</div>
+                    <div class="text-xs text-gray-400">ID: {{ p.id }}</div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Right: users panel -->
+            <div class="flex-1 flex flex-col overflow-y-auto">
+              <div *ngIf="!selectedPatente" class="flex-1 flex items-center justify-center text-sm text-[#1A4E79]/40">
+                <div class="text-center">
+                  <svg class="w-10 h-10 mx-auto mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  </svg>
+                  Selecione uma patente
+                </div>
+              </div>
+              <ng-container *ngIf="selectedPatente">
+                <ng-container *ngTemplateOutlet="usersPanel"></ng-container>
+              </ng-container>
+            </div>
+          </div>
+
+          <div *ngIf="mensagem" class="mt-3 flex-shrink-0 bg-red-100 border border-red-300 rounded-lg p-3 text-sm text-red-700">
+            {{ mensagem }}
+          </div>
         </div>
       </div>
     </main>

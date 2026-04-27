@@ -32,7 +32,7 @@ const CHV = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 
   imports: [CommonModule, FormsModule],
   providers: [PrestacaoContasService],
   template: `
-  <main class="min-h-screen p-4 md:p-6 bg-gradient-to-br from-[#1A4E79] to-[#75C9C8]">
+  <main class="h-full overflow-y-auto p-4 md:p-6 bg-gradient-to-br from-[#1A4E79] to-[#75C9C8]">
     <div class="max-w-full mx-auto px-4">
       <div class="bg-white/95 backdrop-blur-sm rounded-xl shadow-xl border border-white/20 overflow-hidden">
 

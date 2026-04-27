@@ -18,33 +18,29 @@ type Tab = 'patentes' | 'menus';
       </div>
     </div>
 
-    <main class="min-h-screen bg-gradient-to-br from-[#1A4E79] to-[#75C9C8] p-3 md:p-6 overflow-y-auto">
-      <div class="max-w-5xl mx-auto">
-
-        <!-- Page title -->
-        <h1 class="text-xl md:text-2xl font-bold text-white mb-4">Gestão de Patentes</h1>
-
-        <!-- Tabs -->
-        <div class="flex gap-1 mb-4 bg-white/20 rounded-xl p-1 w-fit">
-          <button
-            (click)="activeTab = 'patentes'"
-            [class]="activeTab === 'patentes' ? tabActive : tabInactive">
-            Patentes
-          </button>
-          <button
-            (click)="activeTab = 'menus'"
-            [class]="activeTab === 'menus' ? tabActive : tabInactive">
-            Menus do Sistema
-          </button>
+    <main class="h-full flex flex-col bg-gradient-to-br from-[#1A4E79] to-[#75C9C8] overflow-hidden">
+      <!-- Cabeçalho fixo: título + tabs -->
+      <div class="flex-shrink-0 px-3 md:px-6 pt-3 md:pt-6 pb-2">
+        <div class="max-w-5xl mx-auto">
+          <h1 class="text-xl md:text-2xl font-bold text-white mb-3">Gestão de Patentes</h1>
+          <div class="flex gap-1 bg-white/20 rounded-xl p-1 w-fit">
+            <button (click)="activeTab = 'patentes'" [class]="activeTab === 'patentes' ? tabActive : tabInactive">Patentes</button>
+            <button (click)="activeTab = 'menus'" [class]="activeTab === 'menus' ? tabActive : tabInactive">Menus do Sistema</button>
+          </div>
         </div>
+      </div>
+
+      <!-- Conteúdo: preenche o restante da viewport -->
+      <div class="flex-1 min-h-0 overflow-hidden flex flex-col px-3 md:px-6 pb-3 md:pb-6">
+        <div class="max-w-5xl mx-auto w-full flex-1 min-h-0 flex flex-col">
 
         <!-- ══════════════════════════════════════════════════
              TAB: PATENTES
         ══════════════════════════════════════════════════ -->
-        <div *ngIf="activeTab === 'patentes'">
+        <div *ngIf="activeTab === 'patentes'" class="flex-1 min-h-0 flex flex-col">
 
           <!-- "+ Nova Patente" always visible -->
-          <div class="flex justify-end mb-3">
+          <div class="flex justify-end mb-3 flex-shrink-0">
             <button
               (click)="abrirFormNova()"
               class="flex items-center gap-2 bg-white text-[#1A4E79] px-4 py-2 rounded-lg text-sm font-semibold shadow hover:bg-[#f0f9f9] active:scale-95 transition-all">
@@ -54,7 +50,7 @@ type Tab = 'patentes' | 'menus';
           </div>
 
           <!-- ── MOBILE: accordion (hidden on lg+) ── -->
-          <div class="flex flex-col gap-2 lg:hidden">
+          <div class="flex flex-col gap-2 lg:hidden flex-1 overflow-y-auto">
             <div *ngIf="!loading && patentes.length === 0" class="bg-white/90 rounded-xl p-6 text-center text-[#1A4E79]/60 text-sm">
               Nenhuma patente cadastrada.
             </div>
@@ -88,9 +84,9 @@ type Tab = 'patentes' | 'menus';
           </div>
 
           <!-- ── DESKTOP: split layout (hidden on mobile) ── -->
-          <div class="hidden lg:grid lg:grid-cols-[280px,1fr] lg:gap-4 bg-white rounded-xl shadow overflow-hidden" style="min-height:520px">
+          <div class="hidden lg:flex flex-1 min-h-0 bg-white rounded-xl shadow overflow-hidden">
             <!-- Left: patent list -->
-            <div class="border-r border-[#E6EEF2] flex flex-col">
+            <div class="w-[280px] flex-shrink-0 border-r border-[#E6EEF2] flex flex-col overflow-hidden">
               <div class="px-4 py-3 border-b border-[#E6EEF2] bg-[#f8fdfd]">
                 <span class="text-xs font-semibold text-[#1A4E79] uppercase tracking-wide">Patentes ({{ patentes.length }})</span>
               </div>
@@ -120,7 +116,7 @@ type Tab = 'patentes' | 'menus';
             </div>
 
             <!-- Right: menus panel -->
-            <div class="flex flex-col">
+            <div class="flex-1 flex flex-col overflow-y-auto">
               <div *ngIf="!expandedId" class="flex-1 flex items-center justify-center text-sm text-[#1A4E79]/40">
                 <div class="text-center">
                   <svg class="w-10 h-10 mx-auto mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
@@ -137,11 +133,11 @@ type Tab = 'patentes' | 'menus';
         <!-- ══════════════════════════════════════════════════
              TAB: MENUS DO SISTEMA
         ══════════════════════════════════════════════════ -->
-        <div *ngIf="activeTab === 'menus'">
-          <div class="bg-white rounded-xl shadow overflow-hidden">
+        <div *ngIf="activeTab === 'menus'" class="flex-1 min-h-0 flex flex-col">
+          <div class="bg-white rounded-xl shadow overflow-hidden flex-1 flex flex-col">
             <!-- Header -->
             <div class="flex items-center justify-between px-4 py-3 border-b border-[#E6EEF2] bg-[#f8fdfd]">
-              <span class="text-sm font-semibold text-[#1A4E79]">Menus do sistema (SZC)</span>
+              <span class="text-sm font-semibold text-[#1A4E79]">Menus do sistema</span>
               <button
                 (click)="abrirFormNovoMenu()"
                 class="flex items-center gap-1.5 bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 active:scale-95 transition-all">
@@ -151,7 +147,7 @@ type Tab = 'patentes' | 'menus';
             </div>
 
             <!-- Mobile: card list -->
-            <div class="lg:hidden divide-y divide-[#E6EEF2]">
+            <div class="lg:hidden flex-1 overflow-y-auto divide-y divide-[#E6EEF2]">
               <div *ngIf="!menusAdmin.length && !loading" class="p-6 text-center text-sm text-[#1A4E79]/50">Nenhum menu cadastrado.</div>
               <div *ngFor="let m of menusAdmin" class="px-4 py-3 flex items-start gap-3">
                 <div class="flex-1 min-w-0">
@@ -172,7 +168,7 @@ type Tab = 'patentes' | 'menus';
             </div>
 
             <!-- Desktop: table -->
-            <div class="hidden lg:block overflow-x-auto">
+            <div class="hidden lg:block flex-1 overflow-y-auto overflow-x-auto">
               <table class="w-full text-sm">
                 <thead>
                   <tr class="bg-[#f8fdfd] text-xs text-[#1A4E79]/70 uppercase tracking-wide">
@@ -209,7 +205,8 @@ type Tab = 'patentes' | 'menus';
           </div>
         </div>
 
-        <div *ngIf="mensagem" class="mt-3 bg-red-100 border border-red-300 rounded-lg p-3 text-sm text-red-700">{{ mensagem }}</div>
+        <div *ngIf="mensagem" class="mt-3 flex-shrink-0 bg-red-100 border border-red-300 rounded-lg p-3 text-sm text-red-700">{{ mensagem }}</div>
+        </div>
       </div>
     </main>
 
@@ -322,17 +319,17 @@ type Tab = 'patentes' | 'menus';
         <h3 class="text-base font-semibold text-[#1A4E79] mb-4">{{ isEditingMenu ? 'Editar Menu' : 'Novo Menu' }}</h3>
         <div class="flex flex-col gap-3">
           <div>
-            <label class="block text-xs font-medium text-[#1A4E79] mb-1">Label (ZC_MENU) *</label>
+            <label class="block text-xs font-medium text-[#1A4E79] mb-1">Label  *</label>
             <input type="text" [(ngModel)]="formMenu.menu" maxlength="30" placeholder="Ex: Financeiro"
               class="w-full border border-[#CBD8E1] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#75C9C8] text-[#1A4E79]" />
           </div>
           <div>
-            <label class="block text-xs font-medium text-[#1A4E79] mb-1">Rota (ZC_ROTA) *</label>
+            <label class="block text-xs font-medium text-[#1A4E79] mb-1">Rota  *</label>
             <input type="text" [(ngModel)]="formMenu.rota" maxlength="80" placeholder="Ex: /financeiro"
               class="w-full border border-[#CBD8E1] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#75C9C8] text-[#1A4E79] font-mono" />
           </div>
           <div>
-            <label class="block text-xs font-medium text-[#1A4E79] mb-1">Descrição (ZC_DESC)</label>
+            <label class="block text-xs font-medium text-[#1A4E79] mb-1">Descrição </label>
             <input type="text" [(ngModel)]="formMenu.desc" maxlength="60" placeholder="Descrição opcional"
               class="w-full border border-[#CBD8E1] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#75C9C8] text-[#1A4E79]" />
           </div>
