@@ -3,13 +3,6 @@ import { Component, OnInit, HostListener } from '@angular/core';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 
-import {
-  PoMenuItem,
-  PoMenuModule,
-  PoPageModule,
-  PoToolbarModule,
-} from '@po-ui/ng-components';
-
 import { LanguageBlockComponent, LanguageGuardService } from './language-block.component';
 import { MenuComponent } from './shared/menu/menu.component';
 import { MenuStateService } from './shared/services/menu-state.service';
@@ -19,9 +12,6 @@ import { MenuStateService } from './shared/services/menu-state.service';
   standalone: true,
   imports: [
     CommonModule,
-    PoToolbarModule,
-    PoMenuModule,
-    PoPageModule,
     RouterOutlet,
     LanguageBlockComponent,
     MenuComponent
@@ -30,10 +20,6 @@ import { MenuStateService } from './shared/services/menu-state.service';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit {
-  readonly menus: Array<PoMenuItem> = [
-    { label: 'Home', action: this.onClick.bind(this) },
-  ];
-
   blocked = false;
   currentRoute = '';
   menuCollapsed = false;
@@ -54,8 +40,8 @@ export class AppComponent implements OnInit {
 
     // Monitora mudanças de rota
     this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe((event: NavigationEnd) => {
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd)
+    ).subscribe(event => {
       this.currentRoute = event.url;
     });
 
@@ -160,7 +146,4 @@ export class AppComponent implements OnInit {
     }
   }
 
-  private onClick() {
-    alert('Clicked in menu item');
-  }
 }
