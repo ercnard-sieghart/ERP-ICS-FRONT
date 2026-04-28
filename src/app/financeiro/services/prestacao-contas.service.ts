@@ -43,6 +43,7 @@ export interface PrestacaoContasPayload {
   FLF_EMISSA: string;
   FLF_DTINI: string;
   FLF_DTFIM: string;
+  FLF_NACION: string;
   FLF_CC: string;
   FLF_ITCTB: string;
   FLF_CLVL: string;

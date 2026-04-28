@@ -81,7 +81,7 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
               </svg>
             </div>
-            <div class="flex-1 min-w-0 grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-1">
+            <div class="flex-1 min-w-0 grid grid-cols-2 md:grid-cols-5 gap-x-4 gap-y-1">
               <div>
                 <div class="text-[10px] text-gray-400 uppercase tracking-wide">Código</div>
                 <div class="text-sm font-bold text-[#1A4E79]">{{ model.flf_presta }}</div>
@@ -93,6 +93,10 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
               <div>
                 <div class="text-[10px] text-gray-400 uppercase tracking-wide">Emissão</div>
                 <div class="text-sm text-gray-700">{{ model.flf_emissa }}</div>
+              </div>
+              <div>
+                <div class="text-[10px] text-gray-400 uppercase tracking-wide">Gasto Nacional</div>
+                <div class="text-sm text-gray-700">{{ model.flf_nacion === 'S' ? 'Sim' : 'Não' }}</div>
               </div>
               <div class="min-w-0">
                 <div class="text-[10px] text-gray-400 uppercase tracking-wide">Motivo</div>
@@ -163,14 +167,31 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
               </div>
               <div class="grid grid-cols-2 gap-3">
                 <div>
-                  <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Saída</label>
-                  <input type="date" name="flf_dtini" [(ngModel)]="model.flf_dtini"
+                  <label class="block text-xs font-semibold text-[#1A4E79] mb-1.5 uppercase tracking-wide">Saída *</label>
+                  <input type="date" name="flf_dtini" [(ngModel)]="model.flf_dtini" required
                     class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all text-sm" />
                 </div>
                 <div>
-                  <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Chegada</label>
-                  <input type="date" name="flf_dtfim" [(ngModel)]="model.flf_dtfim"
+                  <label class="block text-xs font-semibold text-[#1A4E79] mb-1.5 uppercase tracking-wide">Chegada *</label>
+                  <input type="date" name="flf_dtfim" [(ngModel)]="model.flf_dtfim" required
                     class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all text-sm" />
+                </div>
+              </div>
+
+              <!-- ── Gasto Nacional ── -->
+              <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-[#1A4E79] mb-1.5 uppercase tracking-wide">Gasto Nacional *</label>
+                <div class="flex rounded-lg border border-[#75C9C8]/30 overflow-hidden w-fit shadow-sm">
+                  <label class="flex items-center justify-center px-6 py-2.5 cursor-pointer text-sm transition-all"
+                    [ngClass]="model.flf_nacion === 'S' ? 'bg-[#1A4E79] text-white font-semibold' : 'bg-white text-gray-600 hover:bg-[#f0f9f9]'">
+                    <input type="radio" name="flf_nacion" [(ngModel)]="model.flf_nacion" value="S" class="sr-only" required />
+                    Sim
+                  </label>
+                  <label class="flex items-center justify-center px-6 py-2.5 cursor-pointer text-sm border-l border-[#75C9C8]/30 transition-all"
+                    [ngClass]="model.flf_nacion === 'N' ? 'bg-[#1A4E79] text-white font-semibold' : 'bg-white text-gray-600 hover:bg-[#f0f9f9]'">
+                    <input type="radio" name="flf_nacion" [(ngModel)]="model.flf_nacion" value="N" class="sr-only" required />
+                    Não
+                  </label>
                 </div>
               </div>
 
@@ -236,10 +257,10 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
 
               <!-- ── Motivo ── -->
               <div>
-                <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
-                  Motivo <span class="normal-case font-normal text-gray-300">({{ (model.motivo || '').length }}/80)</span>
+                <label class="block text-xs font-semibold text-[#1A4E79] mb-1.5 uppercase tracking-wide">
+                  Motivo * <span class="normal-case font-normal text-gray-300">({{ (model.motivo || '').length }}/80)</span>
                 </label>
-                <textarea name="motivo" [(ngModel)]="model.motivo" maxlength="80" rows="3"
+                <textarea name="motivo" [(ngModel)]="model.motivo" maxlength="80" rows="3" required
                   placeholder="Descreva o motivo da prestação..."
                   class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all text-sm resize-none"></textarea>
               </div>
@@ -663,7 +684,7 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
 
   get percentuaisInvalidos(): boolean {
     const s = this.somaPercentuais;
-    return s > 0 && s !== 100;
+    return s !== 100;
   }
 
   get totalDespesas(): number {
@@ -706,6 +727,7 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
       flf_tipo: '2', flf_presta: '',
       codParticipante: '', nomeParticipante: '',
       flf_emissa: '', flf_dtini: '', flf_dtfim: '',
+      flf_nacion: 'S',
       itemContabilSearch: '', itemContabil: '',
       centroCustoSearch: '', centroCusto: '',
       classeValorSearch: '', classeValor: '',
@@ -747,7 +769,9 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
   }
 
   salvar(): void {
-    if (!this.model.flf_presta || !this.model.codParticipante?.trim() || !this.model.flf_emissa) {
+    if (!this.model.flf_presta || !this.model.codParticipante?.trim() || !this.model.flf_emissa
+        || !this.model.flf_dtini || !this.model.flf_dtfim
+        || !this.model.motivo?.trim() || !this.model.flf_nacion) {
       alert('Preencha todos os campos obrigatórios marcados com *.');
       return;
     }
@@ -764,6 +788,7 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
       FLF_EMISSA: this.model.flf_emissa,
       FLF_DTINI:  this.model.flf_dtini,
       FLF_DTFIM:  this.model.flf_dtfim,
+      FLF_NACION: this.model.flf_nacion,
       FLF_CC:     this.model.centroCusto,
       FLF_ITCTB:  this.model.itemContabil,
       FLF_CLVL:   this.model.classeValor,
