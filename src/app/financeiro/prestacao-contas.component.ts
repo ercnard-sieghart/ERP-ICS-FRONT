@@ -24,7 +24,6 @@ const CB = 'shrink-0 px-2.5 border border-l-0 border-[#75C9C8]/30 rounded-r-lg b
 const CW = 'relative flex focus-within:ring-2 focus-within:ring-[#75C9C8] rounded-lg shadow-sm';
 const DD = 'absolute z-20 top-full w-full bg-white border border-[#75C9C8]/30 rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto';
 const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-gray-100 last:border-0 flex gap-2';
-const CHV = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>`;
 
 @Component({
   selector: 'app-prestacao-contas',
@@ -32,321 +31,332 @@ const CHV = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 
   imports: [CommonModule, FormsModule],
   providers: [PrestacaoContasService],
   template: `
-  <main class="h-full overflow-y-auto p-4 md:p-6 bg-gradient-to-br from-[#1A4E79] to-[#75C9C8]">
-    <div class="max-w-full mx-auto px-4">
-      <div class="bg-white/95 backdrop-blur-sm rounded-xl shadow-xl border border-white/20 overflow-hidden">
+  <!-- Loading overlay -->
+  <div *ngIf="isSaving || isSavingDespesa"
+    class="fixed inset-0 bg-[#1A4E79]/70 backdrop-blur-sm z-[9999] flex items-center justify-center">
+    <div class="bg-white rounded-xl p-6 shadow-2xl text-center min-w-[160px]">
+      <div class="w-10 h-10 border-4 border-[#75C9C8]/30 border-t-[#1A4E79] rounded-full mx-auto mb-3 animate-spin"></div>
+      <p class="text-sm font-semibold text-[#1A4E79]">{{ isSavingDespesa ? 'Salvando despesa...' : 'Salvando...' }}</p>
+    </div>
+  </div>
 
-        <!-- Header -->
-        <div class="bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] p-4 md:p-6 rounded-t-lg flex items-center gap-4 border-b border-white/10">
-          <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center border border-white/10">
-            <i class="po-icon po-icon-finance text-white text-xl"></i>
+  <main class="h-full flex flex-col bg-gradient-to-br from-[#1A4E79] to-[#75C9C8] overflow-hidden">
+
+    <!-- ── Cabeçalho fixo da página ── -->
+    <div class="flex-shrink-0 px-4 md:px-6 pt-4 md:pt-6 pb-3">
+      <div class="max-w-5xl mx-auto">
+        <h1 class="text-xl md:text-2xl font-bold text-white mb-3">Prestação de Contas</h1>
+        <!-- Step indicator -->
+        <div class="flex items-center gap-2">
+          <div [ngClass]="!headerSaved ? 'bg-white text-[#1A4E79]' : 'bg-white/20 text-white'"
+            class="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all">
+            <span [ngClass]="headerSaved ? 'bg-[#75C9C8]' : 'bg-[#1A4E79]'"
+              class="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold leading-none text-white">
+              {{ headerSaved ? '✓' : '1' }}
+            </span>
+            Cabeçalho
           </div>
-          <div>
-            <h1 class="text-white text-xl md:text-2xl font-bold leading-tight">Prestação de Contas</h1>
-            <p class="text-white/80 text-xs md:text-sm mt-1">Cadastro de prestação de contas avulsa</p>
+          <svg class="w-3 h-3 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+          </svg>
+          <div [ngClass]="headerSaved ? 'bg-white text-[#1A4E79]' : 'bg-white/20 text-white/60'"
+            class="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all">
+            <span [ngClass]="headerSaved ? 'bg-[#1A4E79] text-white' : 'bg-white/30 text-white/50'"
+              class="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold leading-none">2</span>
+            Despesas
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Conteúdo scrollável ── -->
+    <div class="flex-1 min-h-0 overflow-y-auto px-4 md:px-6 pb-4 md:pb-6">
+      <div class="max-w-5xl mx-auto space-y-4">
+
+        <!-- ══════════════ CABEÇALHO SALVO — resumo compacto ══════════════ -->
+        <div *ngIf="headerSaved" class="bg-white rounded-xl shadow-lg overflow-hidden border-l-4 border-[#75C9C8]">
+          <div class="flex items-center gap-4 p-4">
+            <div class="w-10 h-10 bg-[#75C9C8]/10 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5 text-[#75C9C8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0 grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-1">
+              <div>
+                <div class="text-[10px] text-gray-400 uppercase tracking-wide">Código</div>
+                <div class="text-sm font-bold text-[#1A4E79]">{{ model.flf_presta }}</div>
+              </div>
+              <div class="min-w-0">
+                <div class="text-[10px] text-gray-400 uppercase tracking-wide">Participante</div>
+                <div class="text-sm font-semibold text-[#1A4E79] truncate">{{ model.nomeParticipante || model.codParticipante }}</div>
+              </div>
+              <div>
+                <div class="text-[10px] text-gray-400 uppercase tracking-wide">Emissão</div>
+                <div class="text-sm text-gray-700">{{ model.flf_emissa }}</div>
+              </div>
+              <div class="min-w-0">
+                <div class="text-[10px] text-gray-400 uppercase tracking-wide">Motivo</div>
+                <div class="text-sm text-gray-700 truncate">{{ model.motivo || '—' }}</div>
+              </div>
+            </div>
+            <div class="flex gap-2 flex-shrink-0">
+              <button type="button" (click)="voltar()"
+                class="px-3 py-1.5 text-xs border border-[#75C9C8]/40 rounded-lg text-[#1A4E79] hover:bg-[#e6eef0] transition-all">
+                Voltar
+              </button>
+              <button type="button" (click)="novaPrestacao()"
+                class="px-3 py-1.5 text-xs bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white rounded-lg hover:opacity-90 transition-all font-semibold">
+                Nova Prestação
+              </button>
+            </div>
           </div>
         </div>
 
-        <!-- Content -->
-        <div class="p-4 md:p-6 max-h-[calc(100vh-160px)] overflow-y-auto space-y-6">
+        <!-- ══════════════ CABEÇALHO — formulário completo ══════════════ -->
+        <div *ngIf="!headerSaved" class="bg-white rounded-xl shadow-lg overflow-hidden">
+          <!-- Card header -->
+          <div class="flex items-center gap-3 px-4 py-3 border-b border-[#E6EEF2] bg-[#f8fdfd]">
+            <i class="po-icon po-icon-finance text-[#1A4E79] text-lg"></i>
+            <div>
+              <div class="text-sm font-semibold text-[#1A4E79]">Dados da Prestação</div>
+              <div class="text-xs text-gray-400">Preencha os campos obrigatórios (*)</div>
+            </div>
+            <span *ngIf="model.flf_presta" class="ml-auto text-xs font-mono bg-[#1A4E79]/10 text-[#1A4E79] px-2 py-1 rounded font-semibold">
+              {{ isGeneratingCode ? '...' : model.flf_presta }}
+            </span>
+          </div>
 
-          <!-- ══════════════ CABEÇALHO ══════════════ -->
-          <div class="bg-white rounded-lg p-6 md:p-8 border border-[#e6eef0] shadow-md w-full md:w-[90%] mx-auto">
+          <form #prestacaoForm="ngForm" class="p-4 md:p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-            <!-- Header salvo banner -->
-            <div *ngIf="headerSaved" class="mb-4 flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg p-3 text-green-700 text-sm">
-              <svg class="h-4 w-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-              Cabeçalho salvo — adicione as despesas abaixo.
+              <!-- ── Participante ── -->
+              <div>
+                <label class="block text-xs font-semibold text-[#1A4E79] mb-1.5 uppercase tracking-wide">Participante *</label>
+                <div class="${CW}">
+                  <input type="text" name="codParticipante" [(ngModel)]="model.codParticipante" required
+                    autocomplete="off" placeholder="Código ou nome..."
+                    (ngModelChange)="onParticipanteInput($event)" (blur)="fecharParticipanteDropdown()"
+                    class="${CI}" />
+                  <button type="button" (mousedown)="toggleParticipanteDropdown($event)" class="${CB}">
+                    <svg *ngIf="!isLoadingParticipante" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                    <svg *ngIf="isLoadingParticipante" class="animate-spin h-4 w-4 text-[#75C9C8]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
+                  </button>
+                  <div *ngIf="showParticipanteDropdown && participanteResults.length > 0" class="${DD}">
+                    <div *ngFor="let r of participanteResults" (mousedown)="selecionarParticipante(r)" class="${DI}">
+                      <span class="font-semibold text-[#1A4E79] shrink-0">{{ r.codigo }}</span>
+                      <span class="text-gray-500 truncate">{{ r.nome }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Nome do Participante</label>
+                <input type="text" [value]="model.nomeParticipante" readonly placeholder="Preenchido ao selecionar"
+                  class="w-full p-3 bg-gray-50 border border-[#e6eef0] rounded-lg text-sm text-gray-600" />
+              </div>
+
+              <!-- ── Datas ── -->
+              <div>
+                <label class="block text-xs font-semibold text-[#1A4E79] mb-1.5 uppercase tracking-wide">Data de Emissão *</label>
+                <input type="date" name="flf_emissa" [(ngModel)]="model.flf_emissa" required
+                  class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all text-sm" />
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Saída</label>
+                  <input type="date" name="flf_dtini" [(ngModel)]="model.flf_dtini"
+                    class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all text-sm" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Chegada</label>
+                  <input type="date" name="flf_dtfim" [(ngModel)]="model.flf_dtfim"
+                    class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all text-sm" />
+                </div>
+              </div>
+
+              <!-- ── Item Contábil ── -->
+              <div>
+                <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Item Contábil</label>
+                <div class="${CW}">
+                  <input type="text" name="itemContabilSearch" [(ngModel)]="model.itemContabilSearch"
+                    autocomplete="off" placeholder="Código ou descrição..."
+                    (ngModelChange)="onItemContabilInput($event)" (blur)="fecharItemContabilDropdown()"
+                    class="${CI}" />
+                  <button type="button" (mousedown)="toggleItemContabilDropdown($event)" class="${CB}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                  </button>
+                  <div *ngIf="showItemContabilDropdown && itemContabilFiltered.length > 0" class="${DD}">
+                    <div *ngFor="let it of itemContabilFiltered" (mousedown)="selecionarItemContabil(it)" class="${DI}">
+                      <span class="font-semibold text-[#1A4E79] shrink-0">{{ it.codigo }}</span>
+                      <span class="text-gray-500 truncate">{{ it.descricao }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ── Centro de Custo ── -->
+              <div>
+                <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Centro de Custo</label>
+                <div class="${CW}">
+                  <input type="text" name="centroCustoSearch" [(ngModel)]="model.centroCustoSearch"
+                    autocomplete="off" placeholder="Código ou descrição..."
+                    (ngModelChange)="onCentroCustoInput($event)" (blur)="fecharCentroCustoDropdown()"
+                    class="${CI}" />
+                  <button type="button" (mousedown)="toggleCentroCustoDropdown($event)" class="${CB}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                  </button>
+                  <div *ngIf="showCentroCustoDropdown && centroCustoFiltered.length > 0" class="${DD}">
+                    <div *ngFor="let cc of centroCustoFiltered" (mousedown)="selecionarCentroCusto(cc)" class="${DI}">
+                      <span class="font-semibold text-[#1A4E79] shrink-0">{{ cc.codigo }}</span>
+                      <span class="text-gray-500 truncate">{{ cc.descricao }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ── Classe Valor ── -->
+              <div>
+                <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Classe Valor</label>
+                <div class="${CW}">
+                  <input type="text" name="classeValorSearch" [(ngModel)]="model.classeValorSearch"
+                    autocomplete="off" placeholder="Código ou descrição..."
+                    (ngModelChange)="onClasseValorInput($event)" (blur)="fecharClasseValorDropdown()"
+                    class="${CI}" />
+                  <button type="button" (mousedown)="toggleClasseValorDropdown($event)" class="${CB}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                  </button>
+                  <div *ngIf="showClasseValorDropdown && classeValorFiltered.length > 0" class="${DD}">
+                    <div *ngFor="let cv of classeValorFiltered" (mousedown)="selecionarClasseValor(cv)" class="${DI}">
+                      <span class="font-semibold text-[#1A4E79] shrink-0">{{ cv.codigo }}</span>
+                      <span class="text-gray-500 truncate">{{ cv.descricao }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ── Motivo ── -->
+              <div>
+                <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
+                  Motivo <span class="normal-case font-normal text-gray-300">({{ (model.motivo || '').length }}/80)</span>
+                </label>
+                <textarea name="motivo" [(ngModel)]="model.motivo" maxlength="80" rows="3"
+                  placeholder="Descreva o motivo da prestação..."
+                  class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all text-sm resize-none"></textarea>
+              </div>
+
+              <!-- ── Percentuais ── -->
+              <div class="md:col-span-2">
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">% Cliente</label>
+                    <input type="number" name="flf_fatcli" [(ngModel)]="model.flf_fatcli" min="0" max="100"
+                      [ngClass]="{'border-red-400': percentuaisInvalidos}"
+                      class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all text-sm" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">% Empresa</label>
+                    <input type="number" name="flf_fatemp" [(ngModel)]="model.flf_fatemp" min="0" max="100"
+                      [ngClass]="{'border-red-400': percentuaisInvalidos}"
+                      class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all text-sm" />
+                  </div>
+                </div>
+                <p *ngIf="percentuaisInvalidos" class="text-red-500 text-xs mt-1">
+                  % Cliente + % Empresa devem somar 100% (atual: {{ somaPercentuais }}%)
+                </p>
+              </div>
+
+              <!-- ── Cliente / Fornecedor ── -->
+              <div>
+                <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Cliente / Fornecedor</label>
+                <div class="${CW}">
+                  <input type="text" name="flf_clifor" [(ngModel)]="model.flf_clifor"
+                    autocomplete="off" placeholder="Código ou nome..."
+                    (ngModelChange)="onClienteInput($event)" (blur)="fecharClienteDropdown()"
+                    class="${CI}" />
+                  <button type="button" (mousedown)="toggleClienteDropdown($event)" class="${CB}">
+                    <svg *ngIf="!isLoadingCliente" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                    <svg *ngIf="isLoadingCliente" class="animate-spin h-4 w-4 text-[#75C9C8]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
+                  </button>
+                  <div *ngIf="showClienteDropdown && clienteResults.length > 0" class="${DD}">
+                    <div *ngFor="let r of clienteResults" (mousedown)="selecionarCliente(r)" class="${DI}">
+                      <span class="font-semibold text-[#1A4E79] shrink-0">{{ r.codigo }}/{{ r.loja }}</span>
+                      <span class="text-gray-500 truncate">{{ r.nome }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Loja</label>
+                  <input type="text" [value]="model.flf_floja" readonly placeholder="Auto"
+                    class="w-full p-3 bg-gray-50 border border-[#e6eef0] rounded-lg text-sm text-gray-600" />
+                </div>
+                <div *ngIf="model.nomeCliente">
+                  <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Nome</label>
+                  <input type="text" [value]="model.nomeCliente" readonly
+                    class="w-full p-3 bg-gray-50 border border-[#e6eef0] rounded-lg text-sm text-gray-600 truncate" />
+                </div>
+              </div>
+
             </div>
 
-            <form #prestacaoForm="ngForm">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                <!-- Código -->
-                <div>
-                  <label class="block text-sm font-semibold text-[#1A4E79] mb-1">Código da Prestação</label>
-                  <input type="text" [value]="model.flf_presta" readonly
-                    [placeholder]="isGeneratingCode ? 'Gerando...' : '—'"
-                    class="w-full p-3 bg-gray-100 border border-[#e6eef0] rounded-lg shadow-inner" />
-                </div>
-
-                <!-- Tipo -->
-                <div>
-                  <label class="block text-sm font-semibold text-[#1A4E79] mb-1">Tipo de Prestação</label>
-                  <input type="text" value="Avulsa" readonly
-                    class="w-full p-3 bg-gray-100 border border-[#e6eef0] rounded-lg shadow-inner" />
-                </div>
-
-                <!-- ── Participante ── -->
-                <div>
-                  <label class="block text-sm font-semibold text-[#1A4E79] mb-1">Participante *</label>
-                  <div class="${CW}">
-                    <input type="text" name="codParticipante" [(ngModel)]="model.codParticipante" required
-                      autocomplete="off" placeholder="Digite código ou nome..."
-                      (ngModelChange)="onParticipanteInput($event)" (blur)="fecharParticipanteDropdown()"
-                      class="${CI}" />
-                    <button type="button" (mousedown)="toggleParticipanteDropdown($event)" class="${CB}">
-                      <svg *ngIf="!isLoadingParticipante" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-                      <svg *ngIf="isLoadingParticipante" class="animate-spin h-4 w-4 text-[#75C9C8]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
-                    </button>
-                    <div *ngIf="showParticipanteDropdown && participanteResults.length > 0" class="${DD}">
-                      <div *ngFor="let r of participanteResults" (mousedown)="selecionarParticipante(r)" class="${DI}">
-                        <span class="font-semibold text-[#1A4E79] shrink-0">{{ r.codigo }}</span>
-                        <span class="text-gray-500 truncate">{{ r.nome }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <label class="block text-sm font-semibold text-[#1A4E79] mb-1">Nome do Participante</label>
-                  <input type="text" [value]="model.nomeParticipante" readonly placeholder="Preenchido ao selecionar"
-                    class="w-full p-3 bg-gray-100 border border-[#e6eef0] rounded-lg shadow-inner" />
-                </div>
-
-                <!-- Datas -->
-                <div>
-                  <label class="block text-sm font-semibold text-[#1A4E79] mb-1">Data de Emissão *</label>
-                  <input type="date" name="flf_emissa" [(ngModel)]="model.flf_emissa" required
-                    class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all" />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-[#1A4E79] mb-1">Data de Saída</label>
-                  <input type="date" name="flf_dtini" [(ngModel)]="model.flf_dtini"
-                    class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all" />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-[#1A4E79] mb-1">Data de Chegada</label>
-                  <input type="date" name="flf_dtfim" [(ngModel)]="model.flf_dtfim"
-                    class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all" />
-                </div>
-
-                <!-- ── Item Contábil ── -->
-                <div>
-                  <label class="block text-sm font-medium text-[#1A4E79] mb-1">Item Contábil</label>
-                  <div class="${CW}">
-                    <input type="text" name="itemContabilSearch" [(ngModel)]="model.itemContabilSearch"
-                      autocomplete="off" placeholder="Digite código ou descrição..."
-                      (ngModelChange)="onItemContabilInput($event)" (blur)="fecharItemContabilDropdown()"
-                      class="${CI}" />
-                    <button type="button" (mousedown)="toggleItemContabilDropdown($event)" class="${CB}">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-                    </button>
-                    <div *ngIf="showItemContabilDropdown && itemContabilFiltered.length > 0" class="${DD}">
-                      <div *ngFor="let it of itemContabilFiltered" (mousedown)="selecionarItemContabil(it)" class="${DI}">
-                        <span class="font-semibold text-[#1A4E79] shrink-0">{{ it.codigo }}</span>
-                        <span class="text-gray-500 truncate">{{ it.descricao }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- ── Centro de Custo ── -->
-                <div>
-                  <label class="block text-sm font-medium text-[#1A4E79] mb-1">Centro de Custo</label>
-                  <div class="${CW}">
-                    <input type="text" name="centroCustoSearch" [(ngModel)]="model.centroCustoSearch"
-                      autocomplete="off" placeholder="Digite código ou descrição..."
-                      (ngModelChange)="onCentroCustoInput($event)" (blur)="fecharCentroCustoDropdown()"
-                      class="${CI}" />
-                    <button type="button" (mousedown)="toggleCentroCustoDropdown($event)" class="${CB}">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-                    </button>
-                    <div *ngIf="showCentroCustoDropdown && centroCustoFiltered.length > 0" class="${DD}">
-                      <div *ngFor="let cc of centroCustoFiltered" (mousedown)="selecionarCentroCusto(cc)" class="${DI}">
-                        <span class="font-semibold text-[#1A4E79] shrink-0">{{ cc.codigo }}</span>
-                        <span class="text-gray-500 truncate">{{ cc.descricao }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- ── Classe Valor ── -->
-                <div>
-                  <label class="block text-sm font-medium text-[#1A4E79] mb-1">Classe Valor</label>
-                  <div class="${CW}">
-                    <input type="text" name="classeValorSearch" [(ngModel)]="model.classeValorSearch"
-                      autocomplete="off" placeholder="Digite código ou descrição..."
-                      (ngModelChange)="onClasseValorInput($event)" (blur)="fecharClasseValorDropdown()"
-                      class="${CI}" />
-                    <button type="button" (mousedown)="toggleClasseValorDropdown($event)" class="${CB}">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-                    </button>
-                    <div *ngIf="showClasseValorDropdown && classeValorFiltered.length > 0" class="${DD}">
-                      <div *ngFor="let cv of classeValorFiltered" (mousedown)="selecionarClasseValor(cv)" class="${DI}">
-                        <span class="font-semibold text-[#1A4E79] shrink-0">{{ cv.codigo }}</span>
-                        <span class="text-gray-500 truncate">{{ cv.descricao }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Motivo -->
-                <div>
-                  <label class="block text-sm font-medium text-[#1A4E79] mb-1">
-                    Motivo <span class="text-gray-400 font-normal text-xs ml-1">({{ (model.motivo || '').length }}/80)</span>
-                  </label>
-                  <textarea name="motivo" [(ngModel)]="model.motivo" maxlength="80" rows="3"
-                    placeholder="Descreva o motivo da prestação..."
-                    class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all shadow-sm resize-none"></textarea>
-                </div>
-
-                <!-- Percentuais -->
-                <div class="md:col-span-2">
-                  <div class="grid grid-cols-2 gap-4">
-                    <div>
-                      <label class="block text-sm font-medium text-[#1A4E79] mb-1">% Cliente</label>
-                      <input type="number" name="flf_fatcli" [(ngModel)]="model.flf_fatcli" min="0" max="100"
-                        [ngClass]="{'border-red-500': percentuaisInvalidos}"
-                        class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all" />
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-[#1A4E79] mb-1">% Empresa</label>
-                      <input type="number" name="flf_fatemp" [(ngModel)]="model.flf_fatemp" min="0" max="100"
-                        [ngClass]="{'border-red-500': percentuaisInvalidos}"
-                        class="w-full p-3 border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all" />
-                    </div>
-                  </div>
-                  <small *ngIf="percentuaisInvalidos" class="text-red-600 mt-1 block">
-                    % Cliente + % Empresa devem somar exatamente 100% (atual: {{ somaPercentuais }}%)
-                  </small>
-                </div>
-
-                <!-- ── Cliente / Fornecedor ── -->
-                <div>
-                  <label class="block text-sm font-medium text-[#1A4E79] mb-1">Cliente / Fornecedor</label>
-                  <div class="${CW}">
-                    <input type="text" name="flf_clifor" [(ngModel)]="model.flf_clifor"
-                      autocomplete="off" placeholder="Digite código ou nome..."
-                      (ngModelChange)="onClienteInput($event)" (blur)="fecharClienteDropdown()"
-                      class="${CI}" />
-                    <button type="button" (mousedown)="toggleClienteDropdown($event)" class="${CB}">
-                      <svg *ngIf="!isLoadingCliente" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-                      <svg *ngIf="isLoadingCliente" class="animate-spin h-4 w-4 text-[#75C9C8]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/></svg>
-                    </button>
-                    <div *ngIf="showClienteDropdown && clienteResults.length > 0" class="${DD}">
-                      <div *ngFor="let r of clienteResults" (mousedown)="selecionarCliente(r)" class="${DI}">
-                        <span class="font-semibold text-[#1A4E79] shrink-0">{{ r.codigo }}/{{ r.loja }}</span>
-                        <span class="text-gray-500 truncate">{{ r.nome }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-[#1A4E79] mb-1">Loja</label>
-                  <input type="text" [value]="model.flf_floja" readonly placeholder="Preenchida ao selecionar"
-                    class="w-full p-3 bg-gray-100 border border-[#e6eef0] rounded-lg shadow-inner" />
-                </div>
-                <div *ngIf="model.nomeCliente" class="md:col-span-2">
-                  <label class="block text-sm font-medium text-[#1A4E79] mb-1">Nome do Cliente</label>
-                  <input type="text" [value]="model.nomeCliente" readonly
-                    class="w-full p-3 bg-gray-100 border border-[#e6eef0] rounded-lg shadow-inner" />
-                </div>
-
-              </div>
-            </form>
-
-            <!-- Ações do cabeçalho -->
-            <div class="flex justify-end gap-3 mt-6">
+            <!-- Barra de ações -->
+            <div class="flex justify-between items-center pt-4 mt-4 border-t border-[#E6EEF2]">
               <button type="button" (click)="voltar()"
-                class="px-4 py-2 border rounded text-[#1A4E79] border-[#75C9C8] bg-white hover:bg-[#e6eef0] transition-all">
+                class="px-4 py-2 text-sm border border-[#75C9C8]/40 rounded-lg text-[#1A4E79] hover:bg-[#e6eef0] transition-all">
                 Voltar
               </button>
-              <button *ngIf="headerSaved" type="button" (click)="novaPrestacao()"
-                class="px-4 py-2 border rounded text-[#1A4E79] border-[#1A4E79] bg-white hover:bg-[#e6eef0] transition-all">
-                Nova Prestação
+              <button type="button" (click)="salvar()" [disabled]="isSaving || percentuaisInvalidos"
+                class="px-5 py-2 text-sm bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white rounded-lg hover:opacity-90 disabled:opacity-50 transition-all font-semibold shadow-sm">
+                {{ isSaving ? 'Salvando...' : 'Salvar Cabeçalho' }}
               </button>
-              <button type="button" (click)="salvar()" [disabled]="isSaving || percentuaisInvalidos || headerSaved"
-                class="px-4 py-2 bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white rounded hover:shadow-lg disabled:opacity-50 transition-all">
-                {{ isSaving ? 'Salvando...' : headerSaved ? '✓ Cabeçalho Salvo' : 'Salvar Cabeçalho' }}
+            </div>
+          </form>
+        </div>
+
+        <!-- ══════════════ DESPESAS ══════════════ -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden"
+          [class.opacity-50]="!headerSaved" [class.pointer-events-none]="!headerSaved">
+
+          <!-- Card header -->
+          <div class="flex items-center justify-between px-4 py-3 border-b border-[#E6EEF2] bg-[#f8fdfd]">
+            <div class="flex items-center gap-2">
+              <i class="po-icon po-icon-list text-[#1A4E79]"></i>
+              <span class="text-sm font-semibold text-[#1A4E79]">Despesas</span>
+              <span *ngIf="despesas.length > 0"
+                class="text-xs bg-[#1A4E79]/10 text-[#1A4E79] px-2 py-0.5 rounded-full font-semibold">{{ despesas.length }}</span>
+              <span *ngIf="!headerSaved" class="text-xs text-gray-400">(Salve o cabeçalho primeiro)</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span *ngIf="despesas.length > 0" class="text-sm text-gray-600">
+                Total: <strong class="text-[#1A4E79]">R$ {{ totalDespesas | number:'1.2-2' }}</strong>
+              </span>
+              <button type="button" (click)="abrirNovaDespesa()" [disabled]="!headerSaved || showNovaDespesa"
+                class="flex items-center gap-1.5 bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 active:scale-95 disabled:opacity-40 transition-all">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                Despesa
               </button>
             </div>
           </div>
 
-          <!-- ══════════════ DESPESAS ══════════════ -->
-          <div class="bg-white rounded-lg p-6 md:p-8 border border-[#e6eef0] shadow-md w-full md:w-[90%] mx-auto"
-            [class.opacity-50]="!headerSaved" [class.pointer-events-none]="!headerSaved">
+          <div class="p-4">
 
-            <!-- Grid header -->
-            <div class="flex items-center justify-between mb-4">
-              <div class="flex items-center gap-3">
-                <i class="po-icon po-icon-list text-[#1A4E79] text-lg"></i>
-                <h4 class="text-[#1A4E79] font-semibold">Despesas</h4>
-                <span *ngIf="!headerSaved" class="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded">Salve o cabeçalho primeiro</span>
+            <!-- ── Formulário nova despesa ── -->
+            <div *ngIf="showNovaDespesa" class="mb-4 p-4 bg-[#f8fdfd] rounded-xl border border-[#75C9C8]/20">
+              <div class="flex items-center gap-2 mb-3">
+                <div class="w-1 h-4 bg-[#75C9C8] rounded-full"></div>
+                <h5 class="text-sm font-semibold text-[#1A4E79]">Nova Despesa</h5>
               </div>
-              <div class="flex items-center gap-4">
-                <span class="text-sm text-gray-600">Total:
-                  <strong class="text-[#1A4E79]">R$ {{ totalDespesas | number:'1.2-2' }}</strong>
-                </span>
-                <button type="button" (click)="abrirNovaDespesa()"
-                  [disabled]="!headerSaved || showNovaDespesa"
-                  class="px-3 py-1.5 bg-[#1A4E79] text-white rounded text-sm hover:bg-[#1A4E79]/80 disabled:opacity-40 transition-all">
-                  + Despesa
-                </button>
-              </div>
-            </div>
-
-            <!-- Tabela de despesas salvas -->
-            <div class="overflow-x-auto">
-              <table class="w-full text-sm border-collapse">
-                <thead>
-                  <tr class="bg-[#e6eef0] text-[#1A4E79] text-xs">
-                    <th class="p-2 text-left font-semibold">Item</th>
-                    <th class="p-2 text-left font-semibold">Data</th>
-                    <th class="p-2 text-left font-semibold">Tipo</th>
-                    <th class="p-2 text-right font-semibold">Valor</th>
-                    <th class="p-2 text-left font-semibold">Natureza</th>
-                    <th class="p-2 text-left font-semibold">CC</th>
-                    <th class="p-2 text-left font-semibold">Descrição</th>
-                    <th class="p-2 text-center font-semibold">Anexos</th>
-                    <th class="p-2 text-center font-semibold"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let d of despesas" class="border-b border-gray-100 hover:bg-gray-50 text-xs">
-                    <td class="p-2 text-[#1A4E79] font-semibold">{{ d.item }}</td>
-                    <td class="p-2">{{ d.data }}</td>
-                    <td class="p-2">{{ d.tipoDesp }}</td>
-                    <td class="p-2 text-right font-medium">R$ {{ d.valor | number:'1.2-2' }}</td>
-                    <td class="p-2">{{ d.natureza }}</td>
-                    <td class="p-2">{{ d.cc }}</td>
-                    <td class="p-2 truncate max-w-[150px]" [title]="d.descricao">{{ d.descricao }}</td>
-                    <td class="p-2 text-center">
-                      <span class="text-gray-500">{{ d.qtdAnexos }} arq.</span>
-                    </td>
-                    <td class="p-2 text-center">
-                      <button type="button" (click)="confirmarExcluirDespesa(d)"
-                        class="text-red-400 hover:text-red-600 transition-colors" title="Excluir despesa">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                          <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                        </svg>
-                      </button>
-                    </td>
-                  </tr>
-                  <tr *ngIf="despesas.length === 0 && !isLoadingDespesas">
-                    <td colspan="9" class="p-6 text-center text-gray-400 text-sm">Nenhuma despesa cadastrada</td>
-                  </tr>
-                  <tr *ngIf="isLoadingDespesas">
-                    <td colspan="9" class="p-6 text-center text-[#75C9C8] text-sm">Carregando...</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <!-- ── Formulário de nova despesa ── -->
-            <div *ngIf="showNovaDespesa" class="mt-4 p-4 bg-[#e6eef0]/40 rounded-lg border border-[#75C9C8]/30">
-              <h5 class="text-sm font-semibold text-[#1A4E79] mb-3">Nova Despesa</h5>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
 
-                <!-- Data -->
                 <div>
-                  <label class="block text-xs font-medium text-[#1A4E79] mb-1">Data *</label>
+                  <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Data *</label>
                   <input type="date" [(ngModel)]="nd.data"
                     class="w-full p-2 text-sm border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all" />
                 </div>
 
-                <!-- Tipo Despesa -->
                 <div>
-                  <label class="block text-xs font-medium text-[#1A4E79] mb-1">Tipo de Despesa</label>
+                  <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Tipo de Despesa</label>
                   <div class="${CW}">
                     <input type="text" [(ngModel)]="nd.tipoDespSearch" autocomplete="off" placeholder="Buscar tipo..."
                       (ngModelChange)="onNdTipoDespInput($event)" (blur)="fecharNdTipoDespDropdown()"
@@ -363,16 +373,14 @@ const CHV = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 
                   </div>
                 </div>
 
-                <!-- Valor -->
                 <div>
-                  <label class="block text-xs font-medium text-[#1A4E79] mb-1">Valor *</label>
+                  <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Valor *</label>
                   <input type="number" [(ngModel)]="nd.valor" min="0.01" step="0.01"
                     class="w-full p-2 text-sm border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all" />
                 </div>
 
-                <!-- Natureza -->
                 <div>
-                  <label class="block text-xs font-medium text-[#1A4E79] mb-1">Natureza *</label>
+                  <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Natureza *</label>
                   <div class="${CW}">
                     <input type="text" [(ngModel)]="nd.naturezaSearch" autocomplete="off" placeholder="Buscar natureza..."
                       (ngModelChange)="onNdNaturezaInput($event)" (blur)="fecharNdNaturezaDropdown()"
@@ -389,9 +397,8 @@ const CHV = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 
                   </div>
                 </div>
 
-                <!-- Centro de Custo (despesa) -->
                 <div>
-                  <label class="block text-xs font-medium text-[#1A4E79] mb-1">Centro de Custo</label>
+                  <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Centro de Custo</label>
                   <div class="${CW}">
                     <input type="text" [(ngModel)]="nd.ccSearch" autocomplete="off" placeholder="Buscar CC..."
                       (ngModelChange)="onNdCCInput($event)" (blur)="fecharNdCCDropdown()"
@@ -408,9 +415,8 @@ const CHV = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 
                   </div>
                 </div>
 
-                <!-- Item Contábil (despesa) -->
                 <div>
-                  <label class="block text-xs font-medium text-[#1A4E79] mb-1">Item Contábil</label>
+                  <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Item Contábil</label>
                   <div class="${CW}">
                     <input type="text" [(ngModel)]="nd.itemCtbSearch" autocomplete="off" placeholder="Buscar item..."
                       (ngModelChange)="onNdItemCtbInput($event)" (blur)="fecharNdItemCtbDropdown()"
@@ -427,58 +433,149 @@ const CHV = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 
                   </div>
                 </div>
 
-                <!-- Descrição -->
                 <div class="md:col-span-2">
-                  <label class="block text-xs font-medium text-[#1A4E79] mb-1">Descrição *</label>
+                  <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Descrição *</label>
                   <input type="text" [(ngModel)]="nd.descricao" maxlength="100" placeholder="Descreva a despesa..."
                     class="w-full p-2 text-sm border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all" />
                 </div>
 
-                <!-- Documento -->
                 <div>
-                  <label class="block text-xs font-medium text-[#1A4E79] mb-1">Documento</label>
+                  <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Documento</label>
                   <input type="text" [(ngModel)]="nd.doc" maxlength="20" placeholder="Nº do documento..."
                     class="w-full p-2 text-sm border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all" />
                 </div>
 
-                <!-- Anexos -->
                 <div class="md:col-span-3">
-                  <label class="block text-xs font-medium text-[#1A4E79] mb-1">Comprovantes (jpg, png, pdf)</label>
-                  <div class="flex items-center gap-3 flex-wrap">
-                    <label class="cursor-pointer px-3 py-1.5 border border-[#75C9C8] text-[#1A4E79] rounded text-xs hover:bg-[#e6eef0] transition-all">
+                  <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Comprovantes</label>
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <label class="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 border border-[#75C9C8]/40 text-[#1A4E79] rounded-lg text-xs hover:bg-[#e6eef0] transition-all">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
                       Anexar arquivo
                       <input type="file" (change)="onFileSelected($event)" accept=".jpg,.jpeg,.png,.pdf" multiple hidden />
                     </label>
                     <div *ngFor="let f of pendingFiles; let i = index"
-                      class="flex items-center gap-1 bg-[#e6eef0] rounded px-2 py-1 text-xs text-[#1A4E79]">
-                      <span>{{ f.name }}</span>
-                      <button type="button" (click)="removerArquivo(i)" class="text-red-400 hover:text-red-600 ml-1">×</button>
+                      class="flex items-center gap-1.5 bg-[#e6eef0] rounded-lg px-2.5 py-1 text-xs text-[#1A4E79]">
+                      <span class="truncate max-w-[120px]">{{ f.name }}</span>
+                      <button type="button" (click)="removerArquivo(i)" class="text-red-400 hover:text-red-600">×</button>
                     </div>
-                    <span *ngIf="pendingFiles.length === 0" class="text-xs text-gray-400">Nenhum arquivo selecionado</span>
+                    <span *ngIf="pendingFiles.length === 0" class="text-xs text-gray-400">Nenhum arquivo</span>
                   </div>
                 </div>
 
               </div>
 
-              <!-- Erros da despesa -->
-              <p *ngIf="erroDespesa" class="mt-2 text-red-600 text-xs">{{ erroDespesa }}</p>
+              <div *ngIf="erroDespesa"
+                class="mt-3 flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg p-3 text-red-600 text-xs">
+                <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                {{ erroDespesa }}
+              </div>
 
-              <!-- Ações da despesa -->
-              <div class="flex justify-end gap-2 mt-4">
+              <div class="flex justify-end gap-2 mt-3 pt-3 border-t border-[#E6EEF2]">
                 <button type="button" (click)="cancelarNovaDespesa()"
-                  class="px-3 py-1.5 border rounded text-xs text-[#1A4E79] border-[#75C9C8] bg-white hover:bg-[#e6eef0] transition-all">
+                  class="px-3 py-1.5 text-xs border border-[#75C9C8]/40 rounded-lg text-[#1A4E79] hover:bg-[#e6eef0] transition-all">
                   Cancelar
                 </button>
                 <button type="button" (click)="salvarDespesa()" [disabled]="isSavingDespesa"
-                  class="px-3 py-1.5 bg-[#1A4E79] text-white rounded text-xs hover:bg-[#1A4E79]/80 disabled:opacity-50 transition-all">
-                  {{ isSavingDespesa ? 'Salvando...' : 'Salvar Despesa' }}
+                  class="px-4 py-1.5 text-xs bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white rounded-lg hover:opacity-90 disabled:opacity-50 transition-all font-semibold">
+                  {{ isSavingDespesa ? 'Salvando...' : 'Confirmar Despesa' }}
                 </button>
               </div>
             </div>
 
-          </div>
+            <!-- ── Mobile: cards ── -->
+            <div class="lg:hidden flex flex-col gap-2">
+              <div *ngIf="isLoadingDespesas" class="py-8 text-center text-[#75C9C8] text-sm">
+                <div class="w-6 h-6 border-2 border-[#75C9C8]/30 border-t-[#75C9C8] rounded-full mx-auto mb-2 animate-spin"></div>
+                Carregando...
+              </div>
+              <div *ngIf="!isLoadingDespesas && despesas.length === 0 && !showNovaDespesa"
+                class="py-10 text-center text-gray-400 text-sm">
+                <svg class="w-8 h-8 mx-auto mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                Nenhuma despesa cadastrada
+              </div>
+              <div *ngFor="let d of despesas" class="bg-white border border-[#e6eef0] rounded-xl overflow-hidden shadow-sm">
+                <div class="flex items-center justify-between px-4 py-2.5 bg-[#f8fdfd] border-b border-[#E6EEF2]">
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold text-[#1A4E79] bg-white border border-[#75C9C8]/30 rounded px-1.5 py-0.5">#{{ d.item }}</span>
+                    <span class="text-sm font-semibold text-[#1A4E79]">{{ d.tipoDesp || 'Despesa' }}</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-bold text-[#1A4E79]">R$ {{ d.valor | number:'1.2-2' }}</span>
+                    <button type="button" (click)="confirmarExcluirDespesa(d)"
+                      class="p-1.5 rounded text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="px-4 py-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                  <div><span class="text-gray-400">Data</span><div class="text-gray-700 font-medium">{{ d.data }}</div></div>
+                  <div><span class="text-gray-400">Natureza</span><div class="text-gray-700">{{ d.natureza || '—' }}</div></div>
+                  <div><span class="text-gray-400">Centro de Custo</span><div class="text-gray-700">{{ d.cc || '—' }}</div></div>
+                  <div><span class="text-gray-400">Anexos</span><div class="text-gray-700">{{ d.qtdAnexos }} arq.</div></div>
+                  <div class="col-span-2"><span class="text-gray-400">Descrição</span><div class="text-gray-700 break-words">{{ d.descricao || '—' }}</div></div>
+                </div>
+              </div>
+            </div>
 
+            <!-- ── Desktop: tabela ── -->
+            <div class="hidden lg:block overflow-x-auto">
+              <div *ngIf="isLoadingDespesas" class="py-8 text-center text-[#75C9C8] text-sm">
+                <div class="w-6 h-6 border-2 border-[#75C9C8]/30 border-t-[#75C9C8] rounded-full mx-auto mb-2 animate-spin"></div>
+                Carregando...
+              </div>
+              <table *ngIf="!isLoadingDespesas" class="w-full text-sm border-collapse">
+                <thead>
+                  <tr class="text-[#1A4E79] text-xs bg-[#f8fdfd] border-b border-[#E6EEF2]">
+                    <th class="px-3 py-2.5 text-left font-semibold uppercase tracking-wide">Item</th>
+                    <th class="px-3 py-2.5 text-left font-semibold uppercase tracking-wide">Data</th>
+                    <th class="px-3 py-2.5 text-left font-semibold uppercase tracking-wide">Tipo</th>
+                    <th class="px-3 py-2.5 text-right font-semibold uppercase tracking-wide">Valor</th>
+                    <th class="px-3 py-2.5 text-left font-semibold uppercase tracking-wide">Natureza</th>
+                    <th class="px-3 py-2.5 text-left font-semibold uppercase tracking-wide">CC</th>
+                    <th class="px-3 py-2.5 text-left font-semibold uppercase tracking-wide">Descrição</th>
+                    <th class="px-3 py-2.5 text-center font-semibold uppercase tracking-wide">Anex.</th>
+                    <th class="px-3 py-2.5"></th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-[#E6EEF2]">
+                  <tr *ngFor="let d of despesas" class="hover:bg-[#f8fdfd] transition-colors text-xs">
+                    <td class="px-3 py-2.5 font-bold text-[#1A4E79]">{{ d.item }}</td>
+                    <td class="px-3 py-2.5 text-gray-600">{{ d.data }}</td>
+                    <td class="px-3 py-2.5 text-gray-700">{{ d.tipoDesp }}</td>
+                    <td class="px-3 py-2.5 text-right font-semibold text-[#1A4E79]">R$ {{ d.valor | number:'1.2-2' }}</td>
+                    <td class="px-3 py-2.5 text-gray-600">{{ d.natureza }}</td>
+                    <td class="px-3 py-2.5 text-gray-600">{{ d.cc }}</td>
+                    <td class="px-3 py-2.5 text-gray-600 max-w-[180px] truncate" [title]="d.descricao">{{ d.descricao }}</td>
+                    <td class="px-3 py-2.5 text-center text-gray-500">{{ d.qtdAnexos }}</td>
+                    <td class="px-3 py-2.5 text-center">
+                      <button type="button" (click)="confirmarExcluirDespesa(d)"
+                        class="p-1.5 rounded text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr *ngIf="despesas.length === 0 && !showNovaDespesa">
+                    <td colspan="9" class="px-3 py-10 text-center text-gray-400 text-sm">
+                      <svg class="w-8 h-8 mx-auto mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                      Nenhuma despesa cadastrada
+                    </td>
+                  </tr>
+                </tbody>
+                <tfoot *ngIf="despesas.length > 0" class="border-t-2 border-[#E6EEF2]">
+                  <tr class="bg-[#f8fdfd]">
+                    <td colspan="3" class="px-3 py-2.5 text-xs font-semibold text-[#1A4E79]">
+                      Total ({{ despesas.length }} despesa{{ despesas.length !== 1 ? 's' : '' }})
+                    </td>
+                    <td class="px-3 py-2.5 text-right text-sm font-bold text-[#1A4E79]">R$ {{ totalDespesas | number:'1.2-2' }}</td>
+                    <td colspan="5"></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+          </div>
         </div>
+
       </div>
     </div>
   </main>
