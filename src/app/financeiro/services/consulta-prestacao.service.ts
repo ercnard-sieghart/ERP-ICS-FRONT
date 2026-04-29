@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { AuthService } from '../../../shared/services/auth.service';
-import { ConfigService } from '../../../shared/services/config.service';
+import { AuthService } from '../../shared/services/auth.service';
+import { ConfigService } from '../../shared/services/config.service';
 
 export interface PrestacaoRow {
   codigo:     string;
