@@ -50,6 +50,16 @@ export const routes: Routes = [
 			canActivate: [authGuard]
 		},
 		{
+			path: 'financeiro/minhas-prestacoes',
+			loadComponent: () => import('./financeiro/consulta-prestacoes.component').then(m => m.ConsultaPrestacoesComponent),
+			canActivate: [authGuard]
+		},
+		{
+			path: 'financeiro/minhas-prestacoes/:codigo',
+			loadComponent: () => import('./financeiro/detalhe-prestacao.component').then(m => m.DetalhePrestacaoComponent),
+			canActivate: [authGuard]
+		},
+		{
 			path: 'compras/solicitacao',
 			loadComponent: () => import('./compras/solicitacao-compras/solicitacao-compras.component').then(m => m.SolicitacaoComprasComponent),
 			canActivate: [authGuard, patenteGuard]
