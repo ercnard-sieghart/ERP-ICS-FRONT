@@ -13,9 +13,13 @@ import {
 } from './services/prestacao-contas.service';
 import {
   DespesaService,
-  TipoDespResult,
-  NaturezaResult,
-  DespesaRow
+  DespesaRow,
+  FLGResult,
+  ContaContabilResult,
+  GrupoResult,
+  DestinacaoResult,
+  TipoRecursoResult,
+  TipoExecucaoResult
 } from './services/despesa.service';
 
 // ── Shared CSS constants ─────────────────────────────────────────────────────
@@ -32,11 +36,11 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
   providers: [PrestacaoContasService],
   template: `
   <!-- Loading overlay -->
-  <div *ngIf="isSaving || isSavingDespesa"
+  <div *ngIf="isFinalizando"
     class="fixed inset-0 bg-[#1A4E79]/70 backdrop-blur-sm z-[9999] flex items-center justify-center">
     <div class="bg-white rounded-xl p-6 shadow-2xl text-center min-w-[160px]">
       <div class="w-10 h-10 border-4 border-[#75C9C8]/30 border-t-[#1A4E79] rounded-full mx-auto mb-3 animate-spin"></div>
-      <p class="text-sm font-semibold text-[#1A4E79]">{{ isSavingDespesa ? 'Salvando despesa...' : 'Salvando...' }}</p>
+      <p class="text-sm font-semibold text-[#1A4E79]">Finalizando...</p>
     </div>
   </div>
 
@@ -104,10 +108,6 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
               </div>
             </div>
             <div class="flex gap-2 flex-shrink-0">
-              <button type="button" (click)="voltar()"
-                class="px-3 py-1.5 text-xs border border-[#75C9C8]/40 rounded-lg text-[#1A4E79] hover:bg-[#e6eef0] transition-all">
-                Voltar
-              </button>
               <button type="button" (click)="novaPrestacao()"
                 class="px-3 py-1.5 text-xs bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white rounded-lg hover:opacity-90 transition-all font-semibold">
                 Nova Prestação
@@ -125,8 +125,8 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
               <div class="text-sm font-semibold text-[#1A4E79]">Dados da Prestação</div>
               <div class="text-xs text-gray-400">Preencha os campos obrigatórios (*)</div>
             </div>
-            <span *ngIf="model.flf_presta" class="ml-auto text-xs font-mono bg-[#1A4E79]/10 text-[#1A4E79] px-2 py-1 rounded font-semibold">
-              {{ isGeneratingCode ? '...' : model.flf_presta }}
+            <span class="ml-auto text-xs bg-[#1A4E79]/10 text-[#1A4E79] px-2 py-1 rounded italic">
+              Código gerado ao finalizar
             </span>
           </div>
 
@@ -323,10 +323,6 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
 
             <!-- Barra de ações -->
             <div class="flex justify-between items-center pt-4 mt-4 border-t border-[#E6EEF2]">
-              <button type="button" (click)="voltar()"
-                class="px-4 py-2 text-sm border border-[#75C9C8]/40 rounded-lg text-[#1A4E79] hover:bg-[#e6eef0] transition-all">
-                Voltar
-              </button>
               <button type="button" (click)="salvar()" [disabled]="isSaving || percentuaisInvalidos"
                 class="px-5 py-2 text-sm bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white rounded-lg hover:opacity-90 disabled:opacity-50 transition-all font-semibold shadow-sm">
                 {{ isSaving ? 'Salvando...' : 'Salvar Cabeçalho' }}
@@ -370,58 +366,87 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
               </div>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
 
+                <!-- Data -->
                 <div>
                   <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Data *</label>
                   <input type="date" [(ngModel)]="nd.data"
                     class="w-full p-2 text-sm border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all" />
                 </div>
 
+                <!-- Local (UF) -->
                 <div>
-                  <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Tipo de Despesa</label>
+                  <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Local *</label>
+                  <select [(ngModel)]="nd.local"
+                    class="w-full p-2 text-sm border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all bg-white">
+                    <option value="">Selecione o estado...</option>
+                    <option *ngFor="let uf of UF_ESTADOS" [value]="uf.sigla">{{ uf.sigla }} — {{ uf.nome }}</option>
+                  </select>
+                </div>
+
+                <!-- Despesa (FLG) -->
+                <div>
+                  <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Despesa *</label>
                   <div class="${CW}">
-                    <input type="text" [(ngModel)]="nd.tipoDespSearch" autocomplete="off" placeholder="Buscar tipo..."
-                      (ngModelChange)="onNdTipoDespInput($event)" (blur)="fecharNdTipoDespDropdown()"
+                    <input type="text" [(ngModel)]="nd.flgSearch" autocomplete="off" placeholder="Código ou descrição..."
+                      (ngModelChange)="onNdFLGInput($event)" (blur)="fecharNdFLGDropdown()"
                       class="flex-1 min-w-0 p-2 text-sm border border-[#75C9C8]/30 rounded-l-lg focus:outline-none transition-all" />
-                    <button type="button" (mousedown)="toggleNdTipoDespDropdown($event)" class="${CB}">
+                    <button type="button" (mousedown)="toggleNdFLGDropdown($event)" class="${CB}">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
                     </button>
-                    <div *ngIf="ndShowTipoDespDropdown && ndTipoDespFiltered.length > 0" class="${DD}">
-                      <div *ngFor="let t of ndTipoDespFiltered" (mousedown)="selecionarNdTipoDesp(t)" class="${DI}">
-                        <span class="font-semibold text-[#1A4E79] shrink-0">{{ t.codigo }}</span>
-                        <span class="text-gray-500 truncate">{{ t.descricao }}</span>
+                    <div *ngIf="ndShowFLGDropdown && ndFLGFiltered.length > 0" class="${DD}">
+                      <div *ngFor="let f of ndFLGFiltered" (mousedown)="selecionarNdFLG(f)" class="${DI}">
+                        <span class="font-semibold text-[#1A4E79] shrink-0">{{ f.codigo }}</span>
+                        <span class="text-gray-500 truncate">{{ f.descricao }}</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
+                <!-- Descrição (auto-fill, readonly) -->
+                <div class="md:col-span-2">
+                  <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Descrição</label>
+                  <input type="text" [value]="nd.descri" readonly placeholder="Preenchida ao selecionar despesa..."
+                    class="w-full p-2 text-sm bg-gray-50 border border-[#e6eef0] rounded-lg text-gray-600" />
+                </div>
+
+                <!-- Quantidade -->
                 <div>
-                  <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Valor *</label>
-                  <input type="number" [(ngModel)]="nd.valor" min="0.01" step="0.01"
+                  <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Quantidade</label>
+                  <input type="number" [(ngModel)]="nd.quant" min="1" step="1"
                     class="w-full p-2 text-sm border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all" />
                 </div>
 
+                <!-- Valor Total -->
                 <div>
-                  <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Natureza *</label>
+                  <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Valor Total *</label>
+                  <input type="number" [(ngModel)]="nd.total" min="0.01" step="0.01"
+                    class="w-full p-2 text-sm border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all" />
+                </div>
+
+                <!-- Conta Contábil -->
+                <div>
+                  <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Conta Contábil</label>
                   <div class="${CW}">
-                    <input type="text" [(ngModel)]="nd.naturezaSearch" autocomplete="off" placeholder="Buscar natureza..."
-                      (ngModelChange)="onNdNaturezaInput($event)" (blur)="fecharNdNaturezaDropdown()"
+                    <input type="text" [(ngModel)]="nd.contaSearch" autocomplete="off" placeholder="Buscar conta..."
+                      (ngModelChange)="onNdContaInput($event)" (blur)="fecharNdContaDropdown()"
                       class="flex-1 min-w-0 p-2 text-sm border border-[#75C9C8]/30 rounded-l-lg focus:outline-none transition-all" />
-                    <button type="button" (mousedown)="toggleNdNaturezaDropdown($event)" class="${CB}">
+                    <button type="button" (mousedown)="toggleNdContaDropdown($event)" class="${CB}">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
                     </button>
-                    <div *ngIf="ndShowNaturezaDropdown && ndNaturezaFiltered.length > 0" class="${DD}">
-                      <div *ngFor="let n of ndNaturezaFiltered" (mousedown)="selecionarNdNatureza(n)" class="${DI}">
-                        <span class="font-semibold text-[#1A4E79] shrink-0">{{ n.codigo }}</span>
-                        <span class="text-gray-500 truncate">{{ n.descricao }}</span>
+                    <div *ngIf="ndShowContaDropdown && ndContaFiltered.length > 0" class="${DD}">
+                      <div *ngFor="let c of ndContaFiltered" (mousedown)="selecionarNdConta(c)" class="${DI}">
+                        <span class="font-semibold text-[#1A4E79] shrink-0">{{ c.codigo }}</span>
+                        <span class="text-gray-500 truncate">{{ c.descricao }}</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
+                <!-- C. Custo (auto-fill, obrigatório) -->
                 <div>
-                  <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Centro de Custo</label>
+                  <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">C. Custo *</label>
                   <div class="${CW}">
-                    <input type="text" [(ngModel)]="nd.ccSearch" autocomplete="off" placeholder="Buscar CC..."
+                    <input type="text" [(ngModel)]="nd.ccSearch" autocomplete="off" placeholder="Auto / buscar CC..."
                       (ngModelChange)="onNdCCInput($event)" (blur)="fecharNdCCDropdown()"
                       class="flex-1 min-w-0 p-2 text-sm border border-[#75C9C8]/30 rounded-l-lg focus:outline-none transition-all" />
                     <button type="button" (mousedown)="toggleNdCCDropdown($event)" class="${CB}">
@@ -436,10 +461,11 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
                   </div>
                 </div>
 
+                <!-- Item Contábil (auto-fill) -->
                 <div>
-                  <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Item Contábil</label>
+                  <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Item Contábil</label>
                   <div class="${CW}">
-                    <input type="text" [(ngModel)]="nd.itemCtbSearch" autocomplete="off" placeholder="Buscar item..."
+                    <input type="text" [(ngModel)]="nd.itemCtbSearch" autocomplete="off" placeholder="Auto / buscar item..."
                       (ngModelChange)="onNdItemCtbInput($event)" (blur)="fecharNdItemCtbDropdown()"
                       class="flex-1 min-w-0 p-2 text-sm border border-[#75C9C8]/30 rounded-l-lg focus:outline-none transition-all" />
                     <button type="button" (mousedown)="toggleNdItemCtbDropdown($event)" class="${CB}">
@@ -454,18 +480,109 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
                   </div>
                 </div>
 
-                <div class="md:col-span-2">
-                  <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Descrição *</label>
-                  <input type="text" [(ngModel)]="nd.descricao" maxlength="100" placeholder="Descreva a despesa..."
-                    class="w-full p-2 text-sm border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all" />
-                </div>
-
+                <!-- Classe Valor (auto-fill) -->
                 <div>
-                  <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Documento</label>
-                  <input type="text" [(ngModel)]="nd.doc" maxlength="20" placeholder="Nº do documento..."
-                    class="w-full p-2 text-sm border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all" />
+                  <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Classe Valor</label>
+                  <div class="${CW}">
+                    <input type="text" [(ngModel)]="nd.clVlSearch" autocomplete="off" placeholder="Auto / buscar classe..."
+                      (ngModelChange)="onNdClVlInput($event)" (blur)="fecharNdClVlDropdown()"
+                      class="flex-1 min-w-0 p-2 text-sm border border-[#75C9C8]/30 rounded-l-lg focus:outline-none transition-all" />
+                    <button type="button" (mousedown)="toggleNdClVlDropdown($event)" class="${CB}">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                    </button>
+                    <div *ngIf="ndShowClVlDropdown && ndClVlFiltered.length > 0" class="${DD}">
+                      <div *ngFor="let cv of ndClVlFiltered" (mousedown)="selecionarNdClVl(cv)" class="${DI}">
+                        <span class="font-semibold text-[#1A4E79] shrink-0">{{ cv.codigo }}</span>
+                        <span class="text-gray-500 truncate">{{ cv.descricao }}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
+                <!-- Grupo (FLK) -->
+                <div>
+                  <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Grupo</label>
+                  <div class="${CW}">
+                    <input type="text" [(ngModel)]="nd.grupoSearch" autocomplete="off" placeholder="Buscar grupo..."
+                      (ngModelChange)="onNdGrupoInput($event)" (blur)="fecharNdGrupoDropdown()"
+                      class="flex-1 min-w-0 p-2 text-sm border border-[#75C9C8]/30 rounded-l-lg focus:outline-none transition-all" />
+                    <button type="button" (mousedown)="toggleNdGrupoDropdown($event)" class="${CB}">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                    </button>
+                    <div *ngIf="ndShowGrupoDropdown && ndGrupoFiltered.length > 0" class="${DD}">
+                      <div *ngFor="let g of ndGrupoFiltered" (mousedown)="selecionarNdGrupo(g)" class="${DI}">
+                        <span class="font-semibold text-[#1A4E79] shrink-0">{{ g.codigo }}</span>
+                        <span class="text-gray-500 truncate">{{ g.descricao }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Destinação (AMF) -->
+                <div>
+                  <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Destinação</label>
+                  <div class="${CW}">
+                    <input type="text" [(ngModel)]="nd.destinacaoSearch" autocomplete="off" placeholder="Buscar destinação..."
+                      (ngModelChange)="onNdDestinacaoInput($event)" (blur)="fecharNdDestinacaoDropdown()"
+                      class="flex-1 min-w-0 p-2 text-sm border border-[#75C9C8]/30 rounded-l-lg focus:outline-none transition-all" />
+                    <button type="button" (mousedown)="toggleNdDestinacaoDropdown($event)" class="${CB}">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                    </button>
+                    <div *ngIf="ndShowDestinacaoDropdown && ndDestinacaoFiltered.length > 0" class="${DD}">
+                      <div *ngFor="let d of ndDestinacaoFiltered" (mousedown)="selecionarNdDestinacao(d)" class="${DI}">
+                        <span class="font-semibold text-[#1A4E79] shrink-0">{{ d.codigo }}</span>
+                        <span class="text-gray-500 truncate">{{ d.descricao }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Tipo Recurso (AK6) -->
+                <div>
+                  <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Tipo Recurso</label>
+                  <div class="${CW}">
+                    <input type="text" [(ngModel)]="nd.tipoRecursoSearch" autocomplete="off" placeholder="Buscar tipo recurso..."
+                      (ngModelChange)="onNdTipoRecursoInput($event)" (blur)="fecharNdTipoRecursoDropdown()"
+                      class="flex-1 min-w-0 p-2 text-sm border border-[#75C9C8]/30 rounded-l-lg focus:outline-none transition-all" />
+                    <button type="button" (mousedown)="toggleNdTipoRecursoDropdown($event)" class="${CB}">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                    </button>
+                    <div *ngIf="ndShowTipoRecursoDropdown && ndTipoRecursoFiltered.length > 0" class="${DD}">
+                      <div *ngFor="let r of ndTipoRecursoFiltered" (mousedown)="selecionarNdTipoRecurso(r)" class="${DI}">
+                        <span class="font-semibold text-[#1A4E79] shrink-0">{{ r.codigo }}</span>
+                        <span class="text-gray-500 truncate">{{ r.descricao }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Tipo Execução (AKF) -->
+                <div>
+                  <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">Tipo Execução</label>
+                  <div class="${CW}">
+                    <input type="text" [(ngModel)]="nd.tipoExecucaoSearch" autocomplete="off" placeholder="Buscar tipo execução..."
+                      (ngModelChange)="onNdTipoExecucaoInput($event)" (blur)="fecharNdTipoExecucaoDropdown()"
+                      class="flex-1 min-w-0 p-2 text-sm border border-[#75C9C8]/30 rounded-l-lg focus:outline-none transition-all" />
+                    <button type="button" (mousedown)="toggleNdTipoExecucaoDropdown($event)" class="${CB}">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                    </button>
+                    <div *ngIf="ndShowTipoExecucaoDropdown && ndTipoExecucaoFiltered.length > 0" class="${DD}">
+                      <div *ngFor="let e of ndTipoExecucaoFiltered" (mousedown)="selecionarNdTipoExecucao(e)" class="${DI}">
+                        <span class="font-semibold text-[#1A4E79] shrink-0">{{ e.codigo }}</span>
+                        <span class="text-gray-500 truncate">{{ e.descricao }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Observação (obrigatória) -->
+                <div class="md:col-span-3">
+                  <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Observação *</label>
+                  <textarea [(ngModel)]="nd.obs" maxlength="254" rows="2" placeholder="Observação obrigatória..."
+                    class="w-full p-2 text-sm border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all resize-none"></textarea>
+                </div>
+
+                <!-- Comprovantes -->
                 <div class="md:col-span-3">
                   <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Comprovantes</label>
                   <div class="flex items-center gap-2 flex-wrap">
@@ -496,9 +613,9 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
                   class="px-3 py-1.5 text-xs border border-[#75C9C8]/40 rounded-lg text-[#1A4E79] hover:bg-[#e6eef0] transition-all">
                   Cancelar
                 </button>
-                <button type="button" (click)="salvarDespesa()" [disabled]="isSavingDespesa"
-                  class="px-4 py-1.5 text-xs bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white rounded-lg hover:opacity-90 disabled:opacity-50 transition-all font-semibold">
-                  {{ isSavingDespesa ? 'Salvando...' : 'Confirmar Despesa' }}
+                <button type="button" (click)="salvarDespesa()"
+                  class="px-4 py-1.5 text-xs bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] text-white rounded-lg hover:opacity-90 transition-all font-semibold">
+                  Confirmar Despesa
                 </button>
               </div>
             </div>
@@ -518,10 +635,10 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
                 <div class="flex items-center justify-between px-4 py-2.5 bg-[#f8fdfd] border-b border-[#E6EEF2]">
                   <div class="flex items-center gap-2">
                     <span class="text-[10px] font-bold text-[#1A4E79] bg-white border border-[#75C9C8]/30 rounded px-1.5 py-0.5">#{{ d.item }}</span>
-                    <span class="text-sm font-semibold text-[#1A4E79]">{{ d.tipoDesp || 'Despesa' }}</span>
+                    <span class="text-sm font-semibold text-[#1A4E79]">{{ d.despes || 'Despesa' }}</span>
                   </div>
                   <div class="flex items-center gap-2">
-                    <span class="text-sm font-bold text-[#1A4E79]">R$ {{ d.valor | number:'1.2-2' }}</span>
+                    <span class="text-sm font-bold text-[#1A4E79]">R$ {{ d.total | number:'1.2-2' }}</span>
                     <button type="button" (click)="confirmarExcluirDespesa(d)"
                       class="p-1.5 rounded text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
@@ -530,10 +647,12 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
                 </div>
                 <div class="px-4 py-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
                   <div><span class="text-gray-400">Data</span><div class="text-gray-700 font-medium">{{ d.data }}</div></div>
-                  <div><span class="text-gray-400">Natureza</span><div class="text-gray-700">{{ d.natureza || '—' }}</div></div>
-                  <div><span class="text-gray-400">Centro de Custo</span><div class="text-gray-700">{{ d.cc || '—' }}</div></div>
+                  <div><span class="text-gray-400">Local</span><div class="text-gray-700">{{ d.local || '—' }}</div></div>
+                  <div><span class="text-gray-400">Qtd</span><div class="text-gray-700">{{ d.quant }}</div></div>
+                  <div><span class="text-gray-400">Total</span><div class="text-gray-700 font-semibold">R$ {{ d.total | number:'1.2-2' }}</div></div>
+                  <div><span class="text-gray-400">C. Custo</span><div class="text-gray-700">{{ d.cc || '—' }}</div></div>
                   <div><span class="text-gray-400">Anexos</span><div class="text-gray-700">{{ d.qtdAnexos }} arq.</div></div>
-                  <div class="col-span-2"><span class="text-gray-400">Descrição</span><div class="text-gray-700 break-words">{{ d.descricao || '—' }}</div></div>
+                  <div class="col-span-2"><span class="text-gray-400">Descrição</span><div class="text-gray-700 break-words">{{ d.descri || '—' }}</div></div>
                 </div>
               </div>
             </div>
@@ -549,9 +668,10 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
                   <tr class="text-[#1A4E79] text-xs bg-[#f8fdfd] border-b border-[#E6EEF2]">
                     <th class="px-3 py-2.5 text-left font-semibold uppercase tracking-wide">Item</th>
                     <th class="px-3 py-2.5 text-left font-semibold uppercase tracking-wide">Data</th>
-                    <th class="px-3 py-2.5 text-left font-semibold uppercase tracking-wide">Tipo</th>
-                    <th class="px-3 py-2.5 text-right font-semibold uppercase tracking-wide">Valor</th>
-                    <th class="px-3 py-2.5 text-left font-semibold uppercase tracking-wide">Natureza</th>
+                    <th class="px-3 py-2.5 text-left font-semibold uppercase tracking-wide">Local</th>
+                    <th class="px-3 py-2.5 text-left font-semibold uppercase tracking-wide">Despesa</th>
+                    <th class="px-3 py-2.5 text-center font-semibold uppercase tracking-wide">Qtd</th>
+                    <th class="px-3 py-2.5 text-right font-semibold uppercase tracking-wide">Total</th>
                     <th class="px-3 py-2.5 text-left font-semibold uppercase tracking-wide">CC</th>
                     <th class="px-3 py-2.5 text-left font-semibold uppercase tracking-wide">Descrição</th>
                     <th class="px-3 py-2.5 text-center font-semibold uppercase tracking-wide">Anex.</th>
@@ -562,11 +682,12 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
                   <tr *ngFor="let d of despesas" class="hover:bg-[#f8fdfd] transition-colors text-xs">
                     <td class="px-3 py-2.5 font-bold text-[#1A4E79]">{{ d.item }}</td>
                     <td class="px-3 py-2.5 text-gray-600">{{ d.data }}</td>
-                    <td class="px-3 py-2.5 text-gray-700">{{ d.tipoDesp }}</td>
-                    <td class="px-3 py-2.5 text-right font-semibold text-[#1A4E79]">R$ {{ d.valor | number:'1.2-2' }}</td>
-                    <td class="px-3 py-2.5 text-gray-600">{{ d.natureza }}</td>
+                    <td class="px-3 py-2.5 text-gray-600">{{ d.local }}</td>
+                    <td class="px-3 py-2.5 text-gray-700">{{ d.despes }}</td>
+                    <td class="px-3 py-2.5 text-center text-gray-600">{{ d.quant }}</td>
+                    <td class="px-3 py-2.5 text-right font-semibold text-[#1A4E79]">R$ {{ d.total | number:'1.2-2' }}</td>
                     <td class="px-3 py-2.5 text-gray-600">{{ d.cc }}</td>
-                    <td class="px-3 py-2.5 text-gray-600 max-w-[180px] truncate" [title]="d.descricao">{{ d.descricao }}</td>
+                    <td class="px-3 py-2.5 text-gray-600 max-w-[180px] truncate" [title]="d.descri">{{ d.descri }}</td>
                     <td class="px-3 py-2.5 text-center text-gray-500">{{ d.qtdAnexos }}</td>
                     <td class="px-3 py-2.5 text-center">
                       <button type="button" (click)="confirmarExcluirDespesa(d)"
@@ -576,7 +697,7 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
                     </td>
                   </tr>
                   <tr *ngIf="despesas.length === 0 && !showNovaDespesa">
-                    <td colspan="9" class="px-3 py-10 text-center text-gray-400 text-sm">
+                    <td colspan="10" class="px-3 py-10 text-center text-gray-400 text-sm">
                       <svg class="w-8 h-8 mx-auto mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                       Nenhuma despesa cadastrada
                     </td>
@@ -584,7 +705,7 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
                 </tbody>
                 <tfoot *ngIf="despesas.length > 0" class="border-t-2 border-[#E6EEF2]">
                   <tr class="bg-[#f8fdfd]">
-                    <td colspan="3" class="px-3 py-2.5 text-xs font-semibold text-[#1A4E79]">
+                    <td colspan="4" class="px-3 py-2.5 text-xs font-semibold text-[#1A4E79]">
                       Total ({{ despesas.length }} despesa{{ despesas.length !== 1 ? 's' : '' }})
                     </td>
                     <td class="px-3 py-2.5 text-right text-sm font-bold text-[#1A4E79]">R$ {{ totalDespesas | number:'1.2-2' }}</td>
@@ -595,6 +716,16 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
             </div>
 
           </div>
+
+          <!-- ── Finalizar ── -->
+          <div *ngIf="headerSaved && despesas.length > 0 && !showNovaDespesa"
+            class="flex justify-end px-4 py-3 border-t border-[#E6EEF2] bg-[#f8fdfd]">
+            <button type="button" (click)="finalizar()" [disabled]="isFinalizando"
+              class="px-5 py-2 text-sm bg-gradient-to-r from-[#75C9C8] to-[#1A4E79] text-white rounded-lg hover:opacity-90 disabled:opacity-50 transition-all font-semibold shadow-sm">
+              Finalizar Prestação
+            </button>
+          </div>
+
         </div>
 
       </div>
@@ -609,6 +740,7 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
   isGeneratingCode  = false;
   isSaving          = false;
   headerSaved       = false;
+  isFinalizando     = false;
 
   // Combobox via API — participante
   participanteResults: ParticipanteResult[] = [];
@@ -639,6 +771,7 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
 
   // ── Estado das despesas ─────────────────────────────────────────────────────
   despesas:         DespesaRow[] = [];
+  despesaFiles:     File[][]    = [];
   isLoadingDespesas = false;
   showNovaDespesa   = false;
   isSavingDespesa   = false;
@@ -647,18 +780,45 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
 
   nd: any = {}; // nova despesa form
 
-  tiposDesp: TipoDespResult[] = [];
-  naturezas: NaturezaResult[] = [];
+  flgList:         FLGResult[]          = [];
+  contasContabeis: ContaContabilResult[] = [];
+  grupos:          GrupoResult[]         = [];
+  destinacoes:     DestinacaoResult[]    = [];
+  tiposRecurso:    TipoRecursoResult[]   = [];
+  tiposExecucao:   TipoExecucaoResult[]  = [];
+
+  readonly UF_ESTADOS = [
+    { sigla: 'AC', nome: 'Acre' }, { sigla: 'AL', nome: 'Alagoas' }, { sigla: 'AM', nome: 'Amazonas' },
+    { sigla: 'AP', nome: 'Amapá' }, { sigla: 'BA', nome: 'Bahia' }, { sigla: 'CE', nome: 'Ceará' },
+    { sigla: 'DF', nome: 'Distrito Federal' }, { sigla: 'ES', nome: 'Espírito Santo' }, { sigla: 'GO', nome: 'Goiás' },
+    { sigla: 'MA', nome: 'Maranhão' }, { sigla: 'MG', nome: 'Minas Gerais' }, { sigla: 'MS', nome: 'Mato Grosso do Sul' },
+    { sigla: 'MT', nome: 'Mato Grosso' }, { sigla: 'PA', nome: 'Pará' }, { sigla: 'PB', nome: 'Paraíba' },
+    { sigla: 'PE', nome: 'Pernambuco' }, { sigla: 'PI', nome: 'Piauí' }, { sigla: 'PR', nome: 'Paraná' },
+    { sigla: 'RJ', nome: 'Rio de Janeiro' }, { sigla: 'RN', nome: 'Rio Grande do Norte' },
+    { sigla: 'RO', nome: 'Rondônia' }, { sigla: 'RR', nome: 'Roraima' }, { sigla: 'RS', nome: 'Rio Grande do Sul' },
+    { sigla: 'SC', nome: 'Santa Catarina' }, { sigla: 'SE', nome: 'Sergipe' },
+    { sigla: 'SP', nome: 'São Paulo' }, { sigla: 'TO', nome: 'Tocantins' }
+  ];
 
   // Combobox local — nova despesa (nd = nova despesa)
-  ndTipoDespFiltered: TipoDespResult[]   = [];
-  ndShowTipoDespDropdown = false;
-  ndNaturezaFiltered:  NaturezaResult[]  = [];
-  ndShowNaturezaDropdown = false;
-  ndCCFiltered:        CentroCustoResult[] = [];
-  ndShowCCDropdown     = false;
-  ndItemCtbFiltered:   ItemContabilResult[] = [];
+  ndFLGFiltered:        FLGResult[]          = [];
+  ndShowFLGDropdown     = false;
+  ndContaFiltered:      ContaContabilResult[] = [];
+  ndShowContaDropdown   = false;
+  ndCCFiltered:         CentroCustoResult[]  = [];
+  ndShowCCDropdown      = false;
+  ndItemCtbFiltered:    ItemContabilResult[] = [];
   ndShowItemCtbDropdown = false;
+  ndClVlFiltered:          ClasseValorResult[]  = [];
+  ndShowClVlDropdown       = false;
+  ndGrupoFiltered:         GrupoResult[]        = [];
+  ndShowGrupoDropdown      = false;
+  ndDestinacaoFiltered:    DestinacaoResult[]   = [];
+  ndShowDestinacaoDropdown = false;
+  ndTipoRecursoFiltered:   TipoRecursoResult[]  = [];
+  ndShowTipoRecursoDropdown = false;
+  ndTipoExecucaoFiltered:  TipoExecucaoResult[] = [];
+  ndShowTipoExecucaoDropdown = false;
 
   constructor(
     private prestacaoService: PrestacaoContasService,
@@ -667,7 +827,6 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.initModel();
-    this.gerarCodigo();
     this.carregarListasCabecalho();
     this.carregarListasDespesa();
     this.initAutocomplete();
@@ -684,11 +843,11 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
 
   get percentuaisInvalidos(): boolean {
     const s = this.somaPercentuais;
-    return s !== 100;
+    return s > 0 && s !== 100;
   }
 
   get totalDespesas(): number {
-    return this.despesas.reduce((acc, d) => acc + d.valor, 0);
+    return this.despesas.reduce((acc, d) => acc + d.total, 0);
   }
 
   // ── Inicialização ───────────────────────────────────────────────────────────
@@ -718,8 +877,12 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
   }
 
   private carregarListasDespesa(): void {
-    this.despesaService.listarTiposDesp().subscribe({ next: i => this.tiposDesp = i, error: () => {} });
-    this.despesaService.listarNaturezas().subscribe({ next: i => this.naturezas = i, error: () => {} });
+    this.despesaService.listarFLG().subscribe({ next: i => this.flgList = i, error: () => {} });
+    this.despesaService.listarContasContabeis().subscribe({ next: i => this.contasContabeis = i, error: () => {} });
+    this.despesaService.listarGrupos().subscribe({ next: i => this.grupos = i, error: () => {} });
+    this.despesaService.listarDestinacoes().subscribe({ next: i => this.destinacoes = i, error: () => {} });
+    this.despesaService.listarTiposRecurso().subscribe({ next: i => this.tiposRecurso = i, error: () => {} });
+    this.despesaService.listarTiposExecucao().subscribe({ next: i => this.tiposExecucao = i, error: () => {} });
   }
 
   initModel(): void {
@@ -737,23 +900,31 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
   }
 
   private initNd(): void {
-    this.nd = { data: '', tipoDespSearch: '', tipoDesp: '', valor: 0,
-      naturezaSearch: '', natureza: '', ccSearch: '', cc: '',
-      itemCtbSearch: '', itemCtb: '', descricao: '', doc: '' };
-    this.pendingFiles = [];
-    this.erroDespesa  = '';
-    this.ndTipoDespFiltered = [];  this.ndShowTipoDespDropdown = false;
-    this.ndNaturezaFiltered = [];  this.ndShowNaturezaDropdown = false;
-    this.ndCCFiltered       = [];  this.ndShowCCDropdown       = false;
-    this.ndItemCtbFiltered  = [];  this.ndShowItemCtbDropdown  = false;
-  }
-
-  gerarCodigo(): void {
-    this.isGeneratingCode = true;
-    this.prestacaoService.gerarCodigoPrestacao().subscribe({
-      next: c => { this.model.flf_presta = c; this.isGeneratingCode = false; },
-      error: () => { this.isGeneratingCode = false; }
-    });
+    this.nd = {
+      data: '', local: '',
+      flgSearch: '', despes: '', descri: '',
+      quant: 1, total: 0,
+      contaSearch: '', conta: '',
+      ccSearch: '', cc: '',
+      itemCtbSearch: '', itemCtb: '',
+      clVlSearch: '', clvl: '',
+      obs: '',
+      grupoSearch: '', grupo: '',
+      destinacaoSearch: '', destinacao: '',
+      tipoRecursoSearch: '', tipoRecurso: '',
+      tipoExecucaoSearch: '', tipoExecucao: ''
+    };
+    this.pendingFiles             = [];
+    this.erroDespesa              = '';
+    this.ndFLGFiltered            = [];  this.ndShowFLGDropdown          = false;
+    this.ndContaFiltered          = [];  this.ndShowContaDropdown        = false;
+    this.ndCCFiltered             = [];  this.ndShowCCDropdown           = false;
+    this.ndItemCtbFiltered        = [];  this.ndShowItemCtbDropdown      = false;
+    this.ndClVlFiltered           = [];  this.ndShowClVlDropdown         = false;
+    this.ndGrupoFiltered          = [];  this.ndShowGrupoDropdown        = false;
+    this.ndDestinacaoFiltered     = [];  this.ndShowDestinacaoDropdown   = false;
+    this.ndTipoRecursoFiltered    = [];  this.ndShowTipoRecursoDropdown  = false;
+    this.ndTipoExecucaoFiltered   = [];  this.ndShowTipoExecucaoDropdown = false;
   }
 
   // ── Ações do cabeçalho ──────────────────────────────────────────────────────
@@ -763,13 +934,13 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
   novaPrestacao(): void {
     this.headerSaved = false;
     this.despesas = [];
+    this.despesaFiles = [];
     this.showNovaDespesa = false;
     this.initModel();
-    this.gerarCodigo();
   }
 
   salvar(): void {
-    if (!this.model.flf_presta || !this.model.codParticipante?.trim() || !this.model.flf_emissa
+    if (!this.model.codParticipante?.trim() || !this.model.flf_emissa
         || !this.model.flf_dtini || !this.model.flf_dtfim
         || !this.model.motivo?.trim() || !this.model.flf_nacion) {
       alert('Preencha todos os campos obrigatórios marcados com *.');
@@ -779,30 +950,7 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
       alert('% Cliente + % Empresa devem somar exatamente 100%.');
       return;
     }
-
-    this.isSaving = true;
-    const payload = {
-      FLF_TIPO:   this.model.flf_tipo,
-      FLF_PRESTA: this.model.flf_presta,
-      FLF_PARTIC: this.model.codParticipante,
-      FLF_EMISSA: this.model.flf_emissa,
-      FLF_DTINI:  this.model.flf_dtini,
-      FLF_DTFIM:  this.model.flf_dtfim,
-      FLF_NACION: this.model.flf_nacion,
-      FLF_CC:     this.model.centroCusto,
-      FLF_ITCTB:  this.model.itemContabil,
-      FLF_CLVL:   this.model.classeValor,
-      FLF_MOTIVO: this.model.motivo,
-      FLF_FATCLI: Number(this.model.flf_fatcli) || 0,
-      FLF_FATEMP: Number(this.model.flf_fatemp) || 0,
-      FLF_CLIFOR: this.model.flf_clifor,
-      FLF_FLOJA:  this.model.flf_floja
-    };
-
-    this.prestacaoService.salvarPrestacao(payload).subscribe({
-      next: () => { this.isSaving = false; this.headerSaved = true; },
-      error: (err: Error) => { this.isSaving = false; alert(`Erro ao salvar: ${err.message}`); }
-    });
+    this.headerSaved = true;
   }
 
   // ── Despesas ────────────────────────────────────────────────────────────────
@@ -836,74 +984,118 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
     this.pendingFiles = this.pendingFiles.filter((_, i) => i !== index);
   }
 
-  async salvarDespesa(): Promise<void> {
-    if (!this.nd.data || this.nd.valor <= 0 || !this.nd.natureza || !this.nd.descricao?.trim()) {
-      this.erroDespesa = 'Preencha os campos obrigatórios: Data, Valor, Natureza e Descrição.';
+  salvarDespesa(): void {
+    if (!this.nd.data || !this.nd.local || !this.nd.despes || Number(this.nd.total) <= 0
+        || !this.nd.cc || !this.nd.obs?.trim()) {
+      this.erroDespesa = 'Preencha os campos obrigatórios: Data, Local, Despesa, Valor Total, Centro de Custo e Observação.';
       return;
     }
-
-    this.erroDespesa    = '';
-    this.isSavingDespesa = true;
-
-    try {
-      const resp = await firstValueFrom(this.despesaService.inserirDespesa({
-        FLE_PRESTA:  this.model.flf_presta,
-        FLE_DATA:    this.nd.data,
-        FLE_TPDESP:  this.nd.tipoDesp,
-        FLE_VALOR:   Number(this.nd.valor),
-        FLE_MOEDA:   '01',
-        FLE_NATUREZ: this.nd.natureza,
-        FLE_CC:      this.nd.cc,
-        FLE_ITEMCTA: this.nd.itemCtb,
-        FLE_DESC:    this.nd.descricao,
-        FLE_DOC:     this.nd.doc
-      }));
-
-      if (!resp?.success) {
-        this.erroDespesa = resp?.message || 'Erro ao salvar despesa.';
-        this.isSavingDespesa = false;
-        return;
-      }
-
-      const nItem = resp.item as number;
-
-      for (const file of this.pendingFiles) {
-        const base64 = await this.fileToBase64(file);
-        const ext    = file.name.split('.').pop()?.toLowerCase() || '';
-        await firstValueFrom(this.despesaService.uploadAnexo({
-          presta: this.model.flf_presta,
-          item:   nItem,
-          nome:   file.name,
-          tipo:   ext,
-          arquivo: base64
-        })).catch(() => {});
-      }
-
-      this.showNovaDespesa  = false;
-      this.isSavingDespesa  = false;
-      this.initNd();
-      this.recarregarDespesas();
-    } catch (err: any) {
-      this.erroDespesa    = err?.message || 'Erro inesperado ao salvar despesa.';
-      this.isSavingDespesa = false;
-    }
+    this.erroDespesa = '';
+    const nextItem = this.despesas.length + 1;
+    this.despesas = [...this.despesas, {
+      item:      nextItem,
+      data:      this.nd.data,
+      local:     this.nd.local,
+      despes:    this.nd.despes,
+      descri:    this.nd.descri,
+      quant:        Number(this.nd.quant) || 1,
+      total:        Number(this.nd.total),
+      conta:        this.nd.conta,
+      cc:           this.nd.cc,
+      itemCtb:      this.nd.itemCtb,
+      clvl:         this.nd.clvl,
+      obs:          this.nd.obs,
+      grupo:        this.nd.grupo,
+      destinacao:   this.nd.destinacao,
+      tipoRecurso:  this.nd.tipoRecurso,
+      tipoExecucao: this.nd.tipoExecucao,
+      qtdAnexos:    this.pendingFiles.length
+    }];
+    this.despesaFiles = [...this.despesaFiles, [...this.pendingFiles]];
+    this.showNovaDespesa = false;
+    this.initNd();
   }
 
   confirmarExcluirDespesa(d: DespesaRow): void {
-    if (!confirm(`Excluir despesa ${d.item} — ${d.descricao}?`)) return;
-    this.despesaService.excluirDespesa(this.model.flf_presta, d.item).subscribe({
-      next: () => this.recarregarDespesas(),
-      error: (err: Error) => alert(`Erro ao excluir: ${err.message}`)
-    });
+    if (!confirm(`Excluir despesa ${d.item} — ${d.descri}?`)) return;
+    const idx = this.despesas.indexOf(d);
+    if (idx < 0) return;
+    this.despesas     = this.despesas.filter((_, i) => i !== idx).map((x, i) => ({ ...x, item: i + 1 }));
+    this.despesaFiles = this.despesaFiles.filter((_, i) => i !== idx);
   }
 
-  private recarregarDespesas(): void {
-    if (!this.model.flf_presta) return;
-    this.isLoadingDespesas = true;
-    this.despesaService.listarDespesas(this.model.flf_presta).subscribe({
-      next: rows => { this.despesas = rows; this.isLoadingDespesas = false; },
-      error: () => { this.isLoadingDespesas = false; }
-    });
+  async finalizar(): Promise<void> {
+    if (!this.despesas.length) return;
+
+    const saldo = this.totalDespesas;
+    const saldoFmt = saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const confirmar = confirm(
+      `O saldo calculado desta prestação de contas foi de:\nR$ ${saldoFmt}\n\nDeseja finalizar e enviar ao sistema?`
+    );
+    if (!confirmar) return;
+
+    this.isFinalizando = true;
+
+    const payload = {
+      FLF_TIPO:   this.model.flf_tipo,
+      FLF_PRESTA: '',
+      FLF_PARTIC: this.model.codParticipante,
+      FLF_EMISSA: this.model.flf_emissa,
+      FLF_DTINI:  this.model.flf_dtini,
+      FLF_DTFIM:  this.model.flf_dtfim,
+      FLF_NACION: this.model.flf_nacion,
+      FLF_CC:     this.model.centroCusto,
+      FLF_ITCTB:  this.model.itemContabil,
+      FLF_CLVL:   this.model.classeValor,
+      FLF_MOTIVO: this.model.motivo,
+      FLF_FATCLI: Number(this.model.flf_fatcli) || 0,
+      FLF_FATEMP: Number(this.model.flf_fatemp) || 0,
+      FLF_CLIFOR: this.model.flf_clifor,
+      FLF_FLOJA:  this.model.flf_floja
+    };
+
+    try {
+      const cabResp = await firstValueFrom(this.prestacaoService.salvarPrestacao(payload));
+      const presta  = cabResp?.codigo as string;
+
+      for (let i = 0; i < this.despesas.length; i++) {
+        const d    = this.despesas[i];
+        const resp = await firstValueFrom(this.despesaService.inserirDespesa({
+          FLE_PRESTA:  presta,
+          FLE_DATA:    d.data,
+          FLE_LOCAL:   d.local,
+          FLE_DESPES:  d.despes,
+          FLE_DESCRI:  d.descri,
+          FLE_QUANT:   d.quant,
+          FLE_TOTAL:   d.total,
+          FLE_CONTA:   d.conta,
+          FLE_CC:      d.cc,
+          FLE_ITEMCTA: d.itemCtb,
+          FLE_CLVL:    d.clvl,
+          FLE_OBS:     d.obs,
+          FLE_GRUPO:   d.grupo,
+          EC05DB:      d.destinacao,
+          EC06DB:      d.tipoRecurso,
+          EC07DB:      d.tipoExecucao
+        }));
+
+        const nItem = resp?.item as number;
+        for (const file of (this.despesaFiles[i] || [])) {
+          const base64 = await this.fileToBase64(file);
+          const ext    = file.name.split('.').pop()?.toLowerCase() || '';
+          await firstValueFrom(this.despesaService.uploadAnexo({
+            presta, item: nItem, nome: file.name, tipo: ext, arquivo: base64
+          })).catch(() => {});
+        }
+      }
+
+      this.isFinalizando = false;
+      alert(`Prestação de contas ${presta} salva com sucesso!`);
+      this.novaPrestacao();
+    } catch (err: any) {
+      this.isFinalizando = false;
+      alert(`Erro ao finalizar: ${err?.message || 'Erro desconhecido'}`);
+    }
   }
 
   private fileToBase64(file: File): Promise<string> {
@@ -963,7 +1155,7 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
   }
   fecharItemContabilDropdown(): void { setTimeout(() => { this.showItemContabilDropdown = false; }, 150); }
 
-  // ── Centro de Custo (local) ──────────────────────────────────────────────────
+  // ── Centro de Custo (API) ──────────────────────────────────────────────────
 
   onCentroCustoInput(v: string): void {
     this.model.centroCusto = '';
@@ -1024,43 +1216,48 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
 
   // ── Comboboxes da nova despesa ───────────────────────────────────────────────
 
-  onNdTipoDespInput(v: string): void {
-    this.nd.tipoDesp = '';
-    if (!v?.trim()) { this.ndShowTipoDespDropdown = false; this.ndTipoDespFiltered = []; return; }
-    this.ndTipoDespFiltered = this.filtrar(this.tiposDesp, v);
-    this.ndShowTipoDespDropdown = this.ndTipoDespFiltered.length > 0;
+  onNdFLGInput(v: string): void {
+    this.nd.despes = '';
+    if (!v?.trim()) { this.ndShowFLGDropdown = false; this.ndFLGFiltered = []; return; }
+    this.ndFLGFiltered = this.filtrar(this.flgList, v);
+    this.ndShowFLGDropdown = this.ndFLGFiltered.length > 0;
   }
-  toggleNdTipoDespDropdown(e: MouseEvent): void {
+  toggleNdFLGDropdown(e: MouseEvent): void {
     e.preventDefault();
-    if (this.ndShowTipoDespDropdown) { this.ndShowTipoDespDropdown = false; return; }
-    const t = (this.nd.tipoDespSearch || '').trim();
-    this.ndTipoDespFiltered = t ? this.filtrar(this.tiposDesp, t) : [...this.tiposDesp];
-    this.ndShowTipoDespDropdown = this.ndTipoDespFiltered.length > 0;
+    if (this.ndShowFLGDropdown) { this.ndShowFLGDropdown = false; return; }
+    const t = (this.nd.flgSearch || '').trim();
+    this.ndFLGFiltered = t ? this.filtrar(this.flgList, t) : [...this.flgList];
+    this.ndShowFLGDropdown = this.ndFLGFiltered.length > 0;
   }
-  selecionarNdTipoDesp(item: TipoDespResult): void {
-    this.nd.tipoDesp = item.codigo; this.nd.tipoDespSearch = `${item.codigo} - ${item.descricao}`;
-    this.ndTipoDespFiltered = []; this.ndShowTipoDespDropdown = false;
+  selecionarNdFLG(item: FLGResult): void {
+    this.nd.despes = item.codigo;
+    this.nd.flgSearch = `${item.codigo} - ${item.descricao}`;
+    this.nd.descri = item.descricao;
+    if (item.custo)  { this.nd.cc      = item.custo;  this.nd.ccSearch      = item.custo; }
+    if (item.itectb) { this.nd.itemCtb = item.itectb; this.nd.itemCtbSearch = item.itectb; }
+    if (item.clvl)   { this.nd.clvl    = item.clvl;   this.nd.clVlSearch    = item.clvl; }
+    this.ndFLGFiltered = []; this.ndShowFLGDropdown = false;
   }
-  fecharNdTipoDespDropdown(): void { setTimeout(() => { this.ndShowTipoDespDropdown = false; }, 150); }
+  fecharNdFLGDropdown(): void { setTimeout(() => { this.ndShowFLGDropdown = false; }, 150); }
 
-  onNdNaturezaInput(v: string): void {
-    this.nd.natureza = '';
-    if (!v?.trim()) { this.ndShowNaturezaDropdown = false; this.ndNaturezaFiltered = []; return; }
-    this.ndNaturezaFiltered = this.filtrar(this.naturezas, v);
-    this.ndShowNaturezaDropdown = this.ndNaturezaFiltered.length > 0;
+  onNdContaInput(v: string): void {
+    this.nd.conta = '';
+    if (!v?.trim()) { this.ndShowContaDropdown = false; this.ndContaFiltered = []; return; }
+    this.ndContaFiltered = this.filtrar(this.contasContabeis, v);
+    this.ndShowContaDropdown = this.ndContaFiltered.length > 0;
   }
-  toggleNdNaturezaDropdown(e: MouseEvent): void {
+  toggleNdContaDropdown(e: MouseEvent): void {
     e.preventDefault();
-    if (this.ndShowNaturezaDropdown) { this.ndShowNaturezaDropdown = false; return; }
-    const t = (this.nd.naturezaSearch || '').trim();
-    this.ndNaturezaFiltered = t ? this.filtrar(this.naturezas, t) : [...this.naturezas];
-    this.ndShowNaturezaDropdown = this.ndNaturezaFiltered.length > 0;
+    if (this.ndShowContaDropdown) { this.ndShowContaDropdown = false; return; }
+    const t = (this.nd.contaSearch || '').trim();
+    this.ndContaFiltered = t ? this.filtrar(this.contasContabeis, t) : [...this.contasContabeis];
+    this.ndShowContaDropdown = this.ndContaFiltered.length > 0;
   }
-  selecionarNdNatureza(item: NaturezaResult): void {
-    this.nd.natureza = item.codigo; this.nd.naturezaSearch = `${item.codigo} - ${item.descricao}`;
-    this.ndNaturezaFiltered = []; this.ndShowNaturezaDropdown = false;
+  selecionarNdConta(item: ContaContabilResult): void {
+    this.nd.conta = item.codigo; this.nd.contaSearch = `${item.codigo} - ${item.descricao}`;
+    this.ndContaFiltered = []; this.ndShowContaDropdown = false;
   }
-  fecharNdNaturezaDropdown(): void { setTimeout(() => { this.ndShowNaturezaDropdown = false; }, 150); }
+  fecharNdContaDropdown(): void { setTimeout(() => { this.ndShowContaDropdown = false; }, 150); }
 
   onNdCCInput(v: string): void {
     this.nd.cc = '';
@@ -1099,4 +1296,107 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
     this.ndItemCtbFiltered = []; this.ndShowItemCtbDropdown = false;
   }
   fecharNdItemCtbDropdown(): void { setTimeout(() => { this.ndShowItemCtbDropdown = false; }, 150); }
+
+  onNdClVlInput(v: string): void {
+    this.nd.clvl = '';
+    if (!v?.trim()) { this.ndShowClVlDropdown = false; this.ndClVlFiltered = []; return; }
+    this.ndClVlFiltered = this.filtrar(this.classesValor, v);
+    this.ndShowClVlDropdown = this.ndClVlFiltered.length > 0;
+  }
+  toggleNdClVlDropdown(e: MouseEvent): void {
+    e.preventDefault();
+    if (this.ndShowClVlDropdown) { this.ndShowClVlDropdown = false; return; }
+    const t = (this.nd.clVlSearch || '').trim();
+    this.ndClVlFiltered = t ? this.filtrar(this.classesValor, t) : [...this.classesValor];
+    this.ndShowClVlDropdown = this.ndClVlFiltered.length > 0;
+  }
+  selecionarNdClVl(item: ClasseValorResult): void {
+    this.nd.clvl = item.codigo; this.nd.clVlSearch = `${item.codigo} - ${item.descricao}`;
+    this.ndClVlFiltered = []; this.ndShowClVlDropdown = false;
+  }
+  fecharNdClVlDropdown(): void { setTimeout(() => { this.ndShowClVlDropdown = false; }, 150); }
+
+  // ── Grupo FLK (local) ────────────────────────────────────────────────────────
+
+  onNdGrupoInput(v: string): void {
+    this.nd.grupo = '';
+    if (!v?.trim()) { this.ndShowGrupoDropdown = false; this.ndGrupoFiltered = []; return; }
+    this.ndGrupoFiltered = this.filtrar(this.grupos, v);
+    this.ndShowGrupoDropdown = this.ndGrupoFiltered.length > 0;
+  }
+  toggleNdGrupoDropdown(e: MouseEvent): void {
+    e.preventDefault();
+    if (this.ndShowGrupoDropdown) { this.ndShowGrupoDropdown = false; return; }
+    const t = (this.nd.grupoSearch || '').trim();
+    this.ndGrupoFiltered = t ? this.filtrar(this.grupos, t) : [...this.grupos];
+    this.ndShowGrupoDropdown = this.ndGrupoFiltered.length > 0;
+  }
+  selecionarNdGrupo(item: GrupoResult): void {
+    this.nd.grupo = item.codigo; this.nd.grupoSearch = `${item.codigo} - ${item.descricao}`;
+    this.ndGrupoFiltered = []; this.ndShowGrupoDropdown = false;
+  }
+  fecharNdGrupoDropdown(): void { setTimeout(() => { this.ndShowGrupoDropdown = false; }, 150); }
+
+  // ── Destinação AMF (local) ───────────────────────────────────────────────────
+
+  onNdDestinacaoInput(v: string): void {
+    this.nd.destinacao = '';
+    if (!v?.trim()) { this.ndShowDestinacaoDropdown = false; this.ndDestinacaoFiltered = []; return; }
+    this.ndDestinacaoFiltered = this.filtrar(this.destinacoes, v);
+    this.ndShowDestinacaoDropdown = this.ndDestinacaoFiltered.length > 0;
+  }
+  toggleNdDestinacaoDropdown(e: MouseEvent): void {
+    e.preventDefault();
+    if (this.ndShowDestinacaoDropdown) { this.ndShowDestinacaoDropdown = false; return; }
+    const t = (this.nd.destinacaoSearch || '').trim();
+    this.ndDestinacaoFiltered = t ? this.filtrar(this.destinacoes, t) : [...this.destinacoes];
+    this.ndShowDestinacaoDropdown = this.ndDestinacaoFiltered.length > 0;
+  }
+  selecionarNdDestinacao(item: DestinacaoResult): void {
+    this.nd.destinacao = item.codigo; this.nd.destinacaoSearch = `${item.codigo} - ${item.descricao}`;
+    this.ndDestinacaoFiltered = []; this.ndShowDestinacaoDropdown = false;
+  }
+  fecharNdDestinacaoDropdown(): void { setTimeout(() => { this.ndShowDestinacaoDropdown = false; }, 150); }
+
+  // ── Tipo Recurso AK6 (local) ─────────────────────────────────────────────────
+
+  onNdTipoRecursoInput(v: string): void {
+    this.nd.tipoRecurso = '';
+    if (!v?.trim()) { this.ndShowTipoRecursoDropdown = false; this.ndTipoRecursoFiltered = []; return; }
+    this.ndTipoRecursoFiltered = this.filtrar(this.tiposRecurso, v);
+    this.ndShowTipoRecursoDropdown = this.ndTipoRecursoFiltered.length > 0;
+  }
+  toggleNdTipoRecursoDropdown(e: MouseEvent): void {
+    e.preventDefault();
+    if (this.ndShowTipoRecursoDropdown) { this.ndShowTipoRecursoDropdown = false; return; }
+    const t = (this.nd.tipoRecursoSearch || '').trim();
+    this.ndTipoRecursoFiltered = t ? this.filtrar(this.tiposRecurso, t) : [...this.tiposRecurso];
+    this.ndShowTipoRecursoDropdown = this.ndTipoRecursoFiltered.length > 0;
+  }
+  selecionarNdTipoRecurso(item: TipoRecursoResult): void {
+    this.nd.tipoRecurso = item.codigo; this.nd.tipoRecursoSearch = `${item.codigo} - ${item.descricao}`;
+    this.ndTipoRecursoFiltered = []; this.ndShowTipoRecursoDropdown = false;
+  }
+  fecharNdTipoRecursoDropdown(): void { setTimeout(() => { this.ndShowTipoRecursoDropdown = false; }, 150); }
+
+  // ── Tipo Execução AKF (local) ────────────────────────────────────────────────
+
+  onNdTipoExecucaoInput(v: string): void {
+    this.nd.tipoExecucao = '';
+    if (!v?.trim()) { this.ndShowTipoExecucaoDropdown = false; this.ndTipoExecucaoFiltered = []; return; }
+    this.ndTipoExecucaoFiltered = this.filtrar(this.tiposExecucao, v);
+    this.ndShowTipoExecucaoDropdown = this.ndTipoExecucaoFiltered.length > 0;
+  }
+  toggleNdTipoExecucaoDropdown(e: MouseEvent): void {
+    e.preventDefault();
+    if (this.ndShowTipoExecucaoDropdown) { this.ndShowTipoExecucaoDropdown = false; return; }
+    const t = (this.nd.tipoExecucaoSearch || '').trim();
+    this.ndTipoExecucaoFiltered = t ? this.filtrar(this.tiposExecucao, t) : [...this.tiposExecucao];
+    this.ndShowTipoExecucaoDropdown = this.ndTipoExecucaoFiltered.length > 0;
+  }
+  selecionarNdTipoExecucao(item: TipoExecucaoResult): void {
+    this.nd.tipoExecucao = item.codigo; this.nd.tipoExecucaoSearch = `${item.codigo} - ${item.descricao}`;
+    this.ndTipoExecucaoFiltered = []; this.ndShowTipoExecucaoDropdown = false;
+  }
+  fecharNdTipoExecucaoDropdown(): void { setTimeout(() => { this.ndShowTipoExecucaoDropdown = false; }, 150); }
 }

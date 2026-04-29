@@ -5,34 +5,57 @@ import { catchError, map } from 'rxjs/operators';
 import { AuthService } from '../../shared/services/auth.service';
 import { ConfigService } from '../../shared/services/config.service';
 
-export interface TipoDespResult   { codigo: string; descricao: string; }
-export interface NaturezaResult   { codigo: string; descricao: string; }
+export interface FLGResult {
+  codigo: string;
+  descricao: string;
+  custo:  string;
+  itectb: string;
+  clvl:   string;
+}
+
+export interface ContaContabilResult { codigo: string; descricao: string; }
+export interface GrupoResult        { codigo: string; descricao: string; }
+export interface DestinacaoResult   { codigo: string; descricao: string; }
+export interface TipoRecursoResult  { codigo: string; descricao: string; }
+export interface TipoExecucaoResult { codigo: string; descricao: string; }
 
 export interface DespesaRow {
-  item: number;
-  data: string;
-  tipoDesp: string;
-  valor: number;
-  moeda: string;
-  natureza: string;
-  cc: string;
-  itemCtb: string;
-  descricao: string;
-  doc: string;
-  qtdAnexos: number;
+  item:        number;
+  data:        string;
+  local:       string;
+  despes:      string;
+  descri:      string;
+  quant:       number;
+  total:       number;
+  conta:       string;
+  cc:          string;
+  itemCtb:     string;
+  clvl:        string;
+  obs:         string;
+  grupo:       string;
+  destinacao:  string;
+  tipoRecurso: string;
+  tipoExecucao: string;
+  qtdAnexos:   number;
 }
 
 export interface DespesaPayload {
-  FLE_PRESTA: string;
-  FLE_DATA:   string;
-  FLE_TPDESP: string;
-  FLE_VALOR:  number;
-  FLE_MOEDA:  string;
-  FLE_NATUREZ: string;
-  FLE_CC:     string;
+  FLE_PRESTA:  string;
+  FLE_DATA:    string;
+  FLE_LOCAL:   string;
+  FLE_DESPES:  string;
+  FLE_DESCRI:  string;
+  FLE_QUANT:   number;
+  FLE_TOTAL:   number;
+  FLE_CONTA:   string;
+  FLE_CC:      string;
   FLE_ITEMCTA: string;
-  FLE_DESC:   string;
-  FLE_DOC:    string;
+  FLE_CLVL:    string;
+  FLE_OBS:     string;
+  FLE_GRUPO:   string;
+  EC05DB:      string;
+  EC06DB:      string;
+  EC07DB:      string;
 }
 
 export interface AnexoPayload {
@@ -73,45 +96,54 @@ export class DespesaService {
     return new HttpHeaders(h);
   }
 
-  listarTiposDesp(): Observable<TipoDespResult[]> {
-    const url = this.configService.getRestEndpoint('/TIPOSDESP');
+  listarFLG(): Observable<FLGResult[]> {
+    const url = this.configService.getRestEndpoint('/PRESTACAOCONTA/FLG');
     return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
       map(res => {
         const items: any[] = Array.isArray(res) ? res : (res?.items || res?.rows || []);
-        return items.map((i: any) => ({ codigo: i.codigo || '', descricao: i.descricao || '' }));
+        return items.map((i: any) => ({
+          codigo: i.codigo || '', descricao: i.descricao || '',
+          custo: i.custo || '', itectb: i.itectb || '', clvl: i.clvl || ''
+        }));
       }),
-      catchError(() => throwError(() => new Error('Erro ao listar tipos de despesa')))
+      catchError(() => throwError(() => new Error('Erro ao listar despesas FLG')))
     );
   }
 
-  listarNaturezas(): Observable<NaturezaResult[]> {
-    const url = this.configService.getRestEndpoint('/NATUREZAS');
+  listarContasContabeis(): Observable<ContaContabilResult[]> {
+    const url = this.configService.getRestEndpoint('/PRESTACAOCONTA/CONTASCONTABEIS');
     return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
       map(res => {
         const items: any[] = Array.isArray(res) ? res : (res?.items || res?.rows || []);
         return items.map((i: any) => ({ codigo: i.codigo || '', descricao: i.descricao || '' }));
       }),
-      catchError(() => throwError(() => new Error('Erro ao listar naturezas')))
+      catchError(() => throwError(() => new Error('Erro ao listar contas contábeis')))
     );
   }
 
   listarDespesas(presta: string): Observable<DespesaRow[]> {
-    const url = this.configService.getRestEndpoint(`/DESPESAS/${encodeURIComponent(presta)}`);
+    const url = this.configService.getRestEndpoint(`/PRESTACAOCONTA/DESPESAS/${encodeURIComponent(presta)}`);
     return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
       map(res => {
         const items: any[] = Array.isArray(res) ? res : (res?.rows || []);
         return items.map((i: any) => ({
           item:      Number(i.item)      || 0,
           data:      i.data              || '',
-          tipoDesp:  i.tipoDesp          || '',
-          valor:     Number(i.valor)     || 0,
-          moeda:     i.moeda             || '',
-          natureza:  i.natureza          || '',
+          local:     i.local             || '',
+          despes:    i.despes            || '',
+          descri:    i.descri            || '',
+          quant:     Number(i.quant)     || 0,
+          total:     Number(i.total)     || 0,
+          conta:     i.conta             || '',
           cc:        i.cc                || '',
           itemCtb:   i.itemCtb           || '',
-          descricao: i.descricao         || '',
-          doc:       i.doc               || '',
-          qtdAnexos: Number(i.qtdAnexos) || 0
+          clvl:        i.clvl              || '',
+          obs:         i.obs               || '',
+          grupo:       i.grupo             || '',
+          destinacao:  i.destinacao        || '',
+          tipoRecurso: i.tipoRecurso       || '',
+          tipoExecucao: i.tipoExecucao     || '',
+          qtdAnexos:   Number(i.qtdAnexos) || 0
         }));
       }),
       catchError(this.handleError)
@@ -119,28 +151,28 @@ export class DespesaService {
   }
 
   inserirDespesa(payload: DespesaPayload): Observable<any> {
-    const url = this.configService.getRestEndpoint('/DESPESAS');
+    const url = this.configService.getRestEndpoint('/PRESTACAOCONTA/DESPESAS');
     return this.http.post<any>(url, payload, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError)
     );
   }
 
   excluirDespesa(presta: string, item: number): Observable<any> {
-    const url = this.configService.getRestEndpoint(`/DESPESAS/${encodeURIComponent(presta)}/${item}`);
+    const url = this.configService.getRestEndpoint(`/PRESTACAOCONTA/DESPESAS/${encodeURIComponent(presta)}/${item}`);
     return this.http.delete<any>(url, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError)
     );
   }
 
   uploadAnexo(payload: AnexoPayload): Observable<any> {
-    const url = this.configService.getRestEndpoint('/ANEXOS');
+    const url = this.configService.getRestEndpoint('/PRESTACAOCONTA/ANEXOS');
     return this.http.post<any>(url, payload, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError)
     );
   }
 
   listarAnexos(presta: string, item: number): Observable<AnexoRow[]> {
-    const url = this.configService.getRestEndpoint(`/ANEXOS/${encodeURIComponent(presta)}/${item}`);
+    const url = this.configService.getRestEndpoint(`/PRESTACAOCONTA/ANEXOS/${encodeURIComponent(presta)}/${item}`);
     return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
       map(res => {
         const items: any[] = Array.isArray(res) ? res : (res?.rows || []);
@@ -153,6 +185,50 @@ export class DespesaService {
         }));
       }),
       catchError(this.handleError)
+    );
+  }
+
+  listarGrupos(): Observable<GrupoResult[]> {
+    const url = this.configService.getRestEndpoint('/PRESTACAOCONTA/GRUPOS');
+    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
+      map(res => {
+        const items: any[] = Array.isArray(res) ? res : (res?.items || res?.rows || []);
+        return items.map((i: any) => ({ codigo: i.codigo || '', descricao: i.descricao || '' }));
+      }),
+      catchError(() => throwError(() => new Error('Erro ao listar grupos FLK')))
+    );
+  }
+
+  listarDestinacoes(): Observable<DestinacaoResult[]> {
+    const url = this.configService.getRestEndpoint('/PRESTACAOCONTA/DESTINACOES');
+    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
+      map(res => {
+        const items: any[] = Array.isArray(res) ? res : (res?.items || res?.rows || []);
+        return items.map((i: any) => ({ codigo: i.codigo || '', descricao: i.descricao || '' }));
+      }),
+      catchError(() => throwError(() => new Error('Erro ao listar destinações')))
+    );
+  }
+
+  listarTiposRecurso(): Observable<TipoRecursoResult[]> {
+    const url = this.configService.getRestEndpoint('/PRESTACAOCONTA/TIPOSRECURSO');
+    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
+      map(res => {
+        const items: any[] = Array.isArray(res) ? res : (res?.items || res?.rows || []);
+        return items.map((i: any) => ({ codigo: i.codigo || '', descricao: i.descricao || '' }));
+      }),
+      catchError(() => throwError(() => new Error('Erro ao listar tipos de recurso')))
+    );
+  }
+
+  listarTiposExecucao(): Observable<TipoExecucaoResult[]> {
+    const url = this.configService.getRestEndpoint('/PRESTACAOCONTA/TIPOSEXECUCAO');
+    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
+      map(res => {
+        const items: any[] = Array.isArray(res) ? res : (res?.items || res?.rows || []);
+        return items.map((i: any) => ({ codigo: i.codigo || '', descricao: i.descricao || '' }));
+      }),
+      catchError(() => throwError(() => new Error('Erro ao listar tipos de execução')))
     );
   }
 
