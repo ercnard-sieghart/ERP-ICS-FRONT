@@ -49,4 +49,12 @@ export class ConfigService {
     }
     return `${this.apiBaseUrl}${path}`; // Em desenvolvimento usa o proxy
   }
+
+  /**
+   * Retorna a URL completa do endpoint externo da API (sempre usando apiUrl)
+   * Use para chamar endpoints que não devem passar pelo proxy em dev.
+   */
+  getExternalEndpoint(path: string): string {
+    return `${this.apiUrl}${path}`;
+  }
 }

@@ -100,7 +100,7 @@ export class AppComponent implements OnInit {
     }
   }
 
-  @HostListener('window:resize', ['$event'])
+  @HostListener('window:resize')
   checkScreenSize() {
     const wasMobile = this.isMobile;
     this.isMobile = window.innerWidth < 680;
