@@ -44,6 +44,83 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
     </div>
   </div>
 
+  <!-- Modal de confirmação genérico -->
+  <div *ngIf="confirmModal"
+    class="fixed inset-0 bg-[#1A4E79]/60 backdrop-blur-sm z-[10001] flex items-center justify-center px-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
+      <!-- cabeçalho -->
+      <div [ngClass]="confirmModal.danger ? 'from-red-600 to-red-400' : 'from-[#1A4E79] to-[#75C9C8]'"
+        class="bg-gradient-to-r px-5 py-4">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+            <svg *ngIf="!confirmModal.danger" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <svg *ngIf="confirmModal.danger" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+          </div>
+          <p class="text-white font-semibold text-sm">{{ confirmModal.title }}</p>
+        </div>
+      </div>
+      <!-- corpo -->
+      <div class="px-5 py-5 space-y-4">
+        <div *ngIf="confirmModal.detail"
+          class="text-center bg-[#f8fdfd] rounded-xl py-4 border border-[#75C9C8]/20">
+          <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">{{ confirmModal.detailLabel }}</p>
+          <p class="text-3xl font-bold text-[#1A4E79]">{{ confirmModal.detail }}</p>
+          <p *ngIf="confirmModal.detailSub" class="text-xs text-gray-400 mt-1">{{ confirmModal.detailSub }}</p>
+        </div>
+        <p class="text-sm text-gray-600 text-center">{{ confirmModal.body }}</p>
+      </div>
+      <!-- botões -->
+      <div class="flex gap-3 px-5 pb-5">
+        <button type="button" (click)="fecharConfirmModal()"
+          class="flex-1 py-2.5 text-sm border border-[#1A4E79]/30 text-[#1A4E79] rounded-xl hover:bg-[#e6eef0] transition-all font-semibold">
+          Cancelar
+        </button>
+        <button type="button" (click)="executarConfirmModal()"
+          [ngClass]="confirmModal.danger
+            ? 'bg-gradient-to-r from-red-600 to-red-400'
+            : 'bg-gradient-to-r from-[#1A4E79] to-[#75C9C8]'"
+          class="flex-1 py-2.5 text-sm text-white rounded-xl hover:opacity-90 transition-all font-semibold shadow-sm">
+          {{ confirmModal.confirmLabel }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div *ngIf="toast"
+    class="fixed top-5 right-5 z-[10000] max-w-sm w-full shadow-2xl rounded-xl overflow-hidden transition-all"
+    [ngClass]="{
+      'bg-red-600':    toast.type === 'error',
+      'bg-[#1A4E79]': toast.type === 'success',
+      'bg-amber-500': toast.type === 'warning'
+    }">
+    <div class="flex items-start gap-3 px-4 py-3">
+      <!-- ícone -->
+      <svg *ngIf="toast.type === 'error'" class="w-5 h-5 text-white shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+      </svg>
+      <svg *ngIf="toast.type === 'success'" class="w-5 h-5 text-white shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+      </svg>
+      <svg *ngIf="toast.type === 'warning'" class="w-5 h-5 text-white shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z"/>
+      </svg>
+      <!-- mensagem -->
+      <p class="text-sm text-white leading-snug flex-1 whitespace-pre-line">{{ toast.message }}</p>
+      <!-- fechar -->
+      <button type="button" (click)="closeToast()"
+        class="shrink-0 text-white/70 hover:text-white transition-colors ml-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
   <main class="h-full flex flex-col bg-gradient-to-br from-[#1A4E79] to-[#75C9C8] overflow-hidden">
 
     <!-- ── Cabeçalho fixo da página ── -->
@@ -586,10 +663,11 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
                 <div class="md:col-span-3">
                   <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Comprovantes</label>
                   <div class="flex items-center gap-2 flex-wrap">
-                    <label class="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 border border-[#75C9C8]/40 text-[#1A4E79] rounded-lg text-xs hover:bg-[#e6eef0] transition-all">
+                    <label [class.opacity-40]="pendingFiles.length >= 1" [class.pointer-events-none]="pendingFiles.length >= 1"
+                      class="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 border border-[#75C9C8]/40 text-[#1A4E79] rounded-lg text-xs hover:bg-[#e6eef0] transition-all">
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
-                      Anexar arquivo
-                      <input type="file" (change)="onFileSelected($event)" accept=".jpg,.jpeg,.png,.pdf" multiple hidden />
+                      Anexar comprovante
+                      <input type="file" (change)="onFileSelected($event)" accept=".jpg,.jpeg,.png,.pdf" hidden />
                     </label>
                     <div *ngFor="let f of pendingFiles; let i = index"
                       class="flex items-center gap-1.5 bg-[#e6eef0] rounded-lg px-2.5 py-1 text-xs text-[#1A4E79]">
@@ -734,6 +812,106 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
   `
 })
 export class PrestacaoContasComponent implements OnInit, OnDestroy {
+
+  // ── Modal de confirmação genérico ────────────────────────────────────────────
+  confirmModal: {
+    title:        string;
+    body:         string;
+    confirmLabel: string;
+    danger:       boolean;
+    detail?:      string;
+    detailLabel?: string;
+    detailSub?:   string;
+    onConfirm:    () => void;
+  } | null = null;
+
+  fecharConfirmModal(): void { this.confirmModal = null; }
+
+  executarConfirmModal(): void {
+    const fn = this.confirmModal?.onConfirm;
+    this.confirmModal = null;
+    fn?.();
+  }
+
+  async confirmarFinalizar(): Promise<void> {
+    this.isFinalizando = true;
+
+    const payload = {
+      FLF_TIPO:   this.model.flf_tipo,
+      FLF_PRESTA: '',
+      FLF_PARTIC: this.model.codParticipante,
+      FLF_EMISSA: this.model.flf_emissa,
+      FLF_DTINI:  this.model.flf_dtini,
+      FLF_DTFIM:  this.model.flf_dtfim,
+      FLF_NACION: this.model.flf_nacion,
+      FLF_CC:     this.model.centroCusto,
+      FLF_ITCTB:  this.model.itemContabil,
+      FLF_CLVL:   this.model.classeValor,
+      FLF_MOTIVO: this.model.motivo,
+      FLF_FATCLI: Number(this.model.flf_fatcli) || 0,
+      FLF_FATEMP: Number(this.model.flf_fatemp) || 0,
+      FLF_CLIFOR: this.model.flf_clifor,
+      FLF_FLOJA:  this.model.flf_floja
+    };
+
+    try {
+      const cabResp = await firstValueFrom(this.prestacaoService.salvarPrestacao(payload));
+      const presta  = cabResp?.codigo as string;
+
+      for (let i = 0; i < this.despesas.length; i++) {
+        const d    = this.despesas[i];
+        const resp = await firstValueFrom(this.despesaService.inserirDespesa({
+          FLE_PRESTA:  presta,
+          FLE_DATA:    d.data,
+          FLE_LOCAL:   d.local,
+          FLE_DESPES:  d.despes,
+          FLE_DESCRI:  d.descri,
+          FLE_QUANT:   d.quant,
+          FLE_TOTAL:   d.total,
+          FLE_CONTA:   d.conta,
+          FLE_CC:      d.cc,
+          FLE_ITEMCTA: d.itemCtb,
+          FLE_CLVL:    d.clvl,
+          FLE_OBS:     d.obs,
+          FLE_GRUPO:   d.grupo,
+          EC05DB:      d.destinacao,
+          EC06DB:      d.tipoRecurso,
+          EC07DB:      d.tipoExecucao
+        }));
+
+        const nItem = resp?.item as number;
+        for (const file of (this.despesaFiles[i] || [])) {
+          const base64 = await this.fileToBase64(file);
+          const ext    = file.name.split('.').pop()?.toLowerCase() || '';
+          await firstValueFrom(this.despesaService.uploadAnexo({
+            presta, item: nItem, nome: file.name, tipo: ext, arquivo: base64
+          })).catch(() => {});
+        }
+      }
+
+      this.isFinalizando = false;
+      this.showToast(`Prestação de contas ${presta} salva com sucesso!`, 'success');
+      this.novaPrestacao();
+    } catch (err: any) {
+      this.isFinalizando = false;
+      this.showToast(`Erro ao finalizar: ${err?.message || 'Erro desconhecido'}`, 'error');
+    }
+  }
+
+  // ── Toast ───────────────────────────────────────────────────────────────────
+  toast: { message: string; type: 'error' | 'success' | 'warning' } | null = null;
+  private toastTimer: any = null;
+
+  showToast(message: string, type: 'error' | 'success' | 'warning' = 'error', durationMs = 6000): void {
+    clearTimeout(this.toastTimer);
+    this.toast = { message, type };
+    this.toastTimer = setTimeout(() => { this.toast = null; }, durationMs);
+  }
+
+  closeToast(): void {
+    clearTimeout(this.toastTimer);
+    this.toast = null;
+  }
 
   // ── Estado do cabeçalho ─────────────────────────────────────────────────────
   model: any = {};
@@ -940,14 +1118,19 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
   }
 
   salvar(): void {
-    if (!this.model.codParticipante?.trim() || !this.model.flf_emissa
-        || !this.model.flf_dtini || !this.model.flf_dtfim
-        || !this.model.motivo?.trim() || !this.model.flf_nacion) {
-      alert('Preencha todos os campos obrigatórios marcados com *.');
+    const erros: string[] = [];
+    if (!this.model.codParticipante?.trim()) erros.push('Participante');
+    if (!this.model.flf_emissa)             erros.push('Data de Emissão');
+    if (!this.model.flf_dtini)              erros.push('Data de Saída');
+    if (!this.model.flf_dtfim)              erros.push('Data de Chegada');
+    if (!this.model.flf_nacion)             erros.push('Gasto Nacional');
+    if (!this.model.motivo?.trim())         erros.push('Motivo');
+    if (erros.length) {
+      this.showToast(`Preencha os campos obrigatórios:\n• ${erros.join('\n• ')}`, 'error');
       return;
     }
-    if (this.percentuaisInvalidos) {
-      alert('% Cliente + % Empresa devem somar exatamente 100%.');
+    if (this.somaPercentuais !== 100) {
+      this.showToast(`% Cliente + % Empresa devem somar exatamente 100%.\nAtual: ${this.somaPercentuais}% — faltam ${100 - this.somaPercentuais}%.`, 'warning');
       return;
     }
     this.headerSaved = true;
@@ -967,16 +1150,19 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (!input.files) return;
+    if (!input.files?.length) return;
+    if (this.pendingFiles.length >= 1) {
+      input.value = '';
+      return;
+    }
+    const f   = input.files[0];
+    const ext = f.name.split('.').pop()?.toLowerCase() || '';
     const allowed = ['jpg', 'jpeg', 'png', 'pdf'];
-    Array.from(input.files).forEach(f => {
-      const ext = f.name.split('.').pop()?.toLowerCase() || '';
-      if (allowed.includes(ext)) {
-        this.pendingFiles = [...this.pendingFiles, f];
-      } else {
-        alert(`Arquivo "${f.name}" não permitido. Use jpg, png ou pdf.`);
-      }
-    });
+    if (allowed.includes(ext)) {
+      this.pendingFiles = [f];
+    } else {
+      this.showToast(`Arquivo "${f.name}" não permitido.\nUse jpg, jpeg, png ou pdf.`, 'warning');
+    }
     input.value = '';
   }
 
@@ -1017,85 +1203,32 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
   }
 
   confirmarExcluirDespesa(d: DespesaRow): void {
-    if (!confirm(`Excluir despesa ${d.item} — ${d.descri}?`)) return;
-    const idx = this.despesas.indexOf(d);
-    if (idx < 0) return;
-    this.despesas     = this.despesas.filter((_, i) => i !== idx).map((x, i) => ({ ...x, item: i + 1 }));
-    this.despesaFiles = this.despesaFiles.filter((_, i) => i !== idx);
+    this.confirmModal = {
+      title:        'Excluir Despesa',
+      body:         `Despesa #${d.item} — ${d.descri || d.despes}`,
+      confirmLabel: 'Excluir',
+      danger:       true,
+      onConfirm: () => {
+        const idx = this.despesas.indexOf(d);
+        if (idx < 0) return;
+        this.despesas     = this.despesas.filter((_, i) => i !== idx).map((x, i) => ({ ...x, item: i + 1 }));
+        this.despesaFiles = this.despesaFiles.filter((_, i) => i !== idx);
+      }
+    };
   }
 
-  async finalizar(): Promise<void> {
+  finalizar(): void {
     if (!this.despesas.length) return;
-
-    const saldo = this.totalDespesas;
-    const saldoFmt = saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const confirmar = confirm(
-      `O saldo calculado desta prestação de contas foi de:\nR$ ${saldoFmt}\n\nDeseja finalizar e enviar ao sistema?`
-    );
-    if (!confirmar) return;
-
-    this.isFinalizando = true;
-
-    const payload = {
-      FLF_TIPO:   this.model.flf_tipo,
-      FLF_PRESTA: '',
-      FLF_PARTIC: this.model.codParticipante,
-      FLF_EMISSA: this.model.flf_emissa,
-      FLF_DTINI:  this.model.flf_dtini,
-      FLF_DTFIM:  this.model.flf_dtfim,
-      FLF_NACION: this.model.flf_nacion,
-      FLF_CC:     this.model.centroCusto,
-      FLF_ITCTB:  this.model.itemContabil,
-      FLF_CLVL:   this.model.classeValor,
-      FLF_MOTIVO: this.model.motivo,
-      FLF_FATCLI: Number(this.model.flf_fatcli) || 0,
-      FLF_FATEMP: Number(this.model.flf_fatemp) || 0,
-      FLF_CLIFOR: this.model.flf_clifor,
-      FLF_FLOJA:  this.model.flf_floja
+    this.confirmModal = {
+      title:        'Confirmar Finalização',
+      body:         'Deseja finalizar e enviar esta prestação ao sistema?',
+      confirmLabel: 'Finalizar',
+      danger:       false,
+      detail:       `R$ ${this.totalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      detailLabel:  'Saldo Calculado',
+      detailSub:    `${this.despesas.length} despesa${this.despesas.length !== 1 ? 's' : ''}`,
+      onConfirm:    () => this.confirmarFinalizar()
     };
-
-    try {
-      const cabResp = await firstValueFrom(this.prestacaoService.salvarPrestacao(payload));
-      const presta  = cabResp?.codigo as string;
-
-      for (let i = 0; i < this.despesas.length; i++) {
-        const d    = this.despesas[i];
-        const resp = await firstValueFrom(this.despesaService.inserirDespesa({
-          FLE_PRESTA:  presta,
-          FLE_DATA:    d.data,
-          FLE_LOCAL:   d.local,
-          FLE_DESPES:  d.despes,
-          FLE_DESCRI:  d.descri,
-          FLE_QUANT:   d.quant,
-          FLE_TOTAL:   d.total,
-          FLE_CONTA:   d.conta,
-          FLE_CC:      d.cc,
-          FLE_ITEMCTA: d.itemCtb,
-          FLE_CLVL:    d.clvl,
-          FLE_OBS:     d.obs,
-          FLE_GRUPO:   d.grupo,
-          EC05DB:      d.destinacao,
-          EC06DB:      d.tipoRecurso,
-          EC07DB:      d.tipoExecucao
-        }));
-
-        const nItem = resp?.item as number;
-        for (const file of (this.despesaFiles[i] || [])) {
-          const base64 = await this.fileToBase64(file);
-          const ext    = file.name.split('.').pop()?.toLowerCase() || '';
-          await firstValueFrom(this.despesaService.uploadAnexo({
-            presta, item: nItem, nome: file.name, tipo: ext, arquivo: base64
-          })).catch(() => {});
-        }
-      }
-
-      this.isFinalizando = false;
-      alert(`Prestação de contas ${presta} salva com sucesso!`);
-      this.novaPrestacao();
-    } catch (err: any) {
-      this.isFinalizando = false;
-      alert(`Erro ao finalizar: ${err?.message || 'Erro desconhecido'}`);
-    }
   }
 
   private fileToBase64(file: File): Promise<string> {
