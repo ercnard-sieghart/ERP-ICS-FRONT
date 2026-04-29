@@ -226,7 +226,8 @@ export class MenuComponent implements OnInit, OnDestroy {
             expanded: false,
             submenus: [
             //  { id: menu.id, label: 'Viagens', icon: 'airplane', link: '/financeiro/viagens' },
-              { id: menu.id, label: 'Prestação de Contas', icon: 'calculator', link: '/financeiro/prestacao-contas' }
+              { id: menu.id, label: 'Prestação de Contas',  icon: 'calculator', link: '/financeiro/prestacao-contas'   },
+              { id: menu.id, label: 'Minhas Prestações',    icon: 'list',       link: '/financeiro/minhas-prestacoes'  }
             ]
           };
           menuMap.set('financeiro', financeiroMenu);
