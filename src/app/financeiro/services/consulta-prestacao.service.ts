@@ -11,7 +11,8 @@ export interface PrestacaoRow {
   status:     string;
   statusDesc: string;
   dtBaixa:    string;
-  motivo:     string;
+  nomecf:     string;
+  dtConf:     string;
   valorTotal: number;
 }
 
@@ -79,7 +80,8 @@ export class ConsultaPrestacaoService {
           status:     r.status     || '',
           statusDesc: r.statusDesc || '',
           dtBaixa:    r.dtBaixa    || '',
-          motivo:     r.motivo     || '',
+          nomecf:     r.nomecf     || '',
+          dtConf:     r.dtConf     || '',
           valorTotal: Number(r.valorTotal) || 0
         })),
         total:    Number(res?.total)    || 0,

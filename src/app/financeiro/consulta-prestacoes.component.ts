@@ -112,8 +112,10 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
               <thead>
                 <tr class="bg-[#f8fdfd] border-b border-[#E6EEF2]">
                   <th class="px-4 py-3 text-left text-xs font-semibold text-[#1A4E79] uppercase tracking-wide">Código</th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-[#1A4E79] uppercase tracking-wide">Data</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-[#1A4E79] uppercase tracking-wide">Emissão</th>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-[#1A4E79] uppercase tracking-wide">Status</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-[#1A4E79] uppercase tracking-wide hidden md:table-cell">Conferente</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-[#1A4E79] uppercase tracking-wide hidden lg:table-cell">Conferência</th>
                   <th class="px-4 py-3 text-right text-xs font-semibold text-[#1A4E79] uppercase tracking-wide">Valor Total</th>
                   <th class="px-4 py-3 text-center text-xs font-semibold text-[#1A4E79] uppercase tracking-wide w-12"></th>
                 </tr>
@@ -123,14 +125,16 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
                   (click)="abrirDetalhe(r)"
                   class="border-b border-[#E6EEF2] hover:bg-[#f0fafa] cursor-pointer transition-colors group">
                   <td class="px-4 py-3 font-semibold text-[#1A4E79]">{{ r.codigo }}</td>
-                  <td class="px-4 py-3 text-gray-600">{{ r.emissao }}</td>
+                  <td class="px-4 py-3 text-gray-600 whitespace-nowrap">{{ formatDate(r.emissao) }}</td>
                   <td class="px-4 py-3">
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border {{ statusInfo(r.status).cls }}">
                       <span class="w-1.5 h-1.5 rounded-full {{ statusInfo(r.status).dot }}"></span>
                       {{ statusInfo(r.status).label }}
                     </span>
                   </td>
-                  <td class="px-4 py-3 text-right font-semibold text-gray-700">
+                  <td class="px-4 py-3 text-gray-600 text-xs hidden md:table-cell">{{ r.nomecf || '—' }}</td>
+                  <td class="px-4 py-3 text-gray-600 whitespace-nowrap hidden lg:table-cell">{{ formatDate(r.dtConf) }}</td>
+                  <td class="px-4 py-3 text-right font-semibold text-gray-700 whitespace-nowrap">
                     R$ {{ r.valorTotal | number:'1.2-2' }}
                   </td>
                   <td class="px-4 py-3 text-center">
@@ -249,4 +253,11 @@ export class ConsultaPrestacoesComponent implements OnInit {
   }
 
   min(a: number, b: number): number { return Math.min(a, b); }
+
+  formatDate(d: string): string {
+    if (!d) return '—';
+    const s = d.replace(/\D/g, '');
+    if (s.length === 8) return `${s.slice(6)}/${s.slice(4, 6)}/${s.slice(0, 4)}`;
+    return d || '—';
+  }
 }
