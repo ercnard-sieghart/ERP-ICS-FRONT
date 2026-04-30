@@ -24,10 +24,11 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
       <div class="max-w-5xl mx-auto">
         <div class="flex items-center gap-3 mb-1">
           <button type="button" (click)="voltar()"
-            class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors shrink-0">
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 hover:bg-white/30 transition-colors shrink-0">
             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
             </svg>
+            <span class="text-white text-xs font-medium">Voltar</span>
           </button>
           <div>
             <h1 class="text-xl md:text-2xl font-bold text-white leading-tight">
@@ -155,7 +156,30 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
                         <span *ngIf="d.ec07db" class="text-[10px] bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded border border-indigo-100">EC7: {{ d.ec07db }}</span>
                       </div>
                     </td>
-                    <td class="px-3 py-3 text-gray-500 text-xs hidden md:table-cell">{{ d.cc || '—' }}</td>
+                    <td class="px-3 py-3 text-xs hidden md:table-cell">
+                      <div class="flex flex-col gap-0.5">
+                        <div class="flex items-center gap-1">
+                          <span class="text-[10px] text-gray-400 uppercase w-8 shrink-0">CC</span>
+                          <span class="text-gray-600">{{ d.cc || '—' }}</span>
+                        </div>
+                        <div *ngIf="d.conta" class="flex items-center gap-1">
+                          <span class="text-[10px] text-gray-400 uppercase w-8 shrink-0">Cta</span>
+                          <span class="text-gray-600">{{ d.conta }}</span>
+                        </div>
+                        <div *ngIf="d.itectb" class="flex items-center gap-1">
+                          <span class="text-[10px] text-gray-400 uppercase w-8 shrink-0">Itm</span>
+                          <span class="text-gray-600">{{ d.itectb }}</span>
+                        </div>
+                        <div *ngIf="d.clvl" class="flex items-center gap-1">
+                          <span class="text-[10px] text-gray-400 uppercase w-8 shrink-0">CVl</span>
+                          <span class="text-gray-600">{{ d.clvl }}</span>
+                        </div>
+                        <div *ngIf="d.grupo" class="flex items-center gap-1">
+                          <span class="text-[10px] text-gray-400 uppercase w-8 shrink-0">Grp</span>
+                          <span class="text-gray-600">{{ d.grupo }}</span>
+                        </div>
+                      </div>
+                    </td>
                     <td class="px-3 py-3 text-right font-semibold text-gray-700 whitespace-nowrap">
                       R$ {{ d.total | number:'1.2-2' }}
                     </td>
