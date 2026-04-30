@@ -35,6 +35,10 @@ export interface DespesaDetalheRow {
   obs:       string;
   partic:    string;
   moeda:     string;
+  conta:     string;
+  itectb:    string;
+  clvl:      string;
+  grupo:     string;
   ec05db:    string;
   ec06db:    string;
   ec07db:    string;
@@ -116,6 +120,10 @@ export class ConsultaPrestacaoService {
           obs:       r.obs               || '',
           partic:    r.partic            || '',
           moeda:     r.moeda             || '',
+          conta:     r.conta             || '',
+          itectb:    r.itectb            || '',
+          clvl:      r.clvl              || '',
+          grupo:     r.grupo             || '',
           ec05db:    r.ec05db            || '',
           ec06db:    r.ec06db            || '',
           ec07db:    r.ec07db            || '',
