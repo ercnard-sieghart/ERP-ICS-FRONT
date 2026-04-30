@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConsultaPrestacaoService, DespesaDetalheRow } from './services/consulta-prestacao.service';
+import { DespesaService, AnexoRow } from './services/despesa.service';
 
 const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = {
   '1': { label: 'Aberta',      cls: 'bg-amber-100 text-amber-800 border-amber-200',    dot: 'bg-amber-500'  },
@@ -133,29 +134,41 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
                 <tbody>
                   <tr *ngFor="let d of rows" class="border-b border-[#E6EEF2] last:border-0 hover:bg-[#f0fafa] transition-colors">
                     <td class="px-3 py-3">
-                      <span class="w-7 h-7 rounded-full bg-[#1A4E79]/10 text-[#1A4E79] text-xs font-bold flex items-center justify-center">
-                        {{ d.item }}
-                      </span>
+                      <div class="flex flex-col items-center gap-0.5">
+                        <span class="w-7 h-7 rounded-full bg-[#1A4E79]/10 text-[#1A4E79] text-xs font-bold flex items-center justify-center">
+                          {{ d.item }}
+                        </span>
+                        <span *ngIf="d.partic" class="text-[9px] text-gray-400 leading-tight text-center">{{ d.partic }}</span>
+                      </div>
                     </td>
-                    <td class="px-3 py-3 text-gray-600 whitespace-nowrap">{{ d.data }}</td>
+                    <td class="px-3 py-3 whitespace-nowrap">
+                      <div class="text-gray-600">{{ formatDate(d.data) }}</div>
+                      <div *ngIf="d.moeda" class="text-[10px] text-gray-400 mt-0.5">Moeda: {{ d.moeda }}</div>
+                    </td>
                     <td class="px-3 py-3">
                       <div class="font-semibold text-gray-800 text-xs">{{ d.despes }}</div>
                       <div *ngIf="d.descricao" class="text-gray-500 text-xs mt-0.5 truncate max-w-xs">{{ d.descricao }}</div>
                       <div *ngIf="d.obs" class="text-gray-400 text-[11px] mt-0.5 truncate max-w-xs italic">{{ d.obs }}</div>
+                      <div *ngIf="d.ec05db || d.ec06db || d.ec07db" class="flex flex-wrap gap-1 mt-1">
+                        <span *ngIf="d.ec05db" class="text-[10px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-100">EC5: {{ d.ec05db }}</span>
+                        <span *ngIf="d.ec06db" class="text-[10px] bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded border border-purple-100">EC6: {{ d.ec06db }}</span>
+                        <span *ngIf="d.ec07db" class="text-[10px] bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded border border-indigo-100">EC7: {{ d.ec07db }}</span>
+                      </div>
                     </td>
                     <td class="px-3 py-3 text-gray-500 text-xs hidden md:table-cell">{{ d.cc || '—' }}</td>
                     <td class="px-3 py-3 text-right font-semibold text-gray-700 whitespace-nowrap">
                       R$ {{ d.total | number:'1.2-2' }}
                     </td>
                     <td class="px-3 py-3 text-center">
-                      <span *ngIf="d.qtdAnexos > 0"
-                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-[#75C9C8]/20 text-[#1A4E79]">
+                      <button *ngIf="d.qtdAnexos > 0" type="button"
+                        (click)="verAnexos(d)"
+                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-[#75C9C8]/20 text-[#1A4E79] hover:bg-[#75C9C8]/40 transition-colors cursor-pointer">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
                         </svg>
                         {{ d.qtdAnexos }}
-                      </span>
+                      </button>
                       <span *ngIf="d.qtdAnexos === 0" class="text-gray-300 text-xs">—</span>
                     </td>
                   </tr>
@@ -176,21 +189,66 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
         </ng-container>
       </div>
     </div>
+
+    <!-- ── Modal de Anexos ── -->
+    <div *ngIf="modalAnexos"
+      class="fixed inset-0 bg-[#1A4E79]/60 backdrop-blur-sm z-50 flex items-center justify-center px-4"
+      (click)="fecharModalAnexos()">
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" (click)="$event.stopPropagation()">
+        <div class="bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] px-5 py-4 flex items-center justify-between">
+          <span class="text-white font-semibold text-sm">Anexos — Item {{ anexosItem }}</span>
+          <button type="button" (click)="fecharModalAnexos()"
+            class="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+        <div class="p-4 max-h-80 overflow-y-auto">
+          <div *ngIf="loadingAnexos" class="flex justify-center py-8">
+            <div class="w-8 h-8 border-4 border-[#75C9C8]/30 border-t-[#1A4E79] rounded-full animate-spin"></div>
+          </div>
+          <div *ngIf="!loadingAnexos && anexosRows.length === 0"
+            class="text-center py-8 text-gray-400 text-sm">Nenhum anexo encontrado.</div>
+          <div *ngIf="!loadingAnexos && anexosRows.length > 0" class="space-y-2">
+            <div *ngFor="let a of anexosRows"
+              class="flex items-start gap-3 p-3 border border-gray-100 rounded-lg">
+              <div class="w-8 h-8 rounded-lg bg-[#1A4E79]/10 flex items-center justify-center shrink-0 mt-0.5">
+                <svg class="w-4 h-4 text-[#1A4E79]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0121 9.414V19a2 2 0 01-2 2z"/>
+                </svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-gray-800 break-all">{{ a.nome }}</p>
+                <p *ngIf="a.descricao" class="text-xs text-gray-500 mt-0.5">{{ a.descricao }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </main>
   `
 })
 export class DetalhePrestacaoComponent implements OnInit {
 
-  codigo    = '';
-  status    = '';
-  rows:     DespesaDetalheRow[] = [];
-  isLoading = false;
-  errorMsg  = '';
+  codigo        = '';
+  status        = '';
+  rows:         DespesaDetalheRow[] = [];
+  isLoading     = false;
+  errorMsg      = '';
+  modalAnexos   = false;
+  anexosItem    = 0;
+  anexosRows:   AnexoRow[] = [];
+  loadingAnexos = false;
 
   constructor(
-    private route:   ActivatedRoute,
-    private router:  Router,
-    private service: ConsultaPrestacaoService
+    private route:          ActivatedRoute,
+    private router:         Router,
+    private service:        ConsultaPrestacaoService,
+    private despesaService: DespesaService
   ) {}
 
   ngOnInit(): void {
@@ -216,6 +274,29 @@ export class DetalhePrestacaoComponent implements OnInit {
 
   voltar(): void {
     this.router.navigate(['/financeiro/minhas-prestacoes']);
+  }
+
+  verAnexos(d: DespesaDetalheRow): void {
+    this.anexosItem    = d.item;
+    this.anexosRows    = [];
+    this.modalAnexos   = true;
+    this.loadingAnexos = true;
+    this.despesaService.listarAnexos(this.codigo, d.item).subscribe({
+      next: rows => { this.anexosRows = rows; this.loadingAnexos = false; },
+      error: ()   => { this.loadingAnexos = false; }
+    });
+  }
+
+  fecharModalAnexos(): void {
+    this.modalAnexos = false;
+    this.anexosRows  = [];
+  }
+
+  formatDate(d: string): string {
+    if (!d) return '—';
+    const s = d.replace(/\D/g, '');
+    if (s.length === 8) return `${s.slice(6)}/${s.slice(4, 6)}/${s.slice(0, 4)}`;
+    return d || '—';
   }
 
   get totalGeral(): number {

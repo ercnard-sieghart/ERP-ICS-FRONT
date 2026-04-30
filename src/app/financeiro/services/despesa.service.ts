@@ -67,11 +67,14 @@ export interface AnexoPayload {
 }
 
 export interface AnexoRow {
-  chave:    string;
-  nome:     string;
-  caminho:  string;
-  tipo:     string;
-  data:     string;
+  chave:     string;
+  nome:      string;
+  descricao: string;
+  caminho:   string;
+  tipo:      string;
+  data:      string;
+  binId:     string;
+  codObj:    string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -177,11 +180,14 @@ export class DespesaService {
       map(res => {
         const items: any[] = Array.isArray(res) ? res : (res?.rows || []);
         return items.map((i: any) => ({
-          chave:   i.chave   || '',
-          nome:    i.nome    || '',
-          caminho: i.caminho || '',
-          tipo:    i.tipo    || '',
-          data:    i.data    || ''
+          chave:     i.chave     || '',
+          nome:      i.nome      || '',
+          descricao: i.descricao || '',
+          caminho:   i.caminho   || '',
+          tipo:      i.tipo      || '',
+          data:      i.data      || '',
+          binId:     i.binId     || '',
+          codObj:    i.codObj    || ''
         }));
       }),
       catchError(this.handleError)

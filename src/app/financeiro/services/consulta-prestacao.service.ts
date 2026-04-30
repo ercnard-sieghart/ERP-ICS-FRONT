@@ -33,6 +33,11 @@ export interface DespesaDetalheRow {
   total:     number;
   cc:        string;
   obs:       string;
+  partic:    string;
+  moeda:     string;
+  ec05db:    string;
+  ec06db:    string;
+  ec07db:    string;
   qtdAnexos: number;
 }
 
@@ -109,6 +114,11 @@ export class ConsultaPrestacaoService {
           total:     Number(r.total)     || 0,
           cc:        r.cc                || '',
           obs:       r.obs               || '',
+          partic:    r.partic            || '',
+          moeda:     r.moeda             || '',
+          ec05db:    r.ec05db            || '',
+          ec06db:    r.ec06db            || '',
+          ec07db:    r.ec07db            || '',
           qtdAnexos: Number(r.qtdAnexos) || 0
         }));
       }),
