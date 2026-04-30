@@ -885,13 +885,13 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
           const ext    = file.name.split('.').pop()?.toLowerCase() || '';
           await firstValueFrom(this.despesaService.uploadAnexo({
             presta, item: nItem, nome: file.name, tipo: ext, arquivo: base64
-          })).catch(() => {});
+          }));
         }
       }
 
       this.isFinalizando = false;
       this.showToast(`Prestação de contas ${presta} salva com sucesso!`, 'success');
-      this.novaPrestacao();
+      setTimeout(() => this.novaPrestacao(), 6000);
     } catch (err: any) {
       this.isFinalizando = false;
       this.showToast(`Erro ao finalizar: ${err?.message || 'Erro desconhecido'}`, 'error');
