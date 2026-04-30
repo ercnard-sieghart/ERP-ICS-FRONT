@@ -277,6 +277,7 @@ export class DetalhePrestacaoComponent implements OnInit {
 
   ngOnInit(): void {
     this.codigo = this.route.snapshot.paramMap.get('codigo') || '';
+    this.status = this.route.snapshot.queryParamMap.get('status') || '';
     this.carregar();
   }
 

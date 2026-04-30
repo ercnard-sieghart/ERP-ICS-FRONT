@@ -236,7 +236,9 @@ export class ConsultaPrestacoesComponent implements OnInit {
   }
 
   abrirDetalhe(r: PrestacaoRow): void {
-    this.router.navigate(['/financeiro/minhas-prestacoes', r.codigo]);
+    this.router.navigate(['/financeiro/minhas-prestacoes', r.codigo], {
+      queryParams: { status: r.status }
+    });
   }
 
   statusInfo(s: string): { label: string; cls: string; dot: string } {
