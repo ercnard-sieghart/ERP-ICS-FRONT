@@ -22,7 +22,13 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
     <!-- ── Cabeçalho da página ── -->
     <div class="flex-shrink-0 px-4 md:px-6 pt-4 md:pt-6 pb-3">
       <div class="max-w-5xl mx-auto">
-        <div class="flex items-center gap-3 mb-1">
+        <div class="flex items-center justify-between gap-3 mb-1">
+          <div>
+            <h1 class="text-xl md:text-2xl font-bold text-white leading-tight">
+              Prestação {{ codigo || '...' }}
+            </h1>
+            <p class="text-white/60 text-xs mt-0.5">Detalhes e despesas</p>
+          </div>
           <button type="button" (click)="voltar()"
             class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 hover:bg-white/30 transition-colors shrink-0">
             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -30,12 +36,6 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
             </svg>
             <span class="text-white text-xs font-medium">Voltar</span>
           </button>
-          <div>
-            <h1 class="text-xl md:text-2xl font-bold text-white leading-tight">
-              Prestação {{ codigo || '...' }}
-            </h1>
-            <p class="text-white/60 text-xs mt-0.5">Detalhes e despesas</p>
-          </div>
         </div>
       </div>
     </div>
