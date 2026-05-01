@@ -1254,8 +1254,8 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
 
   onParticipanteInput(v: string): void {
     this.model.nomeParticipante = '';
-    if (!v?.trim()) { this.showParticipanteDropdown = false; this.participanteResults = []; return; }
-    this.participanteSearch$.next(v);
+    this.participanteSearch$.next(v || '');
+    if (!v?.trim()) { this.showParticipanteDropdown = false; this.participanteResults = []; }
   }
   toggleParticipanteDropdown(e: MouseEvent): void {
     e.preventDefault();
@@ -1334,8 +1334,8 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
 
   onClienteInput(v: string): void {
     this.model.flf_floja = ''; this.model.nomeCliente = '';
-    if (!v?.trim()) { this.showClienteDropdown = false; this.clienteResults = []; return; }
-    this.clienteSearch$.next(v);
+    this.clienteSearch$.next(v || '');
+    if (!v?.trim()) { this.showClienteDropdown = false; this.clienteResults = []; }
   }
   toggleClienteDropdown(e: MouseEvent): void {
     e.preventDefault();
