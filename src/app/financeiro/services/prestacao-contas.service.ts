@@ -124,6 +124,17 @@ export class PrestacaoContasService {
       catchError(this.handleError)
     );
   }
+  listarParticipantes(): Observable<ParticipanteResult[]> {
+    const url = this.configService.getRestEndpoint('/PARTICIPANTES/buscar');
+    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
+      map(res => {
+        const items: any[] = Array.isArray(res) ? res : (res?.items || res?.rows || []);
+        return items.map((i: any) => ({ codigo: i.codigo || '', nome: i.nome || '' }));
+      }),
+      catchError(() => of([]))
+    );
+  }
+
   // ── Busca por termo (autocomplete) ──────────────────────────────────────
 
   buscarParticipantePorTermo(termo: string): Observable<ParticipanteResult[]> {
@@ -141,6 +152,17 @@ export class PrestacaoContasService {
   buscarClientePorTermo(termo: string): Observable<ClienteResult[]> {
     if (!termo?.trim()) return of([]);
     const url = this.configService.getRestEndpoint(`/CLIENTES/buscar/${encodeURIComponent(termo.trim())}`);
+    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
+      map(res => {
+        const items: any[] = Array.isArray(res) ? res : (res?.items || res?.rows || []);
+        return items.map((i: any) => ({ codigo: i.codigo || '', loja: i.loja || '', nome: i.nome || '' }));
+      }),
+      catchError(() => of([]))
+    );
+  }
+
+  listarClientes(): Observable<ClienteResult[]> {
+    const url = this.configService.getRestEndpoint('/CLIENTES/buscar');
     return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
       map(res => {
         const items: any[] = Array.isArray(res) ? res : (res?.items || res?.rows || []);

@@ -1,8 +1,7 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subject, Subscription, of, firstValueFrom } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import {
   PrestacaoContasService,
   ParticipanteResult,
@@ -811,7 +810,7 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
   </main>
   `
 })
-export class PrestacaoContasComponent implements OnInit, OnDestroy {
+export class PrestacaoContasComponent implements OnInit {
 
   // ── Modal de confirmação genérico ────────────────────────────────────────────
   confirmModal: {
@@ -920,19 +919,17 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
   headerSaved       = false;
   isFinalizando     = false;
 
-  // Combobox via API — participante
-  participanteResults: ParticipanteResult[] = [];
+  // Combobox local pré-carregado — participante
+  participantes:           ParticipanteResult[] = [];
+  participanteResults:     ParticipanteResult[] = [];
   showParticipanteDropdown = false;
   isLoadingParticipante    = false;
-  private participanteSearch$ = new Subject<string>();
-  private participanteSub?: Subscription;
 
-  // Combobox via API — cliente/fornecedor
-  clienteResults: ClienteResult[] = [];
+  // Combobox local pré-carregado — cliente/fornecedor
+  clientes:           ClienteResult[] = [];
+  clienteResults:     ClienteResult[] = [];
   showClienteDropdown = false;
   isLoadingCliente    = false;
-  private clienteSearch$ = new Subject<string>();
-  private clienteSub?: Subscription;
 
   // Listas locais
   itensContabeis: ItemContabilResult[] = [];
@@ -1007,12 +1004,6 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
     this.initModel();
     this.carregarListasCabecalho();
     this.carregarListasDespesa();
-    this.initAutocomplete();
-  }
-
-  ngOnDestroy(): void {
-    this.participanteSub?.unsubscribe();
-    this.clienteSub?.unsubscribe();
   }
 
   get somaPercentuais(): number {
@@ -1028,30 +1019,14 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
     return this.despesas.reduce((acc, d) => acc + d.total, 0);
   }
 
-  // ── Inicialização ───────────────────────────────────────────────────────────
-
-  private initAutocomplete(): void {
-    this.participanteSub = this.participanteSearch$.pipe(
-      debounceTime(300), distinctUntilChanged(),
-      switchMap(t => { if (t.length < 2) return of([]); this.isLoadingParticipante = true; return this.prestacaoService.buscarParticipantePorTermo(t); })
-    ).subscribe({
-      next: r => { this.participanteResults = r; this.showParticipanteDropdown = r.length > 0; this.isLoadingParticipante = false; },
-      error: () => { this.isLoadingParticipante = false; }
-    });
-
-    this.clienteSub = this.clienteSearch$.pipe(
-      debounceTime(300), distinctUntilChanged(),
-      switchMap(t => { if (t.length < 2) return of([]); this.isLoadingCliente = true; return this.prestacaoService.buscarClientePorTermo(t); })
-    ).subscribe({
-      next: r => { this.clienteResults = r; this.showClienteDropdown = r.length > 0; this.isLoadingCliente = false; },
-      error: () => { this.isLoadingCliente = false; }
-    });
-  }
-
   private carregarListasCabecalho(): void {
     this.prestacaoService.listarItensContabeis().subscribe({ next: i => this.itensContabeis = i, error: () => {} });
     this.prestacaoService.listarCentrosCusto().subscribe({   next: i => this.centrosCusto = i,   error: () => {} });
     this.prestacaoService.listarClassesValor().subscribe({   next: i => this.classesValor = i,    error: () => {} });
+    this.isLoadingCliente = true;
+    this.prestacaoService.listarClientes().subscribe({ next: i => { this.clientes = i; this.isLoadingCliente = false; }, error: () => { this.isLoadingCliente = false; } });
+    this.isLoadingParticipante = true;
+    this.prestacaoService.listarParticipantes().subscribe({ next: i => { this.participantes = i; this.isLoadingParticipante = false; }, error: () => { this.isLoadingParticipante = false; } });
   }
 
   private carregarListasDespesa(): void {
@@ -1250,16 +1225,30 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
     return lista.filter(i => i.codigo.toLowerCase().includes(t) || i.descricao.toLowerCase().includes(t));
   }
 
-  // ── Participante (API) ───────────────────────────────────────────────────────
+  private filtrarCliente(lista: ClienteResult[], termo: string): ClienteResult[] {
+    const t = termo.toLowerCase();
+    return lista.filter(i => i.codigo.toLowerCase().includes(t) || i.nome.toLowerCase().includes(t));
+  }
+
+  private filtrarParticipante(lista: ParticipanteResult[], termo: string): ParticipanteResult[] {
+    const t = termo.toLowerCase();
+    return lista.filter(i => i.codigo.toLowerCase().includes(t) || i.nome.toLowerCase().includes(t));
+  }
+
+  // ── Participante (local) ─────────────────────────────────────────────────────
 
   onParticipanteInput(v: string): void {
     this.model.nomeParticipante = '';
-    this.participanteSearch$.next(v || '');
-    if (!v?.trim()) { this.showParticipanteDropdown = false; this.participanteResults = []; }
+    if (!v?.trim()) { this.showParticipanteDropdown = false; this.participanteResults = []; return; }
+    this.participanteResults = this.filtrarParticipante(this.participantes, v);
+    this.showParticipanteDropdown = this.participanteResults.length > 0;
   }
   toggleParticipanteDropdown(e: MouseEvent): void {
     e.preventDefault();
-    this.showParticipanteDropdown = !this.showParticipanteDropdown && this.participanteResults.length > 0;
+    if (this.showParticipanteDropdown) { this.showParticipanteDropdown = false; return; }
+    const t = (this.model.codParticipante || '').trim();
+    this.participanteResults = t ? this.filtrarParticipante(this.participantes, t) : [...this.participantes];
+    this.showParticipanteDropdown = this.participanteResults.length > 0;
   }
   selecionarParticipante(item: ParticipanteResult): void {
     this.model.codParticipante = item.codigo; this.model.nomeParticipante = item.nome;
@@ -1334,12 +1323,16 @@ export class PrestacaoContasComponent implements OnInit, OnDestroy {
 
   onClienteInput(v: string): void {
     this.model.flf_floja = ''; this.model.nomeCliente = '';
-    this.clienteSearch$.next(v || '');
-    if (!v?.trim()) { this.showClienteDropdown = false; this.clienteResults = []; }
+    if (!v?.trim()) { this.showClienteDropdown = false; this.clienteResults = []; return; }
+    this.clienteResults = this.filtrarCliente(this.clientes, v);
+    this.showClienteDropdown = this.clienteResults.length > 0;
   }
   toggleClienteDropdown(e: MouseEvent): void {
     e.preventDefault();
-    this.showClienteDropdown = !this.showClienteDropdown && this.clienteResults.length > 0;
+    if (this.showClienteDropdown) { this.showClienteDropdown = false; return; }
+    const t = (this.model.flf_clifor || '').trim();
+    this.clienteResults = t ? this.filtrarCliente(this.clientes, t) : [...this.clientes];
+    this.showClienteDropdown = this.clienteResults.length > 0;
   }
   selecionarCliente(item: ClienteResult): void {
     this.model.flf_clifor = item.codigo; this.model.flf_floja = item.loja; this.model.nomeCliente = item.nome;
