@@ -25,7 +25,6 @@
   pointer-events: all;
 }
 
-/* Sidebar principal - CORREÇÃO: removido border-radius fixo e usado Tailwind */
 .menu-sidebar {
   position: fixed;
   top: 0;
@@ -38,7 +37,7 @@
   display: flex;
   flex-direction: column;
   transition: all 0.3s ease-in-out;
-  /* O border-radius agora é controlado pela classe rounded-r-2xl do Tailwind */
+  border-radius: 0 1.5rem 1.5rem 0 !important;
 }
 
 /* COMPORTAMENTO MOBILE (abaixo de 680px) */
@@ -300,7 +299,7 @@ body.menu-open-mobile {
 
 .menu-sidebar::-webkit-scrollbar-track {
   background: #f1f1f1;
-  border-radius: 0 1rem 1rem 0; /* Para combinar com o rounded-r-2xl */
+  border-radius: 0 1.5rem 1.5rem 0;
 }
 
 .menu-sidebar::-webkit-scrollbar-thumb {

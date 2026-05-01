@@ -56,13 +56,26 @@ export class LoginComponent {
     }, 2500);
   }
 
+  private navegarParaTrocaSenha(username: string, oldPassword: string): void {
+    this.loading = false;
+    this.router.navigate(['/change-password'], {
+      state: { username, oldPassword }
+    });
+  }
+
   loginSubmit(loginData: any) {
   this.loading = true;
   const loginLower = loginData.login ? loginData.login.toLowerCase() : '';
   this.authService.authenticate(loginLower, loginData.password).subscribe({
       next: (oauthResponse: any) => {
+        const responseUrl: string = oauthResponse.url || '';
+        if (responseUrl.includes('changepassworduserservice')) {
+          this.navegarParaTrocaSenha(loginLower, loginData.password);
+          return;
+        }
+
         const oauthBody = oauthResponse.body as any;
-        
+
         if (oauthBody && oauthBody.access_token) {
           localStorage.setItem('authToken', oauthBody.access_token);
           if (oauthBody.refresh_token) {
@@ -109,6 +122,15 @@ export class LoginComponent {
         }
       },
       error: (error: HttpErrorResponse) => {
+        const errUrl: string = error.url || '';
+        if (
+          error.status === 302 ||
+          errUrl.includes('changepassworduserservice') ||
+          error.status === 0
+        ) {
+          this.navegarParaTrocaSenha(loginLower, loginData.password);
+          return;
+        }
         this.loading = false;
         this.popupType = 'error';
         if (error.status === 403) {

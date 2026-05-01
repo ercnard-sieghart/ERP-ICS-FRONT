@@ -1,18 +1,16 @@
 <div class="po-wrapper">
-  <!-- Menu global - aparece em todas as rotas exceto login -->
-  <div class="min-h-screen bg-gradient-to-br from-[#1A4E79] to-[#75C9C8]" *ngIf="shouldShowMenu()">
+  <!-- Layout com menu -->
+  <div class="h-screen overflow-hidden" *ngIf="shouldShowMenu()">
     <app-menu (menuToggled)="onMenuToggled($event)"></app-menu>
-    
-    <!-- Conteúdo principal - SEM margin em mobile -->
-    <div class="transition-all duration-300" 
-         [class.ml-16]="menuCollapsed && !isMobile" 
+    <div class="h-full overflow-hidden transition-all duration-300"
+         [class.ml-16]="menuCollapsed && !isMobile"
          [class.ml-80]="!menuCollapsed && !isMobile"
          [class.ml-0]="isMobile">
       <router-outlet></router-outlet>
     </div>
   </div>
-  
-  <!-- Router outlet sem menu para login -->
+
+  <!-- Router outlet sem menu (login, change-password, error) -->
   <router-outlet *ngIf="!shouldShowMenu()"></router-outlet>
 </div>
 <app-language-block [blocked]="blocked"></app-language-block>

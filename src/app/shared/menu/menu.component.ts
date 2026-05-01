@@ -96,7 +96,7 @@ export class MenuComponent implements OnInit, OnDestroy {
     this.cleanupBodyClass();
   }
 
-  @HostListener('window:resize', ['$event'])
+  @HostListener('window:resize')
   onResize(): void {
     this.checkScreenSize();
   }
@@ -155,8 +155,6 @@ export class MenuComponent implements OnInit, OnDestroy {
     });
 
     menus.forEach(menu => {
-      // Remove menus indesejados de verdade
-      const nomeLower = (menu.nome || '').toLowerCase();
       if (menu.rota === '/dashboard') {
         this.menuItems.push({
           id: menu.id,
@@ -176,7 +174,7 @@ export class MenuComponent implements OnInit, OnDestroy {
               icon: 'magnifying-glass',
               expanded: false,
               submenus: [
-                { id: menu.id, label: 'Extrato Bancário', icon: 'bank', link: '/consultas/extrato-bancario' },
+              //  { id: menu.id, label: 'Extrato Bancário', icon: 'bank', link: '/consultas/extrato-bancario' },
                 { id: menu.id, label: 'Relatórios', icon: 'list', link: '/consultas/relatorio' }
               ]
             };
@@ -224,11 +222,12 @@ export class MenuComponent implements OnInit, OnDestroy {
           financeiroMenu = {
             id: menu.id,
             label: 'Financeiro',
-            icon: 'finance',
+            icon: 'money',
             expanded: false,
             submenus: [
-              { id: menu.id, label: 'Viagens', icon: 'plane', link: '/financeiro/viagens' },
-              { id: menu.id, label: 'Prestação de Contas', icon: 'document', link: '/financeiro/prestacao-contas' }
+            //  { id: menu.id, label: 'Viagens', icon: 'airplane', link: '/financeiro/viagens' },
+              { id: menu.id, label: 'Prestação de Contas',  icon: 'calculator', link: '/financeiro/prestacao-contas'   },
+              { id: menu.id, label: 'Minhas Prestações',    icon: 'list',       link: '/financeiro/minhas-prestacoes'  }
             ]
           };
           menuMap.set('financeiro', financeiroMenu);
@@ -236,6 +235,7 @@ export class MenuComponent implements OnInit, OnDestroy {
         } else {
           const fm: any = financeiroMenu;
           if (!fm.id) fm.id = menu.id;
+          fm.label = 'Financeiro';
           if (fm.submenus && fm.submenus.length > 0) {
             fm.submenus = fm.submenus.map((s: any) => ({ id: fm.id || s.id, label: s.label, icon: s.icon, link: s.link }));
           }
@@ -262,29 +262,10 @@ export class MenuComponent implements OnInit, OnDestroy {
       // Menu principal /patentes
       if (menu.rota === '/patentes') {
         let patentesMenu = menuMap.get('patentes');
-        const mySub = submenusByPrefix['/patentes'] || [];
-        // Submenus vindos do backend (se houver)
-        let submenus: MenuItemWithSubmenu[] = mySub.map((m: any) => ({ id: menu.id, label: m.nome, icon: 'list', link: m.rota }));
-
-        // Se backend retornou apenas a rota principal, derivamos submenus das rotas do cliente
-        if (submenus.length === 0) {
-          try {
-            const prefix = 'patentes';
-            const cfg = this.router && Array.isArray(this.router.config) ? this.router.config : [];
-            const found = cfg.filter(r => r.path && r.path.startsWith(prefix + '/'));
-            if (found && found.length > 0) {
-              submenus = found.map((r: any) => {
-                const path = (r.path || '').replace(/^\//, '');
-                const segs = path.split('/').filter(Boolean);
-                const last = segs.length > 0 ? segs[segs.length - 1] : path;
-                const label = last ? last.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) : (r.path || '');
-                return { id: menu.id, label, icon: 'list', link: '/' + (r.path || '') } as MenuItemWithSubmenu;
-              });
-            }
-          } catch (e) {
-            // falha ao derivar rotas do router.config - ignore
-          }
-        }
+        const submenus: MenuItemWithSubmenu[] = [
+          { id: menu.id, label: 'Coordenação', icon: 'users', link: '/patentes/coordenacao' },
+          { id: menu.id, label: 'Gestão de Patentes', icon: 'users', link: '/patentes/gestao' }
+        ];
 
         if (!patentesMenu) {
           patentesMenu = {
@@ -292,7 +273,7 @@ export class MenuComponent implements OnInit, OnDestroy {
             label: menu.nome || 'Patentes',
             icon: 'users',
             expanded: false,
-            submenus: submenus
+            submenus
           };
           menuMap.set('patentes', patentesMenu);
           this.menuItems.push(patentesMenu);
@@ -406,28 +387,7 @@ export class MenuComponent implements OnInit, OnDestroy {
       });
     });
 
-    // Não adicionar menus 'Patentes' automaticamente — mostrar apenas o que o backend retornou
-    // Se houver rotas cliente para 'financeiro', assegurar que o menu Financeiro exista
-    try {
-      const financePrefix = 'financeiro';
-      const cfg = this.router && Array.isArray(this.router.config) ? this.router.config : [];
-      const children = cfg.filter((r: any) => r.path && r.path.startsWith(financePrefix + '/'));
-      const already = this.menuItems.some(mi => (mi.label && mi.label.toLowerCase() === 'financeiro') || (mi.link === '/financeiro'));
-      if (!already && children && children.length > 0) {
-        const routeLabels: { [path: string]: string } = {
-          'financeiro/viagens': 'Viagens',
-          'financeiro/prestacao-contas': 'Prestação de Contas'
-        };
-        const submenus = children.map((r: any) => {
-          const path = (r.path || '').replace(/^\//, '');
-          const segs = path.split('/').filter(Boolean);
-          const last = segs.length > 0 ? segs[segs.length - 1] : path;
-          const label = routeLabels[path] || (last ? last.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()) : path);
-          return { id: undefined, label, icon: 'list', link: '/' + path } as MenuItemWithSubmenu;
-        });
-        this.menuItems.push({ label: 'Financeiro', icon: 'finance', expanded: false, submenus });
-      }
-    } catch (e) {}
+    // Não adicionar menus 'Patentes' ou 'Financeiro' automaticamente — mostrar apenas o que o backend retornou
 
     this.cdr.detectChanges();
   }
@@ -489,27 +449,33 @@ export class MenuComponent implements OnInit, OnDestroy {
       if (!menuId) {
         // Não conseguimos determinar id do menu pai; ainda assim forçar validação com id vazio
         
-        this.authService.validarAcessoPatente('').subscribe(allowed => {
-          if (allowed) {
-            attemptNavigate();
-          } else {
-            console.warn('[menu] acesso negado (sem id) para rota', item.link);
+        this.authService.validarAcessoPatente('').subscribe({
+          next: allowed => {
+            if (allowed) {
+              attemptNavigate();
+            } else {
+              console.warn('[menu] acesso negado (sem id) para rota', item.link);
+            }
+          },
+          error: err => {
+            console.warn('[menu] erro ao validar menu (sem id)', err);
           }
-        }, err => {
-          console.warn('[menu] erro ao validar menu (sem id)', err);
         });
         return;
       }
 
       // Validar via AuthService antes de navegar
-      this.authService.validarAcessoPatente(menuId).subscribe(allowed => {
-        if (allowed) {
-          attemptNavigate();
-        } else {
-          console.warn('[menu] acesso negado para menu pai id', menuId);
+      this.authService.validarAcessoPatente(menuId).subscribe({
+        next: allowed => {
+          if (allowed) {
+            attemptNavigate();
+          } else {
+            console.warn('[menu] acesso negado para menu pai id', menuId);
+          }
+        },
+        error: err => {
+          console.warn('[menu] erro ao validar menu', err);
         }
-      }, err => {
-        console.warn('[menu] erro ao validar menu', err);
       });
       return;
     }

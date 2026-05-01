@@ -13,6 +13,10 @@ import { ErrorPageComponent } from './error-page.component';
 
 export const routes: Routes = [
 	{ path: 'login', component: LoginComponent },
+	{
+		path: 'change-password',
+		loadComponent: () => import('./change-password/change-password.component').then(m => m.ChangePasswordComponent)
+	},
 		{ path: 'home', component: HomeComponent, canActivate: [authGuard] },
 		{ path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
 		{
@@ -46,6 +50,16 @@ export const routes: Routes = [
 			canActivate: [authGuard]
 		},
 		{
+			path: 'financeiro/minhas-prestacoes',
+			loadComponent: () => import('./financeiro/consulta-prestacoes.component').then(m => m.ConsultaPrestacoesComponent),
+			canActivate: [authGuard]
+		},
+		{
+			path: 'financeiro/minhas-prestacoes/:codigo',
+			loadComponent: () => import('./financeiro/detalhe-prestacao.component').then(m => m.DetalhePrestacaoComponent),
+			canActivate: [authGuard]
+		},
+		{
 			path: 'compras/solicitacao',
 			loadComponent: () => import('./compras/solicitacao-compras/solicitacao-compras.component').then(m => m.SolicitacaoComprasComponent),
 			canActivate: [authGuard, patenteGuard]
@@ -53,6 +67,11 @@ export const routes: Routes = [
 		{
 			path: 'patentes/coordenacao',
 			loadComponent: () => import('./admin/patentes/coordenacao.component').then(m => m.CoordenacaoComponent),
+			canActivate: [authGuard, patenteGuard]
+		},
+		{
+			path: 'patentes/gestao',
+			loadComponent: () => import('./admin/patentes/gestao-patentes.component').then(m => m.GestaoPatentesComponent),
 			canActivate: [authGuard, patenteGuard]
 		},
 	{ path: '', redirectTo: 'login', pathMatch: 'full' },

@@ -43,6 +43,7 @@ export interface PrestacaoContasPayload {
   FLF_EMISSA: string;
   FLF_DTINI: string;
   FLF_DTFIM: string;
+  FLF_NACION: string;
   FLF_CC: string;
   FLF_ITCTB: string;
   FLF_CLVL: string;
@@ -87,7 +88,7 @@ export class PrestacaoContasService {
     );
   }
 
-  // ── Lookups de participante e cliente ────────────────────────────────────
+  // ── Lookups ────────────────────────────────────
 
   buscarParticipante(codigo: string): Observable<ParticipanteResult> {
     const url = this.configService.getRestEndpoint(`/PARTICIPANTES/${encodeURIComponent(codigo)}`);
@@ -112,6 +113,17 @@ export class PrestacaoContasService {
     );
   }
 
+  buscarCentrosCusto(): Observable<CentroCustoResult[]> {
+    const url = this.configService.getRestEndpoint('/PRESTACAOCONTA/CENTROSCUSTO');
+
+    return this.http.get<any[]>(url, { headers: this.getHeaders() }).pipe(
+      map(res => res.map(item => ({
+        codigo: item?.codigo || item?.CTT_CUSTO,
+        descricao: item?.descricao || item?.CTT_DESC01
+      }))),
+      catchError(this.handleError)
+    );
+  }
   // ── Busca por termo (autocomplete) ──────────────────────────────────────
 
   buscarParticipantePorTermo(termo: string): Observable<ParticipanteResult[]> {
@@ -155,7 +167,7 @@ export class PrestacaoContasService {
   }
 
   listarCentrosCusto(): Observable<CentroCustoResult[]> {
-    const url = this.configService.getRestEndpoint('/CENTROSCUSTO');
+    const url = this.configService.getRestEndpoint('/PRESTACAOCONTA/CENTROSCUSTO');
     return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
       map(res => {
         const items = Array.isArray(res) ? res : (res?.items || []);
@@ -169,7 +181,7 @@ export class PrestacaoContasService {
   }
 
   listarClassesValor(): Observable<ClasseValorResult[]> {
-    const url = this.configService.getRestEndpoint('/CLASSESVALOR');
+    const url = this.configService.getRestEndpoint('/PRESTACAOCONTA/CLASSESVALOR');
     return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
       map(res => {
         const items = Array.isArray(res) ? res : (res?.items || []);
@@ -199,7 +211,8 @@ export class PrestacaoContasService {
   // ── Salvar ───────────────────────────────────────────────────────────────
 
   salvarPrestacao(payload: PrestacaoContasPayload): Observable<any> {
-    const url = this.configService.getRestEndpoint('/PRESTACAOCONTA');
+    // Controller espera POST em /PRESTACAOCONTA/PRESTACAOCONTA
+    const url = this.configService.getRestEndpoint('/PRESTACAOCONTA/PRESTACAOCONTA');
     return this.http.post<any>(url, payload, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError)
     );
