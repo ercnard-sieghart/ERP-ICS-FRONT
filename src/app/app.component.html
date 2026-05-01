@@ -1,6 +1,6 @@
 <div class="po-wrapper">
   <!-- Layout com menu -->
-  <div class="h-screen overflow-hidden" *ngIf="shouldShowMenu()">
+  <div class="h-screen overflow-hidden bg-gradient-to-br from-[#1A4E79] to-[#75C9C8]" *ngIf="shouldShowMenu()">
     <app-menu (menuToggled)="onMenuToggled($event)"></app-menu>
     <div class="h-full overflow-hidden transition-all duration-300"
          [class.ml-16]="menuCollapsed && !isMobile"
