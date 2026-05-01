@@ -8,7 +8,7 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
   '1': { label: 'Aberta',               cls: 'bg-amber-100  text-amber-800  border-amber-200',   dot: 'bg-amber-500'   },
   '2': { label: 'Em análise',           cls: 'bg-blue-100   text-blue-800   border-blue-200',    dot: 'bg-blue-500'    },
   '3': { label: 'Pendente',             cls: 'bg-orange-100 text-orange-800 border-orange-200',  dot: 'bg-orange-500'  },
-  '4': { label: 'Aguardando financeiro', cls: 'bg-violet-100 text-violet-800 border-violet-200',  dot: 'bg-violet-500'  },
+  '4': { label: 'Aguardando aprovação', cls: 'bg-violet-100 text-violet-800 border-violet-200',  dot: 'bg-violet-500'  },
   '5': { label: 'Finalizada',           cls: 'bg-green-100  text-green-800  border-green-200',   dot: 'bg-green-500'   },
   '6': { label: 'Pago',                 cls: 'bg-teal-100   text-teal-800   border-teal-200',    dot: 'bg-teal-500'    },
   '8': { label: 'Rejeitada',            cls: 'bg-red-100    text-red-800    border-red-200',     dot: 'bg-red-500'     },
@@ -61,7 +61,7 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
                 <option value="1">Aberta</option>
                 <option value="2">Em análise</option>
                 <option value="3">Pendente</option>
-                <option value="4">Aguardando pagamento</option>
+                <option value="4">Aguardando aprovação</option>
                 <option value="5">Finalizada</option>
                 <option value="6">Pago</option>
                 <option value="8">Rejeitada</option>
