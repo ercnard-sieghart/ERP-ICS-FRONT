@@ -236,8 +236,9 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
             class="text-center py-8 text-gray-400 text-sm">Nenhum anexo encontrado.</div>
           <div *ngIf="!loadingAnexos && anexosRows.length > 0" class="space-y-2">
             <div *ngFor="let a of anexosRows"
-              class="flex items-start gap-3 p-3 border border-gray-100 rounded-lg">
-              <div class="w-8 h-8 rounded-lg bg-[#1A4E79]/10 flex items-center justify-center shrink-0 mt-0.5">
+              (click)="abrirAnexo(a)"
+              class="flex items-center gap-3 p-3 border border-gray-100 rounded-lg hover:bg-[#f0fafa] transition-colors cursor-pointer">
+              <div class="w-8 h-8 rounded-lg bg-[#1A4E79]/10 flex items-center justify-center shrink-0">
                 <svg class="w-4 h-4 text-[#1A4E79]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0121 9.414V19a2 2 0 01-2 2z"/>
@@ -246,6 +247,15 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
               <div class="flex-1 min-w-0">
                 <p class="text-sm font-semibold text-gray-800 break-all">{{ a.nome }}</p>
                 <p *ngIf="a.descricao" class="text-xs text-gray-500 mt-0.5">{{ a.descricao }}</p>
+              </div>
+              <div class="shrink-0">
+                <div *ngIf="abrindoAnexo === a.binId"
+                  class="w-5 h-5 border-2 border-[#75C9C8]/30 border-t-[#1A4E79] rounded-full animate-spin"></div>
+                <svg *ngIf="abrindoAnexo !== a.binId" class="w-4 h-4 text-[#75C9C8]"
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
               </div>
             </div>
           </div>
@@ -267,6 +277,7 @@ export class DetalhePrestacaoComponent implements OnInit {
   anexosItem    = 0;
   anexosRows:   AnexoRow[] = [];
   loadingAnexos = false;
+  abrindoAnexo  = '';
 
   constructor(
     private route:          ActivatedRoute,
@@ -315,6 +326,36 @@ export class DetalhePrestacaoComponent implements OnInit {
   fecharModalAnexos(): void {
     this.modalAnexos = false;
     this.anexosRows  = [];
+  }
+
+  abrirAnexo(a: AnexoRow): void {
+    if (this.abrindoAnexo) return;
+    this.abrindoAnexo = a.binId;
+    this.despesaService.baixarAnexo(a.binId).subscribe({
+      next: ({ base64, nome, tipo }) => {
+        try {
+          const bin   = atob(base64.replace(/[\s\r\n]/g, ''));
+          const bytes = new Uint8Array(bin.length);
+          for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+          const blob  = new Blob([bytes], { type: tipo });
+          const url   = URL.createObjectURL(blob);
+          const link  = document.createElement('a');
+          link.href   = url;
+          const viewable = tipo.startsWith('image/') || tipo === 'application/pdf';
+          if (viewable) {
+            link.target = '_blank';
+          } else {
+            link.download = nome;
+          }
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          setTimeout(() => URL.revokeObjectURL(url), 15000);
+        } catch { /* ignore */ }
+        this.abrindoAnexo = '';
+      },
+      error: () => { this.abrindoAnexo = ''; }
+    });
   }
 
   formatDate(d: string): string {

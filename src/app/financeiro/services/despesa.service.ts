@@ -174,6 +174,18 @@ export class DespesaService {
     );
   }
 
+  baixarAnexo(binId: string): Observable<{ base64: string; nome: string; tipo: string }> {
+    const url = this.configService.getRestEndpoint(`/PRESTACAOCONTA/BINARIO/${encodeURIComponent(binId)}`);
+    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
+      map(res => ({
+        base64: res.base64 || '',
+        nome:   res.nome   || 'arquivo',
+        tipo:   res.tipo   || 'application/octet-stream'
+      })),
+      catchError(this.handleError)
+    );
+  }
+
   listarAnexos(presta: string, item: number): Observable<AnexoRow[]> {
     const url = this.configService.getRestEndpoint(`/PRESTACAOCONTA/ANEXOS/${encodeURIComponent(presta)}/${item}`);
     return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
