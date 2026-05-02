@@ -935,7 +935,7 @@ export class PrestacaoContasComponent implements OnInit {
       FLF_EMISSA: this.model.flf_emissa,
       FLF_DTINI:  this.model.flf_dtini,
       FLF_DTFIM:  this.model.flf_dtfim,
-      FLF_NACION: this.model.flf_nacion,
+      FLF_NACION: this.model.flf_nacion === 'S' ? '1' : '2',
       FLF_CC:     this.model.centroCusto,
       FLF_ITCTB:  this.model.itemContabil,
       FLF_CLVL:   this.model.classeValor,
