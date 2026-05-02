@@ -125,7 +125,7 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
     <!-- ── Cabeçalho fixo da página ── -->
     <div class="flex-shrink-0 px-4 md:px-6 pt-4 md:pt-6 pb-3">
       <div class="max-w-5xl mx-auto">
-        <h1 class="text-xl md:text-2xl font-bold text-white mb-3">Prestação de Contas</h1>
+        <h1 class="text-xl md:text-2xl font-bold text-white mb-3 text-center md:text-left">Prestação de Contas</h1>
         <!-- Step indicator -->
         <div class="flex items-center gap-2">
           <div [ngClass]="!headerSaved ? 'bg-white text-[#1A4E79]' : 'bg-white/20 text-white'"
