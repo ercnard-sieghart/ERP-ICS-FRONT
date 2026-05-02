@@ -63,13 +63,7 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
               <select [(ngModel)]="filtroStatus" (change)="filtrar()"
                 class="w-full px-3 py-2.5 border border-[#75C9C8]/30 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#75C9C8] bg-white">
                 <option value="">Todos</option>
-                <option value="1">Aberta</option>
-                <option value="2">Em análise</option>
-                <option value="3">Pendente</option>
-                <option value="4">Aguardando aprovação</option>
-                <option value="5">Finalizada</option>
-                <option value="6">Pago</option>
-                <option value="8">Rejeitada</option>
+                <option *ngFor="let s of statusOpcoes" [value]="s.cod">{{ s.label }}</option>
               </select>
             </div>
 
@@ -203,6 +197,8 @@ export class ConsultaPrestacoesComponent implements OnInit {
   errorMsg   = '';
   filtroStatus = '';
   filtroBusca  = '';
+
+  readonly statusOpcoes = Object.entries(STATUS_MAP).map(([cod, v]) => ({ cod, label: v.label }));
 
   constructor(
     private service: ConsultaPrestacaoService,
