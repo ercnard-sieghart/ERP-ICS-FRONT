@@ -5,11 +5,13 @@ import { Router } from '@angular/router';
 import { ConsultaPrestacaoService, PrestacaoRow } from './services/consulta-prestacao.service';
 
 const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = {
-  '1': { label: 'Aberta',      cls: 'bg-amber-100 text-amber-800 border-amber-200',   dot: 'bg-amber-500'  },
-  '2': { label: 'Em análise',  cls: 'bg-blue-100  text-blue-800  border-blue-200',    dot: 'bg-blue-500'   },
-  '3': { label: 'Conferida',   cls: 'bg-purple-100 text-purple-800 border-purple-200', dot: 'bg-purple-500' },
-  '4': { label: 'Rejeitada',   cls: 'bg-red-100   text-red-800   border-red-200',     dot: 'bg-red-500'    },
-  '5': { label: 'Finalizada',  cls: 'bg-green-100 text-green-800 border-green-200',   dot: 'bg-green-500'  },
+  '1': { label: 'Aberta',               cls: 'bg-amber-100  text-amber-800  border-amber-200',   dot: 'bg-amber-500'   },
+  '2': { label: 'Em análise',           cls: 'bg-blue-100   text-blue-800   border-blue-200',    dot: 'bg-blue-500'    },
+  '3': { label: 'Pendente',             cls: 'bg-orange-100 text-orange-800 border-orange-200',  dot: 'bg-orange-500'  },
+  '4': { label: 'Aguardando financeiro', cls: 'bg-violet-100 text-violet-800 border-violet-200',  dot: 'bg-violet-500'  },
+  '5': { label: 'Finalizada',           cls: 'bg-green-100  text-green-800  border-green-200',   dot: 'bg-green-500'   },
+  '6': { label: 'Pago',                 cls: 'bg-teal-100   text-teal-800   border-teal-200',    dot: 'bg-teal-500'    },
+  '8': { label: 'Rejeitada',            cls: 'bg-red-100    text-red-800    border-red-200',     dot: 'bg-red-500'     },
 };
 
 @Component({
@@ -21,13 +23,18 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
 
     <!-- ── Cabeçalho ── -->
     <div class="flex-shrink-0 px-4 md:px-6 pt-4 md:pt-6 pb-3">
-      <div class="max-w-5xl mx-auto flex items-center gap-3">
-        <div>
-          <h1 class="text-xl md:text-2xl font-bold text-white">Minhas Prestações</h1>
-          <p class="text-white/60 text-xs mt-0.5">Histórico de prestações de contas</p>
+      <div class="max-w-5xl mx-auto flex justify-center md:justify-start">
+        <div class="text-center md:text-left">
+          <h1 class="text-xl md:text-2xl font-bold text-white">
+            Minhas Prestações
+          </h1>
+          <p class="text-white/60 text-xs mt-0.5">
+            Histórico de prestações de contas
+          </p>
         </div>
       </div>
     </div>
+
 
     <!-- ── Conteúdo ── -->
     <div class="flex-1 min-h-0 overflow-y-auto px-4 md:px-6 pb-6">
@@ -56,11 +63,7 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
               <select [(ngModel)]="filtroStatus" (change)="filtrar()"
                 class="w-full px-3 py-2.5 border border-[#75C9C8]/30 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#75C9C8] bg-white">
                 <option value="">Todos</option>
-                <option value="1">Aberta</option>
-                <option value="2">Em análise</option>
-                <option value="3">Conferida</option>
-                <option value="4">Rejeitada</option>
-                <option value="5">Finalizada</option>
+                <option *ngFor="let s of statusOpcoes" [value]="s.cod">{{ s.label }}</option>
               </select>
             </div>
 
@@ -194,6 +197,8 @@ export class ConsultaPrestacoesComponent implements OnInit {
   errorMsg   = '';
   filtroStatus = '';
   filtroBusca  = '';
+
+  readonly statusOpcoes = Object.entries(STATUS_MAP).map(([cod, v]) => ({ cod, label: v.label }));
 
   constructor(
     private service: ConsultaPrestacaoService,

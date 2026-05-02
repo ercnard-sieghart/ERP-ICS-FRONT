@@ -53,9 +53,9 @@ export interface DespesaPayload {
   FLE_CLVL:    string;
   FLE_OBS:     string;
   FLE_GRUPO:   string;
-  EC05DB:      string;
-  EC06DB:      string;
-  EC07DB:      string;
+  FLE_EC05DB:      string;
+  FLE_EC06DB:      string;
+  FLE_EC07DB:      string;
 }
 
 export interface AnexoPayload {
