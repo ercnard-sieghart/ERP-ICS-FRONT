@@ -948,7 +948,7 @@ export class PrestacaoContasComponent implements OnInit {
 
     try {
       const cabResp = await firstValueFrom(this.prestacaoService.salvarPrestacao(payload));
-      const presta  = cabResp?.codigo as string;
+      const presta  = (cabResp?.codigo as string || '').padStart(10, '0');
 
       for (let i = 0; i < this.despesas.length; i++) {
         const d    = this.despesas[i];

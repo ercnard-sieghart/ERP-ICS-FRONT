@@ -84,7 +84,7 @@ export class ConsultaPrestacaoService {
     return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
       map(res => ({
         rows: (res?.rows || []).map((r: any): PrestacaoRow => ({
-          codigo:     r.codigo     || '',
+          codigo:     (r.codigo || '').padStart(10, '0'),
           emissao:    r.emissao    || '',
           status:     r.status     || '',
           statusDesc: r.statusDesc || '',
