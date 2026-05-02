@@ -31,7 +31,7 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
     <main class="h-full flex flex-col bg-gradient-to-br from-[#1A4E79] to-[#75C9C8] overflow-hidden">
       <div class="flex-shrink-0 px-3 md:px-6 pt-3 md:pt-6 pb-2">
         <div class="max-w-5xl mx-auto">
-          <h1 class="text-xl md:text-2xl font-bold text-white">Coordenação de Patentes</h1>
+          <h1 class="text-xl md:text-2xl font-bold text-white text-center md:text-left mx-auto md:mx-0">Coordenação de Patentes</h1>
         </div>
       </div>
 
