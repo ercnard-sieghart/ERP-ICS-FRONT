@@ -22,7 +22,7 @@ type Tab = 'patentes' | 'menus';
       <!-- Cabeçalho fixo: título + tabs -->
       <div class="flex-shrink-0 px-3 md:px-6 pt-3 md:pt-6 pb-2">
         <div class="max-w-5xl mx-auto">
-          <h1 class="text-xl md:text-2xl font-bold text-white mb-3">Gestão de Patentes</h1>
+          <h1 class="text-3xl font-bold mb-6 text-center text-white sm:text-left mx-auto sm:mx-0">Gestão de Patentes</h1>
           <div class="flex gap-1 bg-white/20 rounded-xl p-1 w-fit">
             <button (click)="activeTab = 'patentes'" [class]="activeTab === 'patentes' ? tabActive : tabInactive">Patentes</button>
             <button (click)="activeTab = 'menus'" [class]="activeTab === 'menus' ? tabActive : tabInactive">Menus do Sistema</button>
