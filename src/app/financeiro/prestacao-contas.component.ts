@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import {
   PrestacaoContasService,
   ParticipanteResult,
@@ -728,7 +729,15 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
                   <div><span class="text-gray-400">Qtd</span><div class="text-gray-700">{{ d.quant }}</div></div>
                   <div><span class="text-gray-400">Total</span><div class="text-gray-700 font-semibold">R$ {{ d.total | number:'1.2-2' }}</div></div>
                   <div><span class="text-gray-400">C. Custo</span><div class="text-gray-700">{{ d.cc || '—' }}</div></div>
-                  <div><span class="text-gray-400">Anexos</span><div class="text-gray-700">{{ d.qtdAnexos }} arq.</div></div>
+                  <div><span class="text-gray-400">Anexos</span>
+                    <div>
+                      <button *ngIf="d.qtdAnexos > 0" type="button" (click)="verAnexos(d)"
+                        class="text-[#1A4E79] font-semibold text-xs underline hover:no-underline">
+                        {{ d.qtdAnexos }} arq.
+                      </button>
+                      <span *ngIf="d.qtdAnexos === 0" class="text-gray-400 text-xs">—</span>
+                    </div>
+                  </div>
                   <div class="col-span-2"><span class="text-gray-400">Descrição</span><div class="text-gray-700 break-words">{{ d.descri || '—' }}</div></div>
                 </div>
               </div>
@@ -765,7 +774,17 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
                     <td class="px-3 py-2.5 text-right font-semibold text-[#1A4E79]">R$ {{ d.total | number:'1.2-2' }}</td>
                     <td class="px-3 py-2.5 text-gray-600">{{ d.cc }}</td>
                     <td class="px-3 py-2.5 text-gray-600 max-w-[180px] truncate" [title]="d.descri">{{ d.descri }}</td>
-                    <td class="px-3 py-2.5 text-center text-gray-500">{{ d.qtdAnexos }}</td>
+                    <td class="px-3 py-2.5 text-center">
+                      <button *ngIf="d.qtdAnexos > 0" type="button" (click)="verAnexos(d)"
+                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-[#75C9C8]/20 text-[#1A4E79] hover:bg-[#75C9C8]/40 transition-colors">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                        </svg>
+                        {{ d.qtdAnexos }}
+                      </button>
+                      <span *ngIf="d.qtdAnexos === 0" class="text-gray-300 text-xs">—</span>
+                    </td>
                     <td class="px-3 py-2.5 text-center">
                       <button type="button" (click)="confirmarExcluirDespesa(d)"
                         class="p-1.5 rounded text-red-400 hover:bg-red-50 hover:text-red-600 transition-colors">
@@ -807,6 +826,80 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
 
       </div>
     </div>
+
+  <!-- ── Modal Anexos Locais ── -->
+  <div *ngIf="modalAnexosLocal"
+    class="fixed inset-0 bg-[#1A4E79]/60 backdrop-blur-sm z-50 flex items-center justify-center px-4"
+    (click)="fecharModalAnexosLocal()">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" (click)="$event.stopPropagation()">
+      <div class="bg-gradient-to-r from-[#1A4E79] to-[#75C9C8] px-5 py-4 flex items-center justify-between">
+        <span class="text-white font-semibold text-sm">Anexos — Item {{ anexosLocalItem }}</span>
+        <button type="button" (click)="fecharModalAnexosLocal()"
+          class="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors">
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="p-4 max-h-80 overflow-y-auto">
+        <div *ngIf="anexosLocalFiles.length === 0"
+          class="text-center py-8 text-gray-400 text-sm">Nenhum arquivo encontrado.</div>
+        <div *ngIf="anexosLocalFiles.length > 0" class="space-y-2">
+          <div *ngFor="let f of anexosLocalFiles"
+            (click)="abrirAnexoLocal(f)"
+            class="flex items-center gap-3 p-3 border border-gray-100 rounded-lg hover:bg-[#f0fafa] transition-colors cursor-pointer">
+            <div class="w-8 h-8 rounded-lg bg-[#1A4E79]/10 flex items-center justify-center shrink-0">
+              <svg class="w-4 h-4 text-[#1A4E79]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0121 9.414V19a2 2 0 01-2 2z"/>
+              </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-semibold text-gray-800 break-all">{{ f.name }}</p>
+            </div>
+            <svg class="w-4 h-4 text-[#75C9C8] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal Preview Anexo ── -->
+  <div *ngIf="previewUrl"
+    class="fixed inset-0 bg-black/85 z-[60] flex flex-col"
+    (click)="fecharPreview()">
+    <div class="flex-shrink-0 flex items-center justify-between px-4 py-3 bg-[#1A4E79]"
+      (click)="$event.stopPropagation()">
+      <span class="text-white text-sm font-semibold truncate max-w-xs">{{ previewNome }}</span>
+      <div class="flex items-center gap-2 shrink-0">
+        <button type="button" (click)="downloadPreview()"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 text-white text-xs font-medium transition-colors">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          </svg>
+          Baixar
+        </button>
+        <button type="button" (click)="fecharPreview()"
+          class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors">
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="flex-1 min-h-0 overflow-auto" (click)="$event.stopPropagation()">
+      <iframe *ngIf="previewTipo === 'application/pdf'" [src]="previewUrl"
+        class="w-full h-full border-0"></iframe>
+      <div *ngIf="previewTipo.startsWith('image/')"
+        class="flex items-center justify-center w-full h-full p-4">
+        <img [src]="previewUrl" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl" />
+      </div>
+    </div>
+  </div>
+
   </main>
   `
 })
@@ -873,9 +966,9 @@ export class PrestacaoContasComponent implements OnInit {
           FLE_CLVL:    d.clvl,
           FLE_OBS:     d.obs,
           FLE_GRUPO:   d.grupo,
-          EC05DB:      d.destinacao,
-          EC06DB:      d.tipoRecurso,
-          EC07DB:      d.tipoExecucao
+          FLE_EC05DB:      d.destinacao,
+          FLE_EC06DB:      d.tipoRecurso,
+          FLE_EC07DB:      d.tipoExecucao
         }));
 
         const nItem = resp?.item as number;
@@ -953,6 +1046,15 @@ export class PrestacaoContasComponent implements OnInit {
   erroDespesa       = '';
   pendingFiles:     File[] = [];
 
+  // ── Visualização de anexos ───────────────────────────────────────────────────
+  modalAnexosLocal     = false;
+  anexosLocalItem      = 0;
+  anexosLocalFiles:    File[] = [];
+  previewUrl:          SafeResourceUrl | null = null;
+  previewNome          = '';
+  previewTipo          = '';
+  private _previewBlobUrl = '';
+
   nd: any = {}; // nova despesa form
 
   flgList:         FLGResult[]          = [];
@@ -997,7 +1099,8 @@ export class PrestacaoContasComponent implements OnInit {
 
   constructor(
     private prestacaoService: PrestacaoContasService,
-    private despesaService: DespesaService
+    private despesaService:   DespesaService,
+    private sanitizer:        DomSanitizer
   ) {}
 
   ngOnInit(): void {
@@ -1017,6 +1120,59 @@ export class PrestacaoContasComponent implements OnInit {
 
   get totalDespesas(): number {
     return this.despesas.reduce((acc, d) => acc + d.total, 0);
+  }
+
+  verAnexos(d: DespesaRow): void {
+    const idx = this.despesas.indexOf(d);
+    if (idx < 0) return;
+    this.anexosLocalItem  = d.item;
+    this.anexosLocalFiles = this.despesaFiles[idx] || [];
+    this.modalAnexosLocal = true;
+  }
+
+  fecharModalAnexosLocal(): void {
+    this.modalAnexosLocal = false;
+    this.anexosLocalFiles = [];
+  }
+
+  abrirAnexoLocal(file: File): void {
+    const tipo = file.type || 'application/octet-stream';
+    const url  = URL.createObjectURL(file);
+    const viewable = tipo.startsWith('image/') || tipo === 'application/pdf';
+    if (viewable) {
+      this._previewBlobUrl = url;
+      this.previewUrl  = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+      this.previewNome = file.name;
+      this.previewTipo = tipo;
+    } else {
+      const link    = document.createElement('a');
+      link.href     = url;
+      link.download = file.name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+    }
+  }
+
+  fecharPreview(): void {
+    this.previewUrl  = null;
+    this.previewNome = '';
+    this.previewTipo = '';
+    if (this._previewBlobUrl) {
+      URL.revokeObjectURL(this._previewBlobUrl);
+      this._previewBlobUrl = '';
+    }
+  }
+
+  downloadPreview(): void {
+    if (!this._previewBlobUrl || !this.previewNome) return;
+    const link    = document.createElement('a');
+    link.href     = this._previewBlobUrl;
+    link.download = this.previewNome;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   private carregarListasCabecalho(): void {

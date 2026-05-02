@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ConsultaPrestacaoService, DespesaDetalheRow } from './services/consulta-prestacao.service';
 import { DespesaService, AnexoRow } from './services/despesa.service';
 
@@ -265,6 +266,40 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
       </div>
     </div>
 
+
+    <!-- ── Modal Preview Anexo ── -->
+    <div *ngIf="previewUrl"
+      class="fixed inset-0 bg-black/85 z-[60] flex flex-col"
+      (click)="fecharPreview()">
+      <div class="flex-shrink-0 flex items-center justify-between px-4 py-3 bg-[#1A4E79]"
+        (click)="$event.stopPropagation()">
+        <span class="text-white text-sm font-semibold truncate max-w-xs">{{ previewNome }}</span>
+        <div class="flex items-center gap-2 shrink-0">
+          <button type="button" (click)="downloadPreview()"
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 text-white text-xs font-medium transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+            </svg>
+            Baixar
+          </button>
+          <button type="button" (click)="fecharPreview()"
+            class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="flex-1 min-h-0 overflow-auto" (click)="$event.stopPropagation()">
+        <iframe *ngIf="previewTipo === 'application/pdf'" [src]="previewUrl"
+          class="w-full h-full border-0"></iframe>
+        <div *ngIf="previewTipo.startsWith('image/')"
+          class="flex items-center justify-center w-full h-full p-4">
+          <img [src]="previewUrl" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl" />
+        </div>
+      </div>
+    </div>
+
   </main>
   `
 })
@@ -279,13 +314,18 @@ export class DetalhePrestacaoComponent implements OnInit {
   anexosItem    = 0;
   anexosRows:   AnexoRow[] = [];
   loadingAnexos = false;
-  abrindoAnexo  = '';
+  abrindoAnexo         = '';
+  previewUrl:          SafeResourceUrl | null = null;
+  previewNome          = '';
+  previewTipo          = '';
+  private _previewBlobUrl = '';
 
   constructor(
     private route:          ActivatedRoute,
     private router:         Router,
     private service:        ConsultaPrestacaoService,
-    private despesaService: DespesaService
+    private despesaService: DespesaService,
+    private sanitizer:      DomSanitizer
   ) {}
 
   ngOnInit(): void {
@@ -341,23 +381,46 @@ export class DetalhePrestacaoComponent implements OnInit {
           for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
           const blob  = new Blob([bytes], { type: tipo });
           const url   = URL.createObjectURL(blob);
-          const link  = document.createElement('a');
-          link.href   = url;
           const viewable = tipo.startsWith('image/') || tipo === 'application/pdf';
           if (viewable) {
-            link.target = '_blank';
+            this._previewBlobUrl = url;
+            this.previewUrl  = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+            this.previewNome = nome;
+            this.previewTipo = tipo;
           } else {
+            const link    = document.createElement('a');
+            link.href     = url;
             link.download = nome;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(url), 5000);
           }
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          setTimeout(() => URL.revokeObjectURL(url), 15000);
         } catch { /* ignore */ }
         this.abrindoAnexo = '';
       },
       error: () => { this.abrindoAnexo = ''; }
     });
+  }
+
+  fecharPreview(): void {
+    this.previewUrl  = null;
+    this.previewNome = '';
+    this.previewTipo = '';
+    if (this._previewBlobUrl) {
+      URL.revokeObjectURL(this._previewBlobUrl);
+      this._previewBlobUrl = '';
+    }
+  }
+
+  downloadPreview(): void {
+    if (!this._previewBlobUrl || !this.previewNome) return;
+    const link    = document.createElement('a');
+    link.href     = this._previewBlobUrl;
+    link.download = this.previewNome;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   formatDate(d: string): string {
