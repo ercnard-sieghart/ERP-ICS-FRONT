@@ -26,7 +26,7 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
     <div class="flex-shrink-0 px-4 md:px-6 pt-4 md:pt-6 pb-3">
       <div class="max-w-5xl mx-auto">
         <div class="flex items-center justify-between gap-3 mb-1">
-          <div>
+          <div class="text-center md:text-left">
             <h1 class="text-xl md:text-2xl font-bold text-white leading-tight">
               Prestação {{ codigo || '...' }}
             </h1>
