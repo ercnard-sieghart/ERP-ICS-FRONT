@@ -9,7 +9,7 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
   '1': { label: 'Aberta',               cls: 'bg-amber-100  text-amber-800  border-amber-200',   dot: 'bg-amber-500'   },
   '2': { label: 'Em análise',           cls: 'bg-blue-100   text-blue-800   border-blue-200',    dot: 'bg-blue-500'    },
   '3': { label: 'Pendente',             cls: 'bg-orange-100 text-orange-800 border-orange-200',  dot: 'bg-orange-500'  },
-  '4': { label: 'Aguardando pagamento', cls: 'bg-violet-100 text-violet-800 border-violet-200',  dot: 'bg-violet-500'  },
+  '4': { label: 'Aguardando aprovação', cls: 'bg-violet-100 text-violet-800 border-violet-200',  dot: 'bg-violet-500'  },
   '5': { label: 'Finalizada',           cls: 'bg-green-100  text-green-800  border-green-200',   dot: 'bg-green-500'   },
   '6': { label: 'Pago',                 cls: 'bg-teal-100   text-teal-800   border-teal-200',    dot: 'bg-teal-500'    },
   '8': { label: 'Rejeitada',            cls: 'bg-red-100    text-red-800    border-red-200',     dot: 'bg-red-500'     },
@@ -25,20 +25,34 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
     <!-- ── Cabeçalho da página ── -->
     <div class="flex-shrink-0 px-4 md:px-6 pt-4 md:pt-6 pb-3">
       <div class="max-w-5xl mx-auto">
-        <div class="flex items-center justify-between gap-3 mb-1">
-          <div class="text-center md:text-left">
+        <div class="flex items-center">
+
+          <!-- Espaçador ajustado -->
+          <div class="w-14"></div>
+
+          <!-- Título -->
+          <div class="flex-1 text-center md:text-left">
             <h1 class="text-xl md:text-2xl font-bold text-white leading-tight">
               Prestação {{ codigo || '...' }}
             </h1>
-            <p class="text-white/60 text-xs mt-0.5">Detalhes e despesas</p>
+            <p class="text-white/60 text-xs mt-0.5">
+              Detalhes e despesas
+            </p>
           </div>
-          <button type="button" (click)="voltar()"
-            class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 hover:bg-white/30 transition-colors shrink-0">
+
+          <!-- Botão -->
+          <button
+            type="button"
+            (click)="voltar()"
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-full
+                  bg-white/20 hover:bg-white/30 transition-colors shrink-0"
+          >
             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
             </svg>
             <span class="text-white text-xs font-medium">Voltar</span>
           </button>
+
         </div>
       </div>
     </div>
