@@ -68,11 +68,12 @@ export interface DespesaPayload {
 }
 
 export interface AnexoPayload {
-  presta:  string;
-  item:    number;
-  nome:    string;
-  tipo:    string;
-  arquivo: string; // base64
+  presta:   string;
+  item:     number;
+  nome:     string;
+  tipo:     string;
+  arquivo:  string; // base64
+  fle_tipo: string;
 }
 
 export interface AnexoRow {

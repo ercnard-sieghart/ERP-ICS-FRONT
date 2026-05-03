@@ -1018,7 +1018,8 @@ export class PrestacaoContasComponent implements OnInit {
           const base64 = await this.fileToBase64(file);
           const ext    = file.name.split('.').pop()?.toLowerCase() || '';
           await firstValueFrom(this.despesaService.uploadAnexo({
-            presta, item: nItem, nome: file.name, tipo: ext, arquivo: base64
+            presta, item: nItem, nome: file.name, tipo: ext, arquivo: base64,
+            fle_tipo: d.tipo || (this.model.flf_nacion === 'S' ? '2' : '1')
           }));
         }
       }
