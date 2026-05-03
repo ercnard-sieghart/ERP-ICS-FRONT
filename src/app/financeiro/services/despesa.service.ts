@@ -46,6 +46,7 @@ export interface DespesaRow {
 
 export interface DespesaPayload {
   FLE_PRESTA:  string;
+  FLE_PARTIC:  string;
   FLE_DATA:    string;
   FLE_LOCAL:   string;
   FLE_DESPES:  string;

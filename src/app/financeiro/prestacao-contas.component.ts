@@ -992,6 +992,7 @@ export class PrestacaoContasComponent implements OnInit {
         const d    = this.despesas[i];
         const resp = await firstValueFrom(this.despesaService.inserirDespesa({
           FLE_PRESTA:  presta,
+          FLE_PARTIC:  this.model.codParticipante,
           FLE_DATA:    d.data,
           FLE_LOCAL:   d.local,
           FLE_DESPES:  d.despes,
