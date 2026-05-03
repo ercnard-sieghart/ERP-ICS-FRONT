@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { ConsultaPrestacaoService, DespesaDetalheRow } from './services/consulta-prestacao.service';
+import { ConsultaPrestacaoService, DespesaDetalheRow, DespesasResult } from './services/consulta-prestacao.service';
 import { DespesaService, AnexoRow } from './services/despesa.service';
 
 const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = {
@@ -112,6 +112,10 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
               <div>
                 <div class="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Valor Total</div>
                 <div class="text-sm font-bold text-[#1A4E79]">R$ {{ totalGeral | number:'1.2-2' }}</div>
+              </div>
+              <div *ngIf="nomecf" class="col-span-2 md:col-span-4">
+                <div class="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Cliente / Fornecedor</div>
+                <div class="text-sm font-semibold text-gray-700">{{ nomecf }}</div>
               </div>
             </div>
           </div>
@@ -323,6 +327,7 @@ export class DetalhePrestacaoComponent implements OnInit {
 
   codigo        = '';
   status        = '';
+  nomecf        = '';
   rows:         DespesaDetalheRow[] = [];
   isLoading     = false;
   errorMsg      = '';
@@ -355,8 +360,9 @@ export class DetalhePrestacaoComponent implements OnInit {
     this.isLoading = true;
     this.errorMsg  = '';
     this.service.listarDespesas(this.codigo).subscribe({
-      next: rows => {
-        this.rows     = rows;
+      next: (result: DespesasResult) => {
+        this.rows      = result.rows;
+        this.nomecf    = result.nomecf;
         this.isLoading = false;
       },
       error: e => {
