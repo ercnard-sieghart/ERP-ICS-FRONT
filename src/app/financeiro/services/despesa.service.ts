@@ -5,6 +5,8 @@ import { catchError, map } from 'rxjs/operators';
 import { AuthService } from '../../shared/services/auth.service';
 import { ConfigService } from '../../shared/services/config.service';
 
+export interface LocalResult { codigo: string; descricao: string; }
+
 export interface FLGResult {
   codigo: string;
   descricao: string;
@@ -37,6 +39,9 @@ export interface DespesaRow {
   tipoRecurso: string;
   tipoExecucao: string;
   qtdAnexos:   number;
+  tipo?:       string;
+  moeda?:      string;
+  txconv?:     number;
 }
 
 export interface DespesaPayload {
@@ -53,9 +58,12 @@ export interface DespesaPayload {
   FLE_CLVL:    string;
   FLE_OBS:     string;
   FLE_GRUPO:   string;
-  FLE_EC05DB:      string;
-  FLE_EC06DB:      string;
-  FLE_EC07DB:      string;
+  FLE_TIPO:    string;
+  FLE_MOEDA:   string;
+  FLE_TXCONV:  number;
+  FLE_EC05DB:  string;
+  FLE_EC06DB:  string;
+  FLE_EC07DB:  string;
 }
 
 export interface AnexoPayload {
@@ -247,6 +255,18 @@ export class DespesaService {
         return items.map((i: any) => ({ codigo: i.codigo || '', descricao: i.descricao || '' }));
       }),
       catchError(() => throwError(() => new Error('Erro ao listar tipos de execução')))
+    );
+  }
+
+  listarLocais(gastoNacional: string): Observable<LocalResult[]> {
+    const tipo = gastoNacional === 'S' ? '1' : '2';
+    const url = this.configService.getRestEndpoint(`/PRESTACAOCONTA/LOCAIS/${tipo}`);
+    return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
+      map(res => {
+        const items: any[] = Array.isArray(res) ? res : (res?.items || res?.rows || []);
+        return items.map((i: any) => ({ codigo: i.codigo || '', descricao: i.descricao || '' }));
+      }),
+      catchError(() => throwError(() => new Error('Erro ao listar locais')))
     );
   }
 
