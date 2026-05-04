@@ -45,6 +45,11 @@ export interface DespesaDetalheRow {
   qtdAnexos: number;
 }
 
+export interface DespesasResult {
+  rows:   DespesaDetalheRow[];
+  nomecf: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ConsultaPrestacaoService {
 
@@ -84,7 +89,7 @@ export class ConsultaPrestacaoService {
     return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
       map(res => ({
         rows: (res?.rows || []).map((r: any): PrestacaoRow => ({
-          codigo:     r.codigo     || '',
+          codigo:     (r.codigo || '').padStart(10, '0'),
           emissao:    r.emissao    || '',
           status:     r.status     || '',
           statusDesc: r.statusDesc || '',
@@ -101,34 +106,37 @@ export class ConsultaPrestacaoService {
     );
   }
 
-  listarDespesas(codigo: string): Observable<DespesaDetalheRow[]> {
+  listarDespesas(codigo: string): Observable<DespesasResult> {
     const url = this.configService.getRestEndpoint(
       `/CONSULTA/PRESTACOES/${encodeURIComponent(codigo)}/DESPESAS`
     );
     return this.http.get<any>(url, { headers: this.getHeaders() }).pipe(
       map(res => {
         const items: any[] = Array.isArray(res) ? res : (res?.rows || []);
-        return items.map((r: any): DespesaDetalheRow => ({
-          item:      Number(r.item)      || 0,
-          data:      r.data              || '',
-          local:     r.local             || '',
-          despes:    r.despes            || '',
-          descricao: r.descricao         || '',
-          quant:     Number(r.quant)     || 0,
-          total:     Number(r.total)     || 0,
-          cc:        r.cc                || '',
-          obs:       r.obs               || '',
-          partic:    r.partic            || '',
-          moeda:     r.moeda             || '',
-          conta:     r.conta             || '',
-          itectb:    r.itectb            || '',
-          clvl:      r.clvl              || '',
-          grupo:     r.grupo             || '',
-          ec05db:    r.ec05db            || '',
-          ec06db:    r.ec06db            || '',
-          ec07db:    r.ec07db            || '',
-          qtdAnexos: Number(r.qtdAnexos) || 0
-        }));
+        return {
+          nomecf: res?.nomecf || '',
+          rows: items.map((r: any): DespesaDetalheRow => ({
+            item:      Number(r.item)      || 0,
+            data:      r.data              || '',
+            local:     r.local             || '',
+            despes:    r.despes            || '',
+            descricao: r.descricao         || '',
+            quant:     Number(r.quant)     || 0,
+            total:     Number(r.total)     || 0,
+            cc:        r.cc                || '',
+            obs:       r.obs               || '',
+            partic:    r.partic            || '',
+            moeda:     r.moeda             || '',
+            conta:     r.conta             || '',
+            itectb:    r.itectb            || '',
+            clvl:      r.clvl              || '',
+            grupo:     r.grupo             || '',
+            ec05db:    r.ec05db            || '',
+            ec06db:    r.ec06db            || '',
+            ec07db:    r.ec07db            || '',
+            qtdAnexos: Number(r.qtdAnexos) || 0
+          }))
+        };
       }),
       catchError(this.handleError)
     );

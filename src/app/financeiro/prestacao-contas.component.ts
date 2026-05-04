@@ -15,6 +15,7 @@ import {
   DespesaService,
   DespesaRow,
   FLGResult,
+  LocalResult,
   ContaContabilResult,
   GrupoResult,
   DestinacaoResult,
@@ -450,14 +451,51 @@ const DI = 'px-3 py-2 hover:bg-[#e6eef0] cursor-pointer text-sm border-b border-
                     class="w-full p-2 text-sm border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all" />
                 </div>
 
-                <!-- Local (UF) -->
+                <!-- Local (estado ou país) -->
                 <div>
                   <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Local *</label>
-                  <select [(ngModel)]="nd.local"
-                    class="w-full p-2 text-sm border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all bg-white">
-                    <option value="">Selecione o estado...</option>
-                    <option *ngFor="let uf of UF_ESTADOS" [value]="uf.sigla">{{ uf.sigla }} — {{ uf.nome }}</option>
-                  </select>
+                  <div class="${CW}">
+                    <input type="text" [(ngModel)]="nd.localSearch" autocomplete="off"
+                      [placeholder]="model.flf_nacion === 'N' ? 'Buscar país...' : 'Buscar estado...'"
+                      (ngModelChange)="onNdLocalInput($event)" (blur)="fecharNdLocaisDropdown()"
+                      class="flex-1 min-w-0 p-2 text-sm border border-[#75C9C8]/30 rounded-l-lg focus:outline-none transition-all" />
+                    <button type="button" (mousedown)="toggleNdLocaisDropdown($event)" class="${CB}">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                    </button>
+                    <div *ngIf="ndShowLocaisDropdown && ndLocaisFiltered.length > 0" class="${DD}">
+                      <div *ngFor="let l of ndLocaisFiltered" (mousedown)="selecionarNdLocal(l)" class="${DI}">
+                        <span class="font-semibold text-[#1A4E79] shrink-0">{{ l.codigo }}</span>
+                        <span class="text-gray-500 truncate">{{ l.descricao }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Moeda (apenas para gasto internacional) -->
+                <div *ngIf="model.flf_nacion === 'N'">
+                  <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Moeda *</label>
+                  <div class="${CW}">
+                    <input type="text" [(ngModel)]="nd.moedaSearch" autocomplete="off" placeholder="Selecione a moeda..."
+                      (ngModelChange)="onNdMoedaInput($event)" (blur)="fecharNdMoedaDropdown()"
+                      class="flex-1 min-w-0 p-2 text-sm border border-[#75C9C8]/30 rounded-l-lg focus:outline-none transition-all" />
+                    <button type="button" (mousedown)="toggleNdMoedaDropdown($event)" class="${CB}">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                    </button>
+                    <div *ngIf="ndShowMoedaDropdown && ndMoedaFiltered.length > 0" class="${DD}">
+                      <div *ngFor="let m of ndMoedaFiltered" (mousedown)="selecionarNdMoeda(m)" class="${DI}">
+                        <span class="font-semibold text-[#1A4E79] shrink-0">{{ m.codigo }}</span>
+                        <span class="text-gray-500 truncate">{{ m.descricao }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Taxa de Conversão (apenas quando moeda = Outras) -->
+                <div *ngIf="model.flf_nacion === 'N' && nd.moeda === '9'">
+                  <label class="block text-xs font-semibold text-[#1A4E79] mb-1 uppercase tracking-wide">Taxa de Conversão *</label>
+                  <input type="number" [(ngModel)]="nd.txconv" min="0" step="0.0001"
+                    placeholder="Ex.: 5.2345"
+                    class="w-full p-2 text-sm border border-[#75C9C8]/30 rounded-lg focus:ring-2 focus:ring-[#75C9C8] focus:border-transparent transition-all" />
                 </div>
 
                 <!-- Despesa (FLG) -->
@@ -935,7 +973,7 @@ export class PrestacaoContasComponent implements OnInit {
       FLF_EMISSA: this.model.flf_emissa,
       FLF_DTINI:  this.model.flf_dtini,
       FLF_DTFIM:  this.model.flf_dtfim,
-      FLF_NACION: this.model.flf_nacion,
+      FLF_NACION: this.model.flf_nacion === 'S' ? '1' : '2',
       FLF_CC:     this.model.centroCusto,
       FLF_ITCTB:  this.model.itemContabil,
       FLF_CLVL:   this.model.classeValor,
@@ -948,12 +986,13 @@ export class PrestacaoContasComponent implements OnInit {
 
     try {
       const cabResp = await firstValueFrom(this.prestacaoService.salvarPrestacao(payload));
-      const presta  = cabResp?.codigo as string;
+      const presta  = (cabResp?.codigo as string || '').padStart(10, '0');
 
       for (let i = 0; i < this.despesas.length; i++) {
         const d    = this.despesas[i];
         const resp = await firstValueFrom(this.despesaService.inserirDespesa({
           FLE_PRESTA:  presta,
+          FLE_PARTIC:  this.model.codParticipante,
           FLE_DATA:    d.data,
           FLE_LOCAL:   d.local,
           FLE_DESPES:  d.despes,
@@ -966,9 +1005,12 @@ export class PrestacaoContasComponent implements OnInit {
           FLE_CLVL:    d.clvl,
           FLE_OBS:     d.obs,
           FLE_GRUPO:   d.grupo,
-          FLE_EC05DB:      d.destinacao,
-          FLE_EC06DB:      d.tipoRecurso,
-          FLE_EC07DB:      d.tipoExecucao
+          FLE_TIPO:    d.tipo   || (this.model.flf_nacion === 'S' ? '2' : '1'),
+          FLE_MOEDA:   d.moeda  || '1',
+          FLE_TXCONV:  d.txconv || 0,
+          FLE_EC05DB:  d.destinacao,
+          FLE_EC06DB:  d.tipoRecurso,
+          FLE_EC07DB:  d.tipoExecucao
         }));
 
         const nItem = resp?.item as number;
@@ -976,7 +1018,8 @@ export class PrestacaoContasComponent implements OnInit {
           const base64 = await this.fileToBase64(file);
           const ext    = file.name.split('.').pop()?.toLowerCase() || '';
           await firstValueFrom(this.despesaService.uploadAnexo({
-            presta, item: nItem, nome: file.name, tipo: ext, arquivo: base64
+            presta, item: nItem, nome: file.name, tipo: ext, arquivo: base64,
+            fle_tipo: d.tipo || (this.model.flf_nacion === 'S' ? '2' : '1')
           }));
         }
       }
@@ -1064,17 +1107,13 @@ export class PrestacaoContasComponent implements OnInit {
   tiposRecurso:    TipoRecursoResult[]   = [];
   tiposExecucao:   TipoExecucaoResult[]  = [];
 
-  readonly UF_ESTADOS = [
-    { sigla: 'AC', nome: 'Acre' }, { sigla: 'AL', nome: 'Alagoas' }, { sigla: 'AM', nome: 'Amazonas' },
-    { sigla: 'AP', nome: 'Amapá' }, { sigla: 'BA', nome: 'Bahia' }, { sigla: 'CE', nome: 'Ceará' },
-    { sigla: 'DF', nome: 'Distrito Federal' }, { sigla: 'ES', nome: 'Espírito Santo' }, { sigla: 'GO', nome: 'Goiás' },
-    { sigla: 'MA', nome: 'Maranhão' }, { sigla: 'MG', nome: 'Minas Gerais' }, { sigla: 'MS', nome: 'Mato Grosso do Sul' },
-    { sigla: 'MT', nome: 'Mato Grosso' }, { sigla: 'PA', nome: 'Pará' }, { sigla: 'PB', nome: 'Paraíba' },
-    { sigla: 'PE', nome: 'Pernambuco' }, { sigla: 'PI', nome: 'Piauí' }, { sigla: 'PR', nome: 'Paraná' },
-    { sigla: 'RJ', nome: 'Rio de Janeiro' }, { sigla: 'RN', nome: 'Rio Grande do Norte' },
-    { sigla: 'RO', nome: 'Rondônia' }, { sigla: 'RR', nome: 'Roraima' }, { sigla: 'RS', nome: 'Rio Grande do Sul' },
-    { sigla: 'SC', nome: 'Santa Catarina' }, { sigla: 'SE', nome: 'Sergipe' },
-    { sigla: 'SP', nome: 'São Paulo' }, { sigla: 'TO', nome: 'Tocantins' }
+  locais: LocalResult[] = [];
+
+  readonly MOEDAS: LocalResult[] = [
+    { codigo: '1', descricao: 'Real' },
+    { codigo: '2', descricao: 'Dólar' },
+    { codigo: '3', descricao: 'Euro' },
+    { codigo: '9', descricao: 'Outras' }
   ];
 
   // Combobox local — nova despesa (nd = nova despesa)
@@ -1096,6 +1135,10 @@ export class PrestacaoContasComponent implements OnInit {
   ndShowTipoRecursoDropdown = false;
   ndTipoExecucaoFiltered:  TipoExecucaoResult[] = [];
   ndShowTipoExecucaoDropdown = false;
+  ndLocaisFiltered:        LocalResult[]        = [];
+  ndShowLocaisDropdown     = false;
+  ndMoedaFiltered:         LocalResult[]        = [];
+  ndShowMoedaDropdown      = false;
 
   constructor(
     private prestacaoService: PrestacaoContasService,
@@ -1210,7 +1253,7 @@ export class PrestacaoContasComponent implements OnInit {
 
   private initNd(): void {
     this.nd = {
-      data: '', local: '',
+      data: '', localSearch: '', local: '',
       flgSearch: '', despes: '', descri: '',
       quant: 1, total: 0,
       contaSearch: '', conta: '',
@@ -1221,7 +1264,10 @@ export class PrestacaoContasComponent implements OnInit {
       grupoSearch: '', grupo: '',
       destinacaoSearch: '', destinacao: '',
       tipoRecursoSearch: '', tipoRecurso: '',
-      tipoExecucaoSearch: '', tipoExecucao: ''
+      tipoExecucaoSearch: '', tipoExecucao: '',
+      tipo:       this.model.flf_nacion === 'S' ? '2' : '1',
+      moedaSearch: '', moeda: '1',
+      txconv:     0
     };
     this.pendingFiles             = [];
     this.erroDespesa              = '';
@@ -1234,6 +1280,8 @@ export class PrestacaoContasComponent implements OnInit {
     this.ndDestinacaoFiltered     = [];  this.ndShowDestinacaoDropdown   = false;
     this.ndTipoRecursoFiltered    = [];  this.ndShowTipoRecursoDropdown  = false;
     this.ndTipoExecucaoFiltered   = [];  this.ndShowTipoExecucaoDropdown = false;
+    this.ndLocaisFiltered         = [];  this.ndShowLocaisDropdown       = false;
+    this.ndMoedaFiltered          = [];  this.ndShowMoedaDropdown        = false;
   }
 
   // ── Ações do cabeçalho ──────────────────────────────────────────────────────
@@ -1272,6 +1320,10 @@ export class PrestacaoContasComponent implements OnInit {
   abrirNovaDespesa(): void {
     this.initNd();
     this.showNovaDespesa = true;
+    this.despesaService.listarLocais(this.model.flf_nacion || 'S').subscribe({
+      next: items => { this.locais = items; },
+      error: () => {}
+    });
   }
 
   cancelarNovaDespesa(): void {
@@ -1326,7 +1378,10 @@ export class PrestacaoContasComponent implements OnInit {
       destinacao:   this.nd.destinacao,
       tipoRecurso:  this.nd.tipoRecurso,
       tipoExecucao: this.nd.tipoExecucao,
-      qtdAnexos:    this.pendingFiles.length
+      qtdAnexos:    this.pendingFiles.length,
+      tipo:         this.nd.tipo,
+      moeda:        this.nd.moeda  || '1',
+      txconv:       Number(this.nd.txconv) || 0
     }];
     this.despesaFiles = [...this.despesaFiles, [...this.pendingFiles]];
     this.showNovaDespesa = false;
@@ -1681,4 +1736,49 @@ export class PrestacaoContasComponent implements OnInit {
     this.ndTipoExecucaoFiltered = []; this.ndShowTipoExecucaoDropdown = false;
   }
   fecharNdTipoExecucaoDropdown(): void { setTimeout(() => { this.ndShowTipoExecucaoDropdown = false; }, 150); }
+
+  // ── Local (SX5 — estados ou países) ─────────────────────────────────────────
+
+  onNdLocalInput(v: string): void {
+    this.nd.local = '';
+    if (!v?.trim()) { this.ndShowLocaisDropdown = false; this.ndLocaisFiltered = []; return; }
+    this.ndLocaisFiltered = this.filtrar(this.locais, v);
+    this.ndShowLocaisDropdown = this.ndLocaisFiltered.length > 0;
+  }
+  toggleNdLocaisDropdown(e: MouseEvent): void {
+    e.preventDefault();
+    if (this.ndShowLocaisDropdown) { this.ndShowLocaisDropdown = false; return; }
+    const t = (this.nd.localSearch || '').trim();
+    this.ndLocaisFiltered = t ? this.filtrar(this.locais, t) : [...this.locais];
+    this.ndShowLocaisDropdown = this.ndLocaisFiltered.length > 0;
+  }
+  selecionarNdLocal(item: LocalResult): void {
+    this.nd.local = item.codigo;
+    this.nd.localSearch = `${item.codigo} - ${item.descricao}`;
+    this.ndLocaisFiltered = []; this.ndShowLocaisDropdown = false;
+  }
+  fecharNdLocaisDropdown(): void { setTimeout(() => { this.ndShowLocaisDropdown = false; }, 150); }
+
+  // ── Moeda FLE_MOEDA ──────────────────────────────────────────────────────────
+
+  onNdMoedaInput(v: string): void {
+    this.nd.moeda = '';
+    if (!v?.trim()) { this.ndShowMoedaDropdown = false; this.ndMoedaFiltered = []; return; }
+    this.ndMoedaFiltered = this.filtrar(this.MOEDAS, v);
+    this.ndShowMoedaDropdown = this.ndMoedaFiltered.length > 0;
+  }
+  toggleNdMoedaDropdown(e: MouseEvent): void {
+    e.preventDefault();
+    if (this.ndShowMoedaDropdown) { this.ndShowMoedaDropdown = false; return; }
+    const t = (this.nd.moedaSearch || '').trim();
+    this.ndMoedaFiltered = t ? this.filtrar(this.MOEDAS, t) : [...this.MOEDAS];
+    this.ndShowMoedaDropdown = this.ndMoedaFiltered.length > 0;
+  }
+  selecionarNdMoeda(item: LocalResult): void {
+    this.nd.moeda = item.codigo;
+    this.nd.moedaSearch = `${item.codigo} - ${item.descricao}`;
+    if (item.codigo !== '9') this.nd.txconv = 0;
+    this.ndMoedaFiltered = []; this.ndShowMoedaDropdown = false;
+  }
+  fecharNdMoedaDropdown(): void { setTimeout(() => { this.ndShowMoedaDropdown = false; }, 150); }
 }
