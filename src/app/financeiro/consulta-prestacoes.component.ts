@@ -136,6 +136,10 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
                       <span class="w-1.5 h-1.5 rounded-full {{ statusInfo(r.status).dot }}"></span>
                       {{ statusInfo(r.status).label }}
                     </span>
+                    <p *ngIf="r.status === '5' && r.motvfl"
+                      class="mt-1 text-[11px] text-red-600 max-w-[200px] truncate" [title]="r.motvfl">
+                      {{ r.motvfl }}
+                    </p>
                   </td>
                   <td class="px-4 py-3 text-gray-600 text-xs hidden md:table-cell">{{ r.nomecf || '—' }}</td>
                   <td class="px-4 py-3 text-gray-600 whitespace-nowrap hidden lg:table-cell">{{ formatDate(r.dtConf) }}</td>
