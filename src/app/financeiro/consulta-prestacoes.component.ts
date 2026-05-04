@@ -120,7 +120,7 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
                   <th class="px-4 py-3 text-left text-xs font-semibold text-[#1A4E79] uppercase tracking-wide">Emissão</th>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-[#1A4E79] uppercase tracking-wide">Status</th>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-[#1A4E79] uppercase tracking-wide hidden md:table-cell">Cliente/Fornecedor</th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-[#1A4E79] uppercase tracking-wide hidden lg:table-cell">Conferência</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-[#1A4E79] uppercase tracking-wide hidden md:table-cell">Motivo</th>
                   <th class="px-4 py-3 text-right text-xs font-semibold text-[#1A4E79] uppercase tracking-wide">Valor Total</th>
                   <th class="px-4 py-3 text-center text-xs font-semibold text-[#1A4E79] uppercase tracking-wide w-12"></th>
                 </tr>
@@ -136,13 +136,22 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
                       <span class="w-1.5 h-1.5 rounded-full {{ statusInfo(r.status).dot }}"></span>
                       {{ statusInfo(r.status).label }}
                     </span>
-                    <p *ngIf="r.status === '5' && r.motvfl"
-                      class="mt-1 text-[11px] text-red-600 max-w-[200px] truncate" [title]="r.motvfl">
-                      {{ r.motvfl }}
-                    </p>
                   </td>
                   <td class="px-4 py-3 text-gray-600 text-xs hidden md:table-cell">{{ r.nomecf || '—' }}</td>
-                  <td class="px-4 py-3 text-gray-600 whitespace-nowrap hidden lg:table-cell">{{ formatDate(r.dtConf) }}</td>
+                  <td class="px-4 py-3 hidden md:table-cell max-w-[220px]">
+                    <ng-container *ngIf="r.status === '5' && r.motvfl; else semMotivo">
+                      <span class="inline-flex items-center gap-1.5 text-xs text-red-700 font-medium leading-snug">
+                        <svg class="w-3.5 h-3.5 shrink-0 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span class="truncate block" [title]="r.motvfl">{{ r.motvfl }}</span>
+                      </span>
+                    </ng-container>
+                    <ng-template #semMotivo>
+                      <span class="text-gray-300 text-xs">—</span>
+                    </ng-template>
+                  </td>
                   <td class="px-4 py-3 text-right font-semibold text-gray-700 whitespace-nowrap">
                     R$ {{ r.valorTotal | number:'1.2-2' }}
                   </td>
