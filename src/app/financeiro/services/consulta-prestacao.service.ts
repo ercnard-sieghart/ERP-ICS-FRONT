@@ -13,6 +13,7 @@ export interface PrestacaoRow {
   dtBaixa:    string;
   nomecf:     string;
   dtConf:     string;
+  motvfl:     string;
   valorTotal: number;
 }
 
@@ -48,6 +49,7 @@ export interface DespesaDetalheRow {
 export interface DespesasResult {
   rows:   DespesaDetalheRow[];
   nomecf: string;
+  motvfl: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -96,6 +98,7 @@ export class ConsultaPrestacaoService {
           dtBaixa:    r.dtBaixa    || '',
           nomecf:     r.nomecf     || '',
           dtConf:     r.dtConf     || '',
+          motvfl:     r.motvfl     || '',
           valorTotal: Number(r.valorTotal) || 0
         })),
         total:    Number(res?.total)    || 0,
@@ -115,6 +118,7 @@ export class ConsultaPrestacaoService {
         const items: any[] = Array.isArray(res) ? res : (res?.rows || []);
         return {
           nomecf: res?.nomecf || '',
+          motvfl: res?.motvfl || '',
           rows: items.map((r: any): DespesaDetalheRow => ({
             item:      Number(r.item)      || 0,
             data:      r.data              || '',

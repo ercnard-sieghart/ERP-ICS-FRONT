@@ -120,6 +120,21 @@ const STATUS_MAP: Record<string, { label: string; cls: string; dot: string }> = 
             </div>
           </div>
 
+          <!-- ── Motivo de reprovação ── -->
+          <div *ngIf="status === '5' && motvfl"
+            class="bg-red-50 border border-red-200 rounded-xl shadow-sm overflow-hidden">
+            <div class="px-4 py-3 bg-red-100 flex items-center gap-2 border-b border-red-200">
+              <svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <span class="text-sm font-semibold text-red-700">Motivo da Reprovação</span>
+            </div>
+            <div class="px-4 py-3">
+              <p class="text-sm text-red-800">{{ motvfl }}</p>
+            </div>
+          </div>
+
           <!-- ── Lista de despesas ── -->
           <div class="bg-white rounded-xl shadow-lg overflow-hidden">
             <div class="px-4 py-3 border-b border-[#E6EEF2] bg-[#f8fdfd] flex items-center gap-2">
@@ -328,6 +343,7 @@ export class DetalhePrestacaoComponent implements OnInit {
   codigo        = '';
   status        = '';
   nomecf        = '';
+  motvfl        = '';
   rows:         DespesaDetalheRow[] = [];
   isLoading     = false;
   errorMsg      = '';
@@ -363,6 +379,7 @@ export class DetalhePrestacaoComponent implements OnInit {
       next: (result: DespesasResult) => {
         this.rows      = result.rows;
         this.nomecf    = result.nomecf;
+        this.motvfl    = result.motvfl;
         this.isLoading = false;
       },
       error: e => {
