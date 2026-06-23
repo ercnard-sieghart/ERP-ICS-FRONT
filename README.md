@@ -62,15 +62,38 @@ Isso garante compatibilidade com o Angular 19.x usado neste projeto.
 
 Para dúvidas ou sugestões, entre em contato com o time de desenvolvimento.
 
-## Development server
+## Inicialização do Projeto
 
-To start a local development server, run:
+### Pré-requisitos
+
+- [Node.js](https://nodejs.org/) v18+
+- Yarn (via Corepack, já incluso no Node.js)
+
+### Primeiro uso (clone limpo)
 
 ```bash
+# 1. Habilitar o Corepack para expor o comando yarn no terminal
+corepack enable
+
+# 2. Instalar as dependências
+yarn install
+
+# 3. Iniciar o servidor de desenvolvimento
 yarn start
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Acesse `http://localhost:4200/` no navegador. A aplicação recarrega automaticamente ao salvar arquivos.
+
+### Uso cotidiano
+
+```bash
+yarn start          # servidor de desenvolvimento
+yarn build          # build de desenvolvimento
+yarn build:prod     # build de produção
+yarn test           # testes unitários
+```
+
+> **Atenção:** este projeto usa **yarn** exclusivamente. Não use `npm install` ou `npm run` — isso gera um `package-lock.json` que conflita com o `yarn.lock`.
 
 ## Code scaffolding
 
